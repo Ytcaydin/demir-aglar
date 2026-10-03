@@ -1,4 +1,5 @@
 {
+  "id": "./",
   "name": "Demir Ağlar",
   "short_name": "Demir Ağlar",
   "description": "Türkiye'yi demiryoluyla ör, şehirlerin ihtiyaçlarını taşı, Anadolu'yu büyüt.",
@@ -9,6 +10,7 @@
   "background_color": "#10202a",
   "theme_color": "#10202a",
   "lang": "tr",
+  "categories": ["games"],
   "icons": [
     {
       "src": "icons/icon-192.png",
