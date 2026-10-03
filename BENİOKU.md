@@ -34,6 +34,17 @@ Trenler çalıştıkça yıpranır. Durumu %50’nin altına inen tren yavaşlar
 
 Ayarlar (⚙) menüsünden bildirimleri açabilirsin. Oyun telefona uygulama olarak kuruluysa ve tarayıcı destekliyorsa, uzun süre girmediğinde kasandaki kazancı ve günlük ödülünü hatırlatır. Tarayıcılar bu arka plan hatırlatmasını her cihazda çalıştırmaz; Play Store sürümünde tam desteklenecek. Oyuna geri döndüğünde ayrıca seni bekleyenlerin (günlük ödül, görevler, bakım bekleyen trenler) bir özetini görürsün.
 
+## Grafik
+
+- **Çağa göre renk tonu:** 1927'de eski fotoğraf (sepya, hafif gren), 1950'lerde kartpostal, 1970'lerde film tonu, günümüzde canlı renkler. Ayarlar (⚙) → Renk tonu ile kapatılabilir.
+- **Karayolu ve havayolu rakipleri görünür:** Kalkınma çağından itibaren şehirler arasında yollar, kamyonlar ve otobüsler; Elektrik çağından itibaren havalimanları arasında uçan uçaklar.
+- **Hava olayları:** Kar fırtınasıyla kapanan hatta kar yağar, selde yağmur ve kara bulutlar görünür.
+- **Fotoğraf modu:** Haritadaki 📷 düğmesi arayüzü gizler. İstediğin açıyı bul, isteğe bağlı şehir adlarıyla 3D fotoğraf çek ve paylaş.
+- **Açılış uçuşu:** Yeni oyunda kamera Doğu'dan Ankara'ya, oradan ilk hattına uçar; dönüşte kısa bir iniş yapar. Dokununca atlanır.
+- **Büyüme ve inşaat:** Büyüyen şehrin binaları yerden yükselir, yanında bir süre vinç çalışır. Büyük projelerin inşaatı beş aşamada görünür.
+- Göller artık su gibi görünür, deniz dalgaları tekrar etmez, ekran kenarındaki etiketler kesilmez.
+- Araç, uçak ve yağış miktarı Ayarlar → Grafik seviyesine göre azalır.
+
 ## Dosyalar
 
 | Dosya | Ne işe yarar |

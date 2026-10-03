@@ -173,6 +173,17 @@ h1{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:.14e
 .perk{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
 .mini:disabled,.card3 .btn:disabled{opacity:.5;cursor:not-allowed}
 .welcome{margin:2px 0 6px}
+#stage3 canvas{transition:filter 2.5s ease}
+.gradeov{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.gradeov::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(20,12,4,0) 52%,rgba(20,12,4,1) 135%);opacity:var(--vig,.12);transition:opacity 2.5s}
+.gradeov::after{content:'';position:absolute;inset:-50%;background-image:var(--noise);opacity:var(--grain,0);mix-blend-mode:overlay;animation:grain .9s steps(4) infinite;transition:opacity 2.5s}
+.gradeov.still::after{animation:none}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-7%,4%)}50%{transform:translate(5%,-6%)}75%{transform:translate(-3%,-2%)}100%{transform:translate(0,0)}}
+@media (prefers-reduced-motion:reduce){.gradeov::after{animation:none}#stage3 canvas{transition:none}}
+.world.photo #labels3,.world.photo .wctl,.world.photo .coach,.world.photo .goalchip,.world.photo .boostflag,.world.photo .scnflag,.world.photo .followcap,.world.photo .drive,.world.photo .setpanel,.world.photo .card3{visibility:hidden}
+.world.photo.labs #labels3{visibility:visible}.world.photo.labs #labels3 .lrow,.world.photo.labs #labels3 .exlab{display:none}
+.photobar{position:absolute;left:10px;right:10px;bottom:10px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;z-index:8}.photobar .btn{padding:9px 12px;font-size:14px}.photobar[hidden]{display:none}
+.flash{position:absolute;inset:0;background:#fff;pointer-events:none;z-index:9;animation:flash .45s ease-out forwards}@keyframes flash{from{opacity:.85}to{opacity:0}}
 </style>
 </head>
 <body>
@@ -199,12 +210,13 @@ h1{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:.14e
 
   <div class="world" id="world">
     <div id="stage3" aria-label="3D Anadolu dünyası. Şehirleri Filo sekmesindeki listeden de seçebilirsin."></div><div id="labels3"></div><div id="load3">Anadolu yükleniyor…</div><div id="err3" hidden></div>
-    <div class="boostflag" id="boostflag" hidden></div><div class="scnflag" id="scnflag" hidden></div><div class="followcap" id="followcap" hidden></div><div class="coach" id="coach" hidden></div><div class="card3" id="card3" hidden></div><div class="drive" id="drive" hidden></div><div class="setpanel" id="setpanel" hidden><button class="wbtn sm" id="dn">GECE</button><button class="wbtn sm" id="snd">SES</button><button class="wbtn sm" id="gfx">GRAFİK</button><button class="wbtn sm" id="vib">TİTREŞİM</button><button class="wbtn sm" id="labq">ETİKET</button><button class="wbtn sm" id="ntf">BİLDİRİM</button></div><div class="goalchip" id="goalchip" hidden></div>
+    <div class="boostflag" id="boostflag" hidden></div><div class="scnflag" id="scnflag" hidden></div><div class="followcap" id="followcap" hidden></div><div class="coach" id="coach" hidden></div><div class="card3" id="card3" hidden></div><div class="photobar" id="photobar" hidden><button class="btn primary" data-a="phshot">📸 Çek ve paylaş</button><button class="btn" data-a="phlab">Şehir adları: Kapalı</button><button class="btn" data-a="phoff">Kapat</button></div><div class="drive" id="drive" hidden></div><div class="setpanel" id="setpanel" hidden><button class="wbtn sm" id="dn">GECE</button><button class="wbtn sm" id="snd">SES</button><button class="wbtn sm" id="gfx">GRAFİK</button><button class="wbtn sm" id="vib">TİTREŞİM</button><button class="wbtn sm" id="labq">ETİKET</button><button class="wbtn sm" id="ntf">BİLDİRİM</button><button class="wbtn sm" id="grade">RENK TONU</button></div><div class="goalchip" id="goalchip" hidden></div>
     <div class="wctl">
       <button class="wbtn" id="zin" aria-label="Yakınlaştır">+</button>
       <button class="wbtn" id="zout" aria-label="Uzaklaştır">−</button>
       <button class="wbtn sm" id="zfit" aria-label="Tüm ülkeyi göster">TÜMÜ</button>
       <button class="wbtn sm" id="follow" aria-label="Treni takip et">TAKİP</button>
+      <button class="wbtn" id="photo" aria-label="Fotoğraf modu">📷</button>
       <button class="wbtn" id="setbtn" aria-label="Ayarlar">⚙</button>
     </div>
   </div>
@@ -1605,13 +1617,15 @@ function init3D(){adjustLandmarks();
   const wmat=new THREE.ShaderMaterial({uniforms:E.waterU,transparent:true,depthWrite:false,
     vertexShader:`varying vec3 vW;varying float vD;void main(){vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;vec4 mv=viewMatrix*w;vD=-mv.z;gl_Position=projectionMatrix*mv;}`,
     fragmentShader:`uniform float time;uniform vec3 sunDir,deep,sky,sunCol,fogColor;uniform float fogNear,fogFar,night;uniform sampler2D depthMap;uniform vec4 dmap;uniform float isLake;varying vec3 vW;varying float vD;
+    float hh(vec2 q){return fract(sin(dot(q,vec2(127.1,311.7)))*43758.5453);}float vnz(vec2 q){vec2 i=floor(q),f=fract(q);f=f*f*(3.-2.*f);return mix(mix(hh(i),hh(i+vec2(1.,0.)),f.x),mix(hh(i+vec2(0.,1.)),hh(i+vec2(1.,1.)),f.x),f.y);}
     void main(){vec2 p=vW.xz;float t=time;
       vec2 g=vec2(cos(p.x*.09+t*1.1)*.5+cos((p.x+p.y)*.14-t*1.4)*.35+cos(p.x*.33+t*2.)*.12, cos(p.y*.1-t*.9)*.5+cos((p.y-p.x)*.12+t*1.3)*.35+cos(p.y*.31-t*1.8)*.12);
+      {vec2 q=p*.045+vec2(t*.05,-t*.035);float amp=.45+.9*vnz(p*.006+vec2(t*.01,0.));g=g*amp+vec2(vnz(q)-.5,vnz(q*2.3+vec2(13.1,7.7)-t*.08)-.5)*1.3;}
       vec3 n=normalize(vec3(-g.x*.16,1.,-g.y*.16));vec3 v=normalize(cameraPosition-vW);
-      float fr=pow(1.-max(dot(n,v),0.),3.);float dep=isLake>0.5?1.0:texture2D(depthMap,(vW.xz-dmap.xy)/dmap.zw).r;vec3 base=mix(vec3(0.05,0.42,0.46),deep,smoothstep(0.08,0.65,dep));vec3 c=mix(base,sky,.15+.6*fr);
+      float fr=pow(1.-max(dot(n,v),0.),3.);float dep=isLake>0.5?1.0:texture2D(depthMap,(vW.xz-dmap.xy)/dmap.zw).r;vec3 base=mix(vec3(0.05,0.42,0.46),deep,smoothstep(0.08,0.65,dep));vec3 c=mix(base,sky,.15+.6*fr);if(isLake>0.5){base=mix(vec3(0.07,0.36,0.42),deep,0.45);c=mix(base,sky,.06+.3*fr);}
       float fz=1.0-smoothstep(0.0,0.16,dep);float wv=0.5+0.5*sin(dep*70.0-t*1.6+sin(p.x*0.21+p.y*0.17)*2.0);float foam=clamp(fz*smoothstep(0.55,0.95,wv)*(1.0-night*0.6)+(1.0-smoothstep(0.0,0.035,dep))*0.7*isLake*0.0+(1.0-smoothstep(0.0,0.035,dep))*0.6,0.0,1.0);c=mix(c,vec3(0.92,0.95,0.95),foam*0.75);
       vec3 h=normalize(normalize(sunDir)+v);float sp=pow(max(dot(n,h),0.),160.)*(1.-night*.85);c+=sunCol*sp*1.5;
-      float a=mix(.28,.46,smoothstep(0.02,0.35,dep))+.44*fr+sp*.3+foam*0.5;float f=smoothstep(fogNear,fogFar,vD);c=mix(c,fogColor,f);a=mix(a,1.,f);
+      float a=mix(.28,.46,smoothstep(0.02,0.35,dep))+.44*fr+sp*.3+foam*0.5;if(isLake>0.5)a=max(a,0.88);float f=smoothstep(fogNear,fogFar,vD);c=mix(c,fogColor,f);a=mix(a,1.,f);
       gl_FragColor=vec4(c,a);
       #include <tonemapping_fragment>
       #include <encodings_fragment>
@@ -1620,7 +1634,7 @@ function init3D(){adjustLandmarks();
   const water=new THREE.Mesh(new THREE.PlaneGeometry(W*5,Hh*9,1,1).rotateX(-Math.PI/2),wmat);water.position.set(cx,0,cz);water.renderOrder=2;scene.add(water);
   const bed=new THREE.Mesh(new THREE.PlaneGeometry(W*5,Hh*9,1,1).rotateX(-Math.PI/2),new THREE.MeshLambertMaterial({color:cc('#1f4c61')}));bed.position.set(cx,-SEA_D-0.4,cz);scene.add(bed);r.setClearColor(0x9fb8c4,1);
   const lakeMat=new THREE.ShaderMaterial({uniforms:Object.assign({},E.waterU,{isLake:{value:1}}),vertexShader:wmat.vertexShader,fragmentShader:wmat.fragmentShader,transparent:true,depthWrite:false});
-  for(const [lo,la,rx,ry] of [LAKES[0],LAKES[2]]){const x=WX(lo),z=WY(la);const lk=new THREE.Mesh(new THREE.CircleGeometry(1,40).rotateX(-Math.PI/2),lakeMat);lk.scale.set(rx*KX*0.92,1,ry*KY*0.92);lk.position.set(x,hAt(x,z)+0.9,z);lk.renderOrder=2;scene.add(lk)}
+  for(const [lo,la,rx,ry] of [LAKES[0],LAKES[2]]){const x=WX(lo),z=WY(la);const lk=new THREE.Mesh(new THREE.CircleGeometry(1,40).rotateX(-Math.PI/2),lakeMat);lk.scale.set(rx*KX*1.0,1,ry*KY*1.0);lk.position.set(x,hAt(x,z)+0.9,z);lk.renderOrder=2;scene.add(lk);const sh=new THREE.Mesh(new THREE.RingGeometry(0.97,1.07,48).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:cc('#d7cfae'),transparent:true,opacity:0.55,depthWrite:false}));sh.scale.copy(lk.scale);sh.position.set(x,lk.position.y+0.05,z);sh.renderOrder=2;scene.add(sh)}
 
   /* sky, stars, light */
   E.skyU={top:{value:cc('#3c7cc2')},hor:{value:cc('#e6dfcc')},sunDir:{value:new THREE.Vector3()},sunGlow:{value:new THREE.Color(1,.85,.6)},night:{value:0}};
@@ -1800,7 +1814,7 @@ function buildCity(id){
   const grp=new THREE.Group();const body=B.build(E.mBody);body.castShadow=true;body.receiveShadow=true;grp.add(body);if(K.Gl.p.length)grp.add(K.Gl.build(E.mGlass));if(K.Go.p.length)grp.add(K.Go.build(E.mGlassOff));if(K.Cw.p.length){const cw=K.Cw.build(E.mCurtain);cw.castShadow=true;grp.add(cw)}
   grp.userData={chim,base,apt:APT,r:L.r};return grp;
 }
-function syncCities(){let n=0;const init=Object.keys(E.cities).length<CITIES.length;for(const c of CITIES){const k=cityKey(c.id);const o=E.cities[c.id];if(o&&o.key===k)continue;if(!init&&n>=2){E.forestDirty=1;continue}if(o)disposeObj(o.grp);const grp=buildCity(c.id);E.scene.add(grp);E.cities[c.id]={grp,key:k};n++}
+function syncCities(){let n=0;const init=Object.keys(E.cities).length<CITIES.length;for(const c of CITIES){const k=cityKey(c.id);const o=E.cities[c.id];if(o&&o.key===k)continue;if(!init&&n>=2){E.forestDirty=1;continue}const grew=o&&o.lv!=null&&cs(c.id).lv>o.lv;if(o)disposeObj(o.grp);const grp=buildCity(c.id);E.scene.add(grp);E.cities[c.id]={grp,key:k,lv:cs(c.id).lv};if(grew&&!FF.on)try{growStart(c.id,grp)}catch(e){}n++}
   if(n)E.forestDirty=1;if(E.forestDirty&&(n===0||init)){E.forestDirty=0;try{forestClear()}catch(e){}}}
 
 /* ---- ships ---- */
@@ -1991,9 +2005,9 @@ function frame3D(dt){
     lab.el.className='lab3'+(st.lv>=5?' big':'')+(con?'':' dim')+(isSel?' sel':growing(c.id)?' grow':'');
     let show=!(camDist>[600,900,1400][q]&&!con&&!isSel&&st.lv<3&&!rivalHas(c.id));
     const o=E.cities[c.id];const [px,py,pz]=project(c.x,(o?o.grp.userData.base:Y_LAND)+Math.min(cityLayout(c.id).top,70)+8,c.y);
-    if(pz>1||px<-60||px>E.VW+60||py<-20||py>E.VH+20)show=false;
-    const x0=px-lab.w/2;if(show&&placed.some(q=>x0<q[0]+q[2]+4&&x0+lab.w+4>q[0]&&Math.abs(py-q[1])<(lab.h||22)+4))show=false;
-    lab.vis=show;if(show){placed.push([x0,py,lab.w]);lab.sx=px;lab.sy=py-(lab.h||22)+8;lab.el.style.transform=`translate(${Math.round(x0)}px,${Math.round(py-(lab.h||22)+8)}px)`;lab.el.style.visibility='visible'}else lab.el.style.visibility='hidden'}
+    if(pz>1||px<0||px>E.VW||py<-20||py>E.VH+20)show=false;
+    const x0=Math.max(4,Math.min(E.VW-lab.w-4,px-lab.w/2));if(show&&placed.some(q=>x0<q[0]+q[2]+4&&x0+lab.w+4>q[0]&&Math.abs(py-q[1])<(lab.h||22)+4))show=false;
+    lab.vis=show;if(show){placed.push([x0,py,lab.w]);lab.sx=px;lab.sy=py-(lab.h||22)+8;lab.el.style.transform=`translate(${Math.round(x0)}px,${Math.round(Math.max(2,py-(lab.h||22)+8))}px)`;lab.el.style.visibility='visible'}else lab.el.style.visibility='hidden'}
   extraLabels(camDist,placed,q);
   for(const f of E.fx){f.life-=dt;f.y+=dt*10;const lb=f.cid&&E.labels[f.cid];let px,py,pz;if(lb&&lb.vis){px=lb.sx;py=lb.sy-12-((f.money?1.6:2.6)-f.life)*16;pz=0}else{[px,py,pz]=project(f.x,f.y,f.z);if(f.money&&lb)pz=2}f.el.style.transform=`translate(${Math.round(px)}px,${Math.round(py)}px) translate(-50%,-50%)`;f.el.style.opacity=pz>1?0:Math.max(0,Math.min(1,f.life));if(f.life<=0)f.el.remove()}
   E.fx=E.fx.filter(f=>f.life>0);
@@ -2045,7 +2059,7 @@ function frameExtras(dt,camDist){
 /* landmark and express labels: placed after city labels, never on top of them */
 function extraLabels(camDist,placed,q){const hit=(x0,y,w,h)=>placed.some(p=>x0<p[0]+p[2]+4&&x0+w+4>p[0]&&Math.abs(y-p[1])<h+4);
   for(const L of E.lmLabels||[]){const l=L.l,[px,py,pz]=project(l.x,Math.max(hAt(l.x,l.y),1.2)+24,l.y);if(!L.w)L.w=L.el.offsetWidth||70;
-    let show=pz<1&&camDist<[380,800,1300][q]&&px>-40&&px<E.VW+40&&py>-10&&py<E.VH+10;const x0=px-L.w/2;if(show&&hit(x0,py,L.w,22))show=false;
+    let show=pz<1&&camDist<[380,800,1300][q]&&px>0&&px<E.VW&&py>-10&&py<E.VH+10;const x0=Math.max(4,Math.min(E.VW-L.w-4,px-L.w/2));if(show&&hit(x0,py,L.w,22))show=false;
     if(show){placed.push([x0,py,L.w]);L.el.style.transform=`translate(${Math.round(x0)}px,${Math.round(py)}px)`;L.el.style.visibility='visible';L.el.classList.toggle('on',connected(l.city))}else L.el.style.visibility='hidden'}
   E.exLab=E.exLab||{};const lay=$('labels3'),fi=E.follow&&E.follow.k==='t'?E.follow.i:-1,cx=E.VW/2,cy=E.VH/2;
   const cand=[];S.trains.forEach((tr,i)=>{let L=E.exLab[i];if(!tr.ex){if(L)L.style.visibility='hidden';return}if(!L){L=document.createElement('div');L.className='exlab';lay.appendChild(L);E.exLab[i]=L}
@@ -2267,7 +2281,7 @@ function airportBuild(K,A){const B=K.B,{cx,cz,ry,y}=A,k=A.K||1,P=(pr,lx,ly,lz,sx
 /* ================= mega project models ================= */
 const MEGA_W={hall:1.55,plant:1.55,dam:1.6,depot:1.5,sheds:1.6,portal:1.15,crane:1.3};
 function megaItems(id){const L=[];for(const g of MEGA){if(g.city!==id)continue;const st=megaSt(g.id);if(!st)continue;L.push(st.done?{t:'mega',m:g.m,id:g.id,u:0.5,v:0.5,w:MEGA_W[g.m]}:{t:'crane',id:g.id,u:0.5,v:0.5,w:MEGA_W.crane,p:st.prog/g.mo})}return L}
-function megaKey(id){return MEGA.filter(g=>g.city===id).map(g=>{const s=megaSt(g.id);return s?(s.done?'D':'C'+Math.floor(s.prog/g.mo*3)):'-'}).join('')}
+function megaKey(id){return MEGA.filter(g=>g.city===id).map(g=>{const s=megaSt(g.id);return s?(s.done?'D':'C'+Math.floor(s.prog/g.mo*5)):'-'}).join('')}
 function megaModel(K,b,x,z,base,ry){const B=K.B,P=(pr,lx,ly,lz,sx,sy,sz,col,M)=>part(M||B,pr,x,base+ly,z,ry,lx,0,lz,sx,sy,sz,col),snow=K.snowy;
   if(b.t==='crane'){const p=b.p||0,H=6+p*16;P(E.gBox,0,-0.2,0,24,0.4,16,cc('#9c8f7a'));
     for(const [a,c2] of [[-12,0],[12,0]])P(E.gBox,a,0,c2,0.2,2,16,cc('#d0b55a'));
@@ -2473,8 +2487,8 @@ function shareCanvas(){const W=1080,H=1350,cv=document.createElement('canvas');c
   g.fillStyle='#e2b85c';g.font=`700 34px ${BF}`;g.fillText('Sen de Anadolu’yu demir ağlarla ör!',70,1222);const u=shareURL();if(u){g.fillStyle='#9fb1bb';g.font=`600 26px ${BF}`;g.fillText(u.replace(/^https?:\/\//,''),70,1268)}
   return cv}
 let shareImgURL=null;
-async function shareNow(){try{if(document.fonts&&document.fonts.ready)await document.fonts.ready}catch(e){}
-  let blob=null;try{const cv=shareCanvas();blob=await new Promise(r=>cv.toBlob(r,'image/png'))}catch(e){}
+async function shareNow(kind){try{if(document.fonts&&document.fonts.ready)await document.fonts.ready}catch(e){}
+  let blob=null;try{const cv=kind==='photo'?photoCanvas():shareCanvas();blob=await new Promise(r=>cv.toBlob(r,'image/png'))}catch(e){}
   if(!blob){bad('<b>Paylaşım görseli oluşturulamadı.</b>');return}
   if(shareImgURL)URL.revokeObjectURL(shareImgURL);shareImgURL=URL.createObjectURL(blob);S.flags.shared=1;renderShare();checkMissions();persist();
   if(window.AndroidBridge&&AndroidBridge.shareImage){try{const b64=await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(String(fr.result).split(',')[1]);fr.onerror=rej;fr.readAsDataURL(blob)});AndroidBridge.shareImage(b64,shareText());return}catch(e){}}
@@ -2482,7 +2496,7 @@ async function shareNow(){try{if(document.fonts&&document.fonts.ready)await docu
   if(navigator.canShare&&navigator.share){try{if(navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Demir Ağlar',text:shareText()});return}}catch(e){if(e&&e.name==='AbortError')return}}
   const a=document.createElement('a');a.href=shareImgURL;a.download=file.name;document.body.appendChild(a);a.click();a.remove();good('<b>Görsel indirildi.</b><span class="note">Galeriden istediğin yerde paylaşabilirsin.</span>')}
 function renderShare(){const el=$('sharep');if(!el)return;const R=rec(),W=recWeek(),P=R.prev,net=v=>(v>=0?'+':'')+fmt(v);
-  el.innerHTML=`<p class="note">Ağının haritası ve rakamlarıyla bir görsel oluştur; WhatsApp, Instagram ya da istediğin yerde paylaş.</p><button class="btn primary" data-a="share">📤 Ağımı paylaş</button>${shareImgURL?`<img class="shareimg" src="${shareImgURL}" alt="Paylaşım görselinin önizlemesi">`:''}
+  el.innerHTML=`<p class="note">Haritadaki 📷 düğmesiyle istediğin açıdan 3D fotoğraf çek ya da ağının harita kartını oluştur; WhatsApp, Instagram ya da istediğin yerde paylaş.</p><div class="row2"><button class="btn primary" data-a="photo">📷 Fotoğraf çek</button><button class="btn" data-a="share">🗺 Harita kartı</button></div>${shareImgURL?`<img class="shareimg" src="${shareImgURL}" alt="Paylaşım görselinin önizlemesi">`:''}
     <span class="note" style="margin-top:4px">Bu hafta (${+W.id.slice(5)}. hafta)</span>
     <div class="kv"><span>Oynanan ay</span><span>${W.mo}</span></div><div class="kv"><span>Net kazanç</span><span class="${W.net>=0?'ok':'no'}">${net(W.net)} bin ₺</span></div><div class="kv"><span>En yüksek şirket değeri</span><span>${fmt(W.v)} bin ₺</span></div>
     ${P?`<div class="kv"><span>Geçen hafta net kazanç</span><span>${net(P.net)} bin ₺</span></div><p class="note">${W.net>P.net?'🏆 Geçen haftanı geçtin!':`Geçen haftayı geçmek için ${fmt(P.net-W.net)} bin ₺ daha.`}</p>`:''}
@@ -2589,6 +2603,132 @@ function v2Click(a,b){
   if(a.startsWith('nes:')){const k=a.slice(4),p=NESIL[k],N=nesil(),l=N.perks[k]||0;if(!p||l>=p.max||N.pts<l+1)return true;N.pts-=l+1;N.perks[k]=l+1;saveMeta();sfx('coin');good(`<b>${p.n} güçlendi</b><span class="note">${p.d(l+1)}.</span>`);renderNesil();renderAct();return true}
   return false}
 $('ntf').onclick=()=>ntfToggle();ntfLabel();
+
+/* ================= grafik paketi 2: çağ renk tonu, yollar ve araçlar, uçaklar, hava olayları, fotoğraf modu, açılış uçuşu, büyüme animasyonu ================= */
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+/* ---------- çağa göre renk tonu ---------- */
+const GRADE=[{n:'1927 fotoğrafı',f:'sepia(.42) saturate(.72) contrast(1.07) brightness(1.03)',v:.55,g:.06},
+ {n:'1950 kartpostalı',f:'sepia(.2) saturate(.86) contrast(1.04) brightness(1.02)',v:.35,g:.035},
+ {n:'1970’ler filmi',f:'sepia(.08) saturate(1.14) contrast(1.06) hue-rotate(-5deg)',v:.22,g:.02},
+ {n:'Günümüz',f:'saturate(1.1) contrast(1.04)',v:.14,g:0}];
+function gradeOn(){return OPT.grade!=='off'}
+function gradeOverlay(){let ov=$('gradeov');if(!ov){ov=document.createElement('div');ov.id='gradeov';ov.className='gradeov';
+  const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d'),im=g.createImageData(128,128);for(let i=0;i<im.data.length;i+=4){const v=Math.random()*255|0;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255}g.putImageData(im,0,0);
+  ov.style.setProperty('--noise',`url(${c.toDataURL()})`);$('stage3').appendChild(ov)}return ov}
+function gradeApply(){const cv=E.renderer&&E.renderer.domElement;if(!cv)return;const e=eraIdx(),on=gradeOn(),k=(on?e:-1)+'|'+GFXQ;if(cv.dataset.g===k)return;cv.dataset.g=k;
+  const G=GRADE[e];cv.style.filter=on?G.f:'none';const ov=gradeOverlay();ov.style.setProperty('--vig',on?G.v:.12);ov.style.setProperty('--grain',on&&GFXQ>0?G.g:0);ov.classList.toggle('still',GFXQ===0)}
+function gradeLabel(){const b=$('grade');if(!b)return;b.textContent='Renk tonu: '+(gradeOn()?'Çağa göre':'Doğal');b.classList.toggle('on',gradeOn());b.setAttribute('aria-pressed',String(gradeOn()))}
+/* ---------- yollar ve karayolu araçları (Kalkınma çağından itibaren) ---------- */
+function roadEdges(){if(E.roadE)return E.roadE;const L=[],seen=new Set();
+  for(const a of CITIES){const near=CITIES.filter(b=>b!==a).map(b=>[b,Math.hypot(b.x-a.x,b.y-a.y)]).sort((p,q)=>p[1]-q[1]).slice(0,2);
+    for(const [b,d] of near){const k=edgeKey(a.id,b.id);if(seen.has(k))continue;seen.add(k);const n=Math.ceil(d/3);let wet=0;for(let i=1;i<n;i++){const f=i/n;if(hAt(a.x+(b.x-a.x)*f,a.y+(b.y-a.y)*f)<0.9)wet++}if(wet>n*0.06)continue;
+      const ux=(b.x-a.x)/d,uz=(b.y-a.y)/d,nx=-uz,nz=ux,bend=(hashId(k)%2?1:-1)*Math.min(18,d*0.07),P=[],cum=[0];
+      for(let i=0;i<=n;i++){const f=i/n,off=7+Math.sin(Math.PI*f)*bend,x=a.x+(b.x-a.x)*f+nx*off*Math.sin(Math.PI*Math.min(1,f*4,(1-f)*4)/2),z=a.y+(b.y-a.y)*f+nz*off*Math.sin(Math.PI*Math.min(1,f*4,(1-f)*4)/2);P.push([x,Math.max(hAt(x,z),1.2)+0.32,z]);if(i)cum.push(cum[i-1]+Math.hypot(x-P[i-1][0],z-P[i-1][2]))}
+      if(P.some(p=>p[1]<1.3&&hAt(p[0],p[2])<0.9))continue;L.push({a:a.id,b:b.id,P,cum,len:cum[cum.length-1]})}}
+  return E.roadE=L}
+function roadMesh(e){const M=new Merger(),era=eraIdx(),asph=cc(era>=2?'#4d5153':'#77716a'),line=cc('#e9e4d4');
+  for(const r of roadEdges()){for(let i=0;i<r.P.length-1;i++){const [x1,y1,z1]=r.P[i],[x2,y2,z2]=r.P[i+1],dx=x2-x1,dz=z2-z1,l=Math.hypot(dx,dz)||1,nx=-dz/l,nz=dx/l;ribbon(M,[r.P[i],r.P[i+1]],nx,nz,era>=2?3:2.4,0,asph);if(era>=2&&i%2===0)ribbon(M,[r.P[i],[x1+dx*0.5,y1+(y2-y1)*0.5,z1+dz*0.5]],nx,nz,0.22,0.05,line)}}
+  const m=M.build(E.mRail);m.receiveShadow=true;return m}
+function vehGeo(kind){const M=new Merger(),W=new THREE.Color(1,1,1),dark=cc('#26282b'),glass=cc('#3b4a56');
+  if(kind==='bus'){M.add(E.gBox,mtx(0,0.45,0,5.6,1.9,1.9,0),W);M.add(E.gBox,mtx(0,1.35,0,5.3,0.6,1.96,0),glass);M.add(E.gBox,mtx(2.82,0.9,0,0.06,1,1.7,0),glass)}
+  else{M.add(E.gBox,mtx(-0.7,0.45,0,3.6,2.2,1.9,0),W);M.add(E.gBox,mtx(1.75,0.45,0,1.3,1.75,1.8,0),cc('#c9c3b5'));M.add(E.gBox,mtx(2.35,1.35,0,0.08,0.7,1.6,0),glass)}
+  for(const x of kind==='bus'?[-1.9,1.9]:[-1.6,1.7])for(const z of [-0.85,0.85])M.add(E.gBox,mtx(x,0,z,0.9,0.75,0.3,0),dark);
+  const g=M.build(E.mBody).geometry;return g}
+const VEH_TR=['#c8412f','#2f6db0','#e2b85c','#3f7d4f','#eeeae0','#7a4b9a'],VEH_BUS=['#eeeae0','#d9a234','#3a86c8'];
+function vehSync(){const e=eraIdx(),want=e>=1?Math.round([0,26,44,60][e]*(GFXQ===0?0.5:1)):0,key=e+'|'+want;if(E.vehKey===key)return;E.vehKey=key;
+  for(const k of ['roadM','truckM','busM'])if(E[k]){E.scene.remove(E[k]);if(k==='roadM')E[k].geometry.dispose();E[k]=null}E.vehs=[];if(!want)return;
+  E.roadM=roadMesh(e);E.scene.add(E.roadM);const R=roadEdges();if(!R.length)return;const tot=R.reduce((s,r)=>s+r.len,0),pickE=()=>{let x=Math.random()*tot;for(const r of R){x-=r.len;if(x<=0)return r}return R[0]};
+  const nb=Math.round(want*0.35),nt=want-nb,mk=(geo,n,cols)=>{const m=new THREE.InstancedMesh(geo,E.mBody,n);m.castShadow=GFXQ>=2;m.receiveShadow=false;for(let i=0;i<n;i++)m.setColorAt(i,cc(cols[i%cols.length]));m.instanceColor.needsUpdate=true;m.frustumCulled=false;E.scene.add(m);return m};
+  E.truckM=mk(vehGeo('truck'),nt,VEH_TR);E.busM=mk(vehGeo('bus'),nb,VEH_BUS);
+  for(let i=0;i<want;i++){const r=pickE();E.vehs.push({r,s:Math.random()*r.len,dir:Math.random()<0.5?1:-1,sp:(i<nt?8:11)*(0.8+Math.random()*0.4),m:i<nt?E.truckM:E.busM,k:i<nt?i:i-nt})}}
+const _dmy=new THREE.Object3D();
+function vehStep(dt,camDist){if(!E.vehs||!E.vehs.length)return;const vis=camDist<900;E.truckM.visible=E.busM.visible=vis;if(E.roadM)E.roadM.visible=camDist<1500;if(!vis)return;const go=speed&&!S.over?Math.min(3,speed):0;
+  for(const v of E.vehs){const r=v.r;v.s+=v.dir*v.sp*dt*go;if(v.s>r.len){v.s=r.len;v.dir=-1}else if(v.s<0){v.s=0;v.dir=1}
+    let k=1;while(k<r.cum.length-1&&r.cum[k]<v.s)k++;const a=r.P[k-1],b=r.P[k],f=(v.s-r.cum[k-1])/((r.cum[k]-r.cum[k-1])||1),dx=(b[0]-a[0])*v.dir,dz=(b[2]-a[2])*v.dir,l=Math.hypot(dx,dz)||1,lane=0.75;
+    _dmy.position.set(a[0]+(b[0]-a[0])*f-dz/l*lane,a[1]+(b[1]-a[1])*f+0.05,a[2]+(b[2]-a[2])*f+dx/l*lane);_dmy.rotation.set(0,-Math.atan2(dz,dx),0);_dmy.updateMatrix();v.m.setMatrixAt(v.k,_dmy.matrix)}
+  E.truckM.instanceMatrix.needsUpdate=true;E.busM.instanceMatrix.needsUpdate=true}
+/* ---------- uçaklar (Elektrik çağından itibaren, havalimanları arasında) ---------- */
+function planeMesh(){const M=new Merger(),W=cc('#f1f2ef'),red=cc('#c8412f'),dk=cc('#3b4a56');
+  M.add(E.gBox,mtx(0,0,0,11,1.5,1.5,0),W);M.add(E.gBox,mtx(5.8,0.15,0,1.2,1.1,1.2,0),W);M.add(E.gBox,mtx(4.6,0.95,0,1.4,0.35,1.3,0),dk);
+  M.add(E.gBox,mtx(0.4,0.35,0,2.4,0.22,13,0),W);M.add(E.gBox,mtx(-4.8,0.5,0,1.5,0.18,4.6,0),W);M.add(E.gBox,mtx(-4.9,1.2,0,1.8,2.6,0.25,0),red);
+  for(const z of [-3,3])M.add(E.gCyl,mtx(0.9,-0.35,z,0.55,0.75,0.55,0,Math.PI/2),cc('#9aa3aa'));
+  const g=new THREE.Group(),m=M.build(E.mBody);m.castShadow=GFXQ>0;g.add(m);return g}
+function airportsNow(){const L=[];for(const c of CITIES){const o=E.cities[c.id],A=o&&o.grp.userData.apt;if(A)L.push({id:c.id,x:A.cx+A.ox*6*(A.K||1),z:A.cz+A.oz*6*(A.K||1),y:A.y+1.2})}return L}
+function planeSync(){const e=eraIdx(),A=e>=2?airportsNow():[],key=A.map(a=>a.id).join(',')+'|'+GFXQ;if(E.planeKey===key)return;E.planeKey=key;
+  for(const p of E.planes||[])E.scene.remove(p.o);E.planes=[];if(A.length<2)return;const n=Math.min(GFXQ===0?3:8,A.length*2);
+  for(let i=0;i<n;i++){const o=planeMesh();E.scene.add(o);const p={o,A};planeNew(p,Math.random());E.planes.push(p)}}
+function planeNew(p,t0){const A=p.A,a=A[Math.floor(Math.random()*A.length)];let b=a;while(b===a)b=A[Math.floor(Math.random()*A.length)];p.a=a;p.b=b;p.t=t0||0;p.d=Math.hypot(b.x-a.x,b.z-a.z);p.dur=Math.max(8,p.d/38)}
+function planeStep(dt,camDist){if(!E.planes||!E.planes.length)return;const go=speed&&!S.over?1:0.25;
+  for(const p of E.planes){p.t+=dt*go/p.dur;if(p.t>=1){planeNew(p,0)}const t=p.t,a=p.a,b=p.b,up=sm(0,0.22,t),dn=1-sm(0.78,1,t),cr=Math.min(up,dn);
+    const x=a.x+(b.x-a.x)*t,z=a.z+(b.z-a.z)*t,y=a.y+(b.y-a.y)*t+(110+p.d*0.05)*cr;const dx=b.x-a.x,dz=b.z-a.z,climb=(t<0.5?1:-1)*(1-cr)*0.35;
+    p.o.position.set(x,y,z);p.o.rotation.set(0,-Math.atan2(dz,dx),climb,'YXZ');p.o.visible=camDist<1700}}
+/* ---------- hava olayları: kar fırtınası ve sel bölgesinde yağış ---------- */
+function wxCloudTex(){if(E.wxTex)return E.wxTex;const c=document.createElement('canvas');c.width=256;c.height=128;const g=c.getContext('2d');for(let i=0;i<16;i++){const x=40+Math.random()*176,y=50+Math.random()*40,r=24+Math.random()*30,gr=g.createRadialGradient(x,y,2,x,y,r);gr.addColorStop(0,'rgba(255,255,255,.95)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,7);g.fill()}return E.wxTex=new THREE.CanvasTexture(c)}
+function wxSync(){const key=S.blocks.map(b=>b.a+b.b+(b.k||'kar')).join(',')+'|'+GFXQ;if(E.wxKey===key)return;E.wxKey=key;
+  for(const w of E.wx||[]){E.scene.remove(w.grp);w.grp.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()})}E.wx=[];
+  for(const b of S.blocks.slice(0,3)){const A=C[b.a],B=C[b.b],cx=(A.x+B.x)/2,cz=(A.y+B.y)/2,R=Math.min(170,Math.hypot(B.x-A.x,B.y-A.y)/2+50),rain=b.k==='sel',n=Math.round((rain?900:1100)*(GFXQ===0?0.45:1)),grp=new THREE.Group();grp.position.set(cx,0,cz);
+    const pos=new Float32Array(n*(rain?6:3)),H=230;for(let i=0;i<n;i++){const x=(Math.random()-0.5)*2*R,y=Math.random()*H,z=(Math.random()-0.5)*2*R;if(rain){pos.set([x,y,z,x+0.8,y-6,z+0.3],i*6)}else pos.set([x,y,z],i*3)}
+    const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    const pts=rain?new THREE.LineSegments(geo,new THREE.LineBasicMaterial({color:0xa9c3d6,transparent:true,opacity:0.55,depthWrite:false})):new THREE.Points(geo,new THREE.PointsMaterial({color:0xffffff,size:2.2,transparent:true,opacity:0.95,depthWrite:false}));pts.frustumCulled=false;grp.add(pts);
+    const clouds=[];for(let i=0;i<(GFXQ>=2?7:4);i++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:wxCloudTex(),transparent:true,opacity:0.85,depthWrite:false,color:rain?0x6b747c:0xb7c0c8,fog:false}));s.scale.set(R*1.1,R*0.55,1);s.position.set((Math.random()-0.5)*R*1.3,190+Math.random()*40,(Math.random()-0.5)*R*1.3);grp.add(s);clouds.push(s)}
+    E.scene.add(grp);E.wx.push({grp,pts,pos,n,rain,R,H,clouds})}}
+function wxStep(dt){if(!E.wx||!E.wx.length)return;const camY=E.camera.position.y;
+  for(const w of E.wx){const a=w.pos,R=w.R;if(w.rain){for(let i=0;i<w.n;i++){const o=i*6;a[o+1]-=dt*150;a[o+4]-=dt*150;if(a[o+4]<0){const x=(Math.random()-0.5)*2*R,z=(Math.random()-0.5)*2*R,y=w.H;a[o]=x;a[o+1]=y;a[o+2]=z;a[o+3]=x+0.8;a[o+4]=y-6;a[o+5]=z+0.3}}}
+    else for(let i=0;i<w.n;i++){const o=i*3;a[o+1]-=dt*(16+(i%7)*2);a[o]+=Math.sin(time*1.3+i)*dt*4;a[o+2]+=dt*6;if(a[o+1]<0){a[o+1]=w.H;a[o]=(Math.random()-0.5)*2*R;a[o+2]=(Math.random()-0.5)*2*R}}
+    w.pts.geometry.attributes.position.needsUpdate=true;for(const s of w.clouds){s.material.opacity=camY<s.position.y+30?0:0.85;s.position.x+=dt*3;if(s.position.x>R)s.position.x=-R}}}
+/* ---------- büyüme animasyonu ve geçici vinçler ---------- */
+function craneObj(){const g=new THREE.Group(),Y=cc('#e2b322'),M=new Merger();M.add(E.gBox,mtx(0,0,0,1.3,34,1.3,0),Y);M.add(E.gBox,mtx(0,0,0,4,0.8,4,0),cc('#6d7479'));
+  const jib=new Merger();jib.add(E.gBox,mtx(6,0,0,28,1.1,1.1,0),Y);jib.add(E.gBox,mtx(-8.5,-0.6,0,3.2,2.2,2,0),cc('#6b6f73'));jib.add(E.gBox,mtx(0.6,-2.2,0,2,2,1.6,0),cc('#f1efe8'));jib.add(E.gBox,mtx(16,-14,0,0.12,14,0.12,0),cc('#2f3336'));jib.add(E.gBox,mtx(16,-14.8,0,1.4,0.8,1.4,0),cc('#c8412f'));
+  const t=M.build(E.mBody),j=jib.build(E.mBody);t.castShadow=j.castShadow=GFXQ>0;j.position.y=34;g.add(t);g.add(j);g.userData.jib=j;return g}
+function growStart(id,grp){const c=C[id],u=grp.userData;u.grow=0;grp.scale.y=0.25;
+  for(let k=0;k<10;k++){const a=k/10*Math.PI*2,r=(u.r||1)*U3*0.6;emitPuff(c.x+Math.cos(a)*r,(u.base||2)+2,c.y+Math.sin(a)*r,Math.cos(a)*3,Math.sin(a)*3,true)}
+  E.cranes=E.cranes||[];if(E.cranes.length>=4){const o=E.cranes.shift();E.scene.remove(o.o)}
+  const o=craneObj(),a=Math.random()*Math.PI*2,r=(u.r||1)*U3*0.45;o.position.set(c.x+Math.cos(a)*r,u.base||cityBase(c),c.y+Math.sin(a)*r);E.scene.add(o);E.cranes.push({o,until:time+30,sp:0.25+Math.random()*0.3})}
+function growStep(dt){for(const id in E.cities){const g=E.cities[id].grp,u=g.userData;if(u.grow==null)continue;u.grow+=dt;const x=Math.min(1,u.grow/1.4),c1=1.70158,s=1+(c1+1)*Math.pow(x-1,3)+c1*Math.pow(x-1,2);g.scale.y=0.25+0.75*s;if(x>=1){g.scale.y=1;delete u.grow}}
+  if(E.cranes&&E.cranes.length){for(const c of E.cranes)c.o.userData.jib.rotation.y+=dt*c.sp*(speed?1:0.3);E.cranes=E.cranes.filter(c=>{if(time<c.until)return true;E.scene.remove(c.o);return false})}}
+/* ---------- açılış uçuşu ---------- */
+function introStart(kind){if(!E.ready||FF.on)return;const cam=E.camera,ctl=E.controls,t1=V3((C.ist.x+C.ank.x)/2,0,(C.ist.y+C.ank.y)/2+10),p1=t1.clone().add(V3(0,320,340));let K,dur;
+  if(kind==='full'){K=[{t:V3(1330,0,170),p:V3(1330,820,1040)},{t:V3(1000,0,210),p:V3(1000,700,860)},{t:V3(C.ank.x,0,C.ank.y),p:V3(C.ank.x+60,380,C.ank.y+470)},{t:t1,p:p1}];dur=6}
+  else{K=[{t:t1.clone(),p:t1.clone().add(V3(0,1250,900))},{t:t1,p:p1}];dur=2.4}
+  E.intro={K,dur,t:0};E.camAnim=null;ctl.enabled=false}
+function introStep(dt){const I=E.intro;if(!I)return;I.t+=Math.min(dt,0.1);const f0=Math.min(1,I.t/I.dur),f=f0*f0*(3-2*f0),n=I.K.length-1,seg=Math.min(n-1,Math.floor(f*n)),u=f*n-seg,a=I.K[seg],b=I.K[seg+1];
+  E.controls.target.lerpVectors(a.t,b.t,u);E.camera.position.lerpVectors(a.p,b.p,u);E.camera.lookAt(E.controls.target);if(f0>=1)introEnd()}
+function introEnd(){const I=E.intro;if(!I)return;E.intro=null;const K=I.K[I.K.length-1];E.controls.target.copy(K.t);E.camera.position.copy(K.p);E.camera.lookAt(K.t);E.controls.enabled=true}
+/* ---------- fotoğraf modu ---------- */
+function photoOn(){if(!E.ready||E.photo)return;E.photo=true;E.photoSel=sel;sel=[];if(E.follow)followStop();$('world').classList.add('photo');$('world').classList.toggle('labs',!!E.photoLab);$('photobar').hidden=false;$('world').scrollIntoView({behavior:'smooth',block:'nearest'})}
+function photoOff(){if(!E.photo)return;E.photo=false;sel=E.photoSel||[];$('world').classList.remove('photo','labs');$('photobar').hidden=true;renderAct()}
+function photoCanvas(){const src=E.renderer.domElement;E.renderer.render(E.scene,E.camera);const W=1080,H=1350,PH=1010,cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d');
+  const DF='"Josefin Sans","Century Gothic",sans-serif',BF='"Source Sans 3","Segoe UI",sans-serif',e=eraIdx();g.fillStyle='#10202a';g.fillRect(0,0,W,H);
+  const sw=src.width,sh=src.height,s=Math.max(W/sw,PH/sh),dw=sw*s,dh=sh*s,dx=(W-dw)/2,dy=(PH-dh)/2;g.save();g.beginPath();g.rect(0,0,W,PH);g.clip();if(gradeOn())g.filter=GRADE[e].f;g.drawImage(src,dx,dy,dw,dh);g.filter='none';
+  const vg=g.createRadialGradient(W/2,PH*0.45,PH*0.35,W/2,PH*0.45,PH*0.95);vg.addColorStop(0,'rgba(16,12,6,0)');vg.addColorStop(1,`rgba(16,12,6,${gradeOn()?GRADE[e].v*0.8:0.25})`);g.fillStyle=vg;g.fillRect(0,0,W,PH);
+  if(E.photoLab){const k=dw/(E.VW||sw);g.font=`700 ${Math.round(13*k)}px ${BF}`;g.textAlign='center';g.textBaseline='middle';
+    for(const c of CITIES){if(!connected(c.id))continue;const o=E.cities[c.id],[px,py,pz]=project(c.x,(o?o.grp.userData.base:Y_LAND)+Math.min(cityLayout(c.id).top,70)+8,c.y);if(pz>1)continue;const x=dx+px*k,y=dy+py*k;if(x<40||x>W-40||y<230||y>PH-20)continue;
+      const tw=g.measureText(c.n).width+18*k/1.2;g.fillStyle='rgba(255,253,247,.93)';g.beginPath();if(g.roundRect)g.roundRect(x-tw/2,y-11*k,tw,22*k,9*k);else g.rect(x-tw/2,y-11*k,tw,22*k);g.fill();g.fillStyle='#2a241c';g.fillText(c.n,x,y+1)}g.textAlign='left'}
+  const tg=g.createLinearGradient(0,0,0,260);tg.addColorStop(0,'rgba(16,32,42,.85)');tg.addColorStop(1,'rgba(16,32,42,0)');g.fillStyle=tg;g.fillRect(0,0,W,260);g.restore();
+  g.textBaseline='top';g.fillStyle='#e2b85c';g.font=`700 70px ${DF}`;g.fillText('DEMİR AĞLAR',60,52);g.fillStyle='#efe6cf';g.font=`600 34px ${BF}`;g.fillText(`${MONTHS[month()%12]} ${year()} · ${ERAS[e].n} çağı`,62,138);
+  const stats=[['Ağdaki şehir',`${nCon()} / ${CITIES.length}`],['Hat',`${fmt(trackKm())} km`],['Şirket değeri',`${fmt(myValue())} bin ₺`]];
+  stats.forEach(([l,v],i)=>{const x=60+i*330;g.fillStyle='#9fb1bb';g.font=`600 26px ${BF}`;g.fillText(l,x,PH+44);g.fillStyle='#efe6cf';g.font=`700 42px ${DF}`;g.fillText(v,x,PH+82)});
+  g.fillStyle='#e2b85c';g.font=`700 32px ${BF}`;g.fillText('Sen de Anadolu’yu demir ağlarla ör!',60,H-118);const u=shareURL();if(u){g.fillStyle='#9fb1bb';g.font=`600 24px ${BF}`;g.fillText(u.replace(/^https?:\/\//,''),60,H-72)}
+  return cv}
+function photoFlash(){const f=document.createElement('div');f.className='flash';$('world').appendChild(f);setTimeout(()=>f.remove(),450)}
+/* ---------- bağlantılar ---------- */
+let introAsked=false;
+const _frame3D=frame3D;frame3D=function(dt){
+  if(!introAsked&&E.ready&&!FF.on){introAsked=true;introStart(S.t<3.3&&!S.scn?'full':'short')}
+  if(E.intro){introStep(dt)}
+  try{gradeApply();vehSync();planeSync();wxSync()}catch(e){console.warn('gfx2',e)}
+  _frame3D(dt);
+  const camDist=E.camera.position.distanceTo(E.controls.target);try{vehStep(dt,camDist);planeStep(dt,camDist);wxStep(dt);growStep(dt)}catch(e){console.warn('gfx2',e)}};
+const _startNew=startNew;startNew=function(){_startNew();if(E.ready){E.intro=null;introStart('full')}};
+$('stage3').addEventListener('pointerdown',()=>{if(E.intro)introEnd()},{capture:true});
+$('grade').onclick=()=>{OPT.grade=gradeOn()?'off':'era';saveOpt();gradeLabel();gradeApply();info(`<b>Renk tonu: ${gradeOn()?GRADE[eraIdx()].n:'Doğal renkler'}</b><span class="note">${gradeOn()?'Her çağın kendi görünümü var: 1927 eski fotoğraf, 1950 kartpostal, 1970’ler film, günümüz canlı renkler.':'Çağ renk tonu kapalı.'}</span>`)};gradeLabel();
+$('photo').onclick=()=>photoOn();
+const _v2Click=v2Click;v2Click=function(a,b){
+  if(a==='photo'){photoOn();return true}
+  if(a==='phoff'){photoOff();return true}
+  if(a==='phlab'){E.photoLab=!E.photoLab;$('world').classList.toggle('labs',E.photoLab);b.textContent=E.photoLab?'Şehir adları: Açık':'Şehir adları: Kapalı';return true}
+  if(a==='phshot'){photoFlash();sfx('chime');shareNow('photo');return true}
+  return _v2Click(a,b)};
 
 window.claude?.hot?.snapshot?.(()=>({S:JSON.parse(serial())}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
