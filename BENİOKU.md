@@ -60,6 +60,19 @@ Not: Dosyayı doğrudan açınca uygulama olarak kurma ve çevrimdışı çalı�
 
 İlerleme tarayıcının kendi hafızasında (localStorage) tutulur. Farklı adres veya tarayıcıda açarsan kayıt oradan başlar.
 
+## Android uygulaması (APK)
+
+Her güncellemede GitHub, `android/` klasöründeki projeden APK'yı kendisi derler ve **Releases** sayfasına koyar. En son sürüm her zaman şu adrestedir:
+
+`https://github.com/Ytcaydin/demir-aglar/releases/latest/download/DemirAglar.apk`
+
+Telefonda bu bağlantıyı aç, dosyayı indir ve kur. İlk seferde Android "bilinmeyen kaynaklardan yükleme" izni ister. Uygulama internetsiz çalışır, çünkü 3D kütüphanesi ve yazı tipleri içine gömülüdür. Paylaşım düğmesi telefonun kendi paylaşım menüsünü açar.
+
+Notlar:
+- APK, depodaki `demir-aglar-sideload.keystore` test anahtarıyla imzalanır. Böylece yeni sürümler eskisinin üzerine kurulur ve kayıtların silinmez. Bu anahtar herkese açık olduğu için **Play Store'da kullanılmamalı**; Play Store için kendi gizli yükleme anahtarını oluştur ve AAB derle.
+- Uygulamada web bildirimleri yok; bildirim düğmesi gizlenir.
+- Tarayıcıdaki kayıt uygulamaya taşınmaz; uygulama kendi kaydıyla başlar.
+
 ## Play Store için
 
 Play Store'a çıkmak için bu PWA, Bubblewrap veya PWABuilder ile Android uygulamasına (TWA) paketlenebilir. Gerçek reklam (AdMob) ve uygulama içi satın alma o aşamada bağlanır; şu an oyundaki "REKLAM" düğmeleri demo.

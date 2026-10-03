@@ -1,0 +1,45 @@
+plugins {
+    id "com.android.application"
+}
+
+def runNo = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+
+android {
+    namespace "com.ytcaydin.demiraglar"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.ytcaydin.demiraglar"
+        minSdk 24
+        targetSdk 35
+        versionCode runNo
+        versionName "1.0.${runNo}"
+    }
+
+    signingConfigs {
+        sideload {
+            // Yalnızca telefona elle kurulum (sideload) için test anahtarı. Play Store için kendi gizli anahtarını kullan.
+            storeFile file("demir-aglar-sideload.keystore")
+            storePassword "android"
+            keyAlias "demiraglar"
+            keyPassword "android"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.sideload
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation "androidx.webkit:webkit:1.12.1"
+    implementation "androidx.core:core:1.13.1"
+}

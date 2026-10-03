@@ -1,0 +1,64 @@
+name: APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "icons/**"
+      - "android/**"
+      - ".github/workflows/apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14.3"
+
+      - name: Oyun dosyalarını hazırla
+        run: python3 android/prepare_assets.py
+
+      - name: APK derle
+        run: |
+          set -o pipefail
+          gradle -p android assembleRelease --no-daemon --stacktrace 2>&1 | tee build.log
+          cp android/app/build/outputs/apk/release/app-release.apk DemirAglar.apk
+
+      - name: Release olarak yayınla
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Demir Ağlar 1.0.${{ github.run_number }}
+          make_latest: "true"
+          body: |
+            Android için kurulum dosyası. Telefonda **DemirAglar.apk** dosyasına dokunup indir, sonra aç ve kur.
+            İlk kurulumda "bilinmeyen kaynaklardan yükleme" izni istenebilir.
+          files: DemirAglar.apk
+
+      - name: Hata kaydını yükle
+        if: failure()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-failed-${{ github.run_number }}
+          name: "Derleme hatası #${{ github.run_number }}"
+          prerelease: true
+          make_latest: "false"
+          body: APK derlenemedi. Ayrıntılar build.log dosyasında.
+          files: build.log

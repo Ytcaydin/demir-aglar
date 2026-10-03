@@ -2449,7 +2449,7 @@ function rec(){return META.rec||(META.rec={})}
 function recWeek(){const R=rec(),w=weekId();if(!R.week||R.week.id!==w){if(R.week)R.prev=R.week;R.week={id:w,net:0,mo:0,v:0,n:0}}return R.week}
 function recMonth(){if(!S||S.scn)return;const W=recWeek(),R=rec(),v=Math.round(myValue()),n=nCon();if(S.last){W.net+=S.last.inc-S.last.exp;W.mo++}
   if(v>W.v){W.v=v;W.y=year()}if(n>W.n)W.n=n;if(!R.best||v>R.best.v)R.best={v,y:year(),n,d:today()};if(!FF.on)saveMeta()}
-function shareURL(){return /^https?:/.test(location.protocol)?location.origin+location.pathname.replace(/[^/]*$/,''):''}
+function shareURL(){return /^https?:/.test(location.protocol)&&location.host!=='appassets.androidplatform.net'?location.origin+location.pathname.replace(/[^/]*$/,''):''}
 function shareText(){const u=shareURL();return `Demir Ağlar’da ${year()} yılına geldim: ${nCon()} şehri bağladım, ${fmt(trackKm())} km hat döşedim. Şirket değeri ${fmt(myValue())} bin ₺!${u?' '+u:''}`}
 function shareCanvas(){const W=1080,H=1350,cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d');
   const DF='"Josefin Sans","Century Gothic",sans-serif',BF='"Source Sans 3","Segoe UI",sans-serif';
@@ -2477,6 +2477,7 @@ async function shareNow(){try{if(document.fonts&&document.fonts.ready)await docu
   let blob=null;try{const cv=shareCanvas();blob=await new Promise(r=>cv.toBlob(r,'image/png'))}catch(e){}
   if(!blob){bad('<b>Paylaşım görseli oluşturulamadı.</b>');return}
   if(shareImgURL)URL.revokeObjectURL(shareImgURL);shareImgURL=URL.createObjectURL(blob);S.flags.shared=1;renderShare();checkMissions();persist();
+  if(window.AndroidBridge&&AndroidBridge.shareImage){try{const b64=await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(String(fr.result).split(',')[1]);fr.onerror=rej;fr.readAsDataURL(blob)});AndroidBridge.shareImage(b64,shareText());return}catch(e){}}
   const file=new File([blob],`demir-aglar-${year()}.png`,{type:'image/png'});
   if(navigator.canShare&&navigator.share){try{if(navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Demir Ağlar',text:shareText()});return}}catch(e){if(e&&e.name==='AbortError')return}}
   const a=document.createElement('a');a.href=shareImgURL;a.download=file.name;document.body.appendChild(a);a.click();a.remove();good('<b>Görsel indirildi.</b><span class="note">Galeriden istediğin yerde paylaşabilirsin.</span>')}
