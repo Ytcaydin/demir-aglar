@@ -45,6 +45,12 @@ Ayarlar (⚙) menüsünden bildirimleri açabilirsin. Oyun telefona uygulama ola
 - Göller artık su gibi görünür, deniz dalgaları tekrar etmez, ekran kenarındaki etiketler kesilmez.
 - Araç, uçak ve yağış miktarı Ayarlar → Grafik seviyesine göre azalır.
 
+## Tam ekran ve tanıtımlar
+
+- Haritanın sağ üstündeki köşeli düğme oyunu **tam ekran** yapar. Tarih, kasa ve hız üstte kalır; Seçim, Görevler, Şirket, Filo, Albüm ve Mağaza alttaki çubuktan açılır. Telefonun geri tuşu önce açık paneli, sonra tam ekranı kapatır.
+- Bir şehre dokununca haritada 2-3 cümlelik **şehir tanıtımı** ve yöresel ürünü çıkar. Aynı tanıtım şehir kartında da durur.
+- Kapadokya, Pamukkale, Efes, Sümela, Nemrut, Truva ve Şehitler Abidesi etiketlerine dokununca **turistik yerin kısa tanıtımı** açılır.
+
 ## Dosyalar
 
 | Dosya | Ne işe yarar |

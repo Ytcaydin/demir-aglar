@@ -11,7 +11,9 @@ import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Base64;
+import android.view.View;
 import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -40,6 +42,7 @@ public class MainActivity extends Activity {
 
     private WebView web;
     private WebViewAssetLoader loader;
+    private boolean immersive = false;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -141,12 +144,53 @@ public class MainActivity extends Activity {
     @Override
     @SuppressWarnings("deprecation")
     public void onBackPressed() {
-        if (web != null && web.canGoBack()) web.goBack();
-        else moveTaskToBack(true);
+        if (web == null) {
+            moveTaskToBack(true);
+            return;
+        }
+        // Önce oyun kendi katmanlarını kapatsın (tam ekran menüsü, fotoğraf modu); kapatacak bir şey yoksa uygulamayı arka plana al.
+        web.evaluateJavascript("(window.fsBack&&fsBack())?'1':'0'", v -> {
+            if ("\"1\"".equals(v)) return;
+            if (web != null && web.canGoBack()) web.goBack();
+            else moveTaskToBack(true);
+        });
     }
 
-    /** Sayfanın çağırdığı yerel işlevler: paylaşım sayfası ve titreşim. */
+    @SuppressWarnings("deprecation")
+    private void applyImmersive(boolean on) {
+        immersive = on;
+        View d = getWindow().getDecorView();
+        if (Build.VERSION.SDK_INT >= 30) {
+            WindowInsetsController c = d.getWindowInsetsController();
+            if (c == null) return;
+            if (on) {
+                c.hide(WindowInsets.Type.systemBars());
+                c.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            } else {
+                c.show(WindowInsets.Type.systemBars());
+            }
+        } else {
+            d.setSystemUiVisibility(on
+                    ? View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    : View.SYSTEM_UI_FLAG_VISIBLE);
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        // Bildirim panelinden dönünce çubuklar yeniden gizlensin.
+        if (hasFocus && immersive) applyImmersive(true);
+    }
+
+    /** Sayfanın çağırdığı yerel işlevler: paylaşım sayfası, titreşim ve tam ekran. */
     private class Bridge {
+        @JavascriptInterface
+        public void setImmersive(boolean on) {
+            runOnUiThread(() -> applyImmersive(on));
+        }
+
         @JavascriptInterface
         public void shareImage(String base64Png, String text) {
             try {

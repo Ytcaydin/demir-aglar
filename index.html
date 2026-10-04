@@ -184,6 +184,28 @@ h1{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:.14e
 .world.photo.labs #labels3{visibility:visible}.world.photo.labs #labels3 .lrow,.world.photo.labs #labels3 .exlab{display:none}
 .photobar{position:absolute;left:10px;right:10px;bottom:10px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;z-index:8}.photobar .btn{padding:9px 12px;font-size:14px}.photobar[hidden]{display:none}
 .flash{position:absolute;inset:0;background:#fff;pointer-events:none;z-index:9;animation:flash .45s ease-out forwards}@keyframes flash{from{opacity:.85}to{opacity:0}}
+.cdesc{margin:0;line-height:1.5;font-size:14px;color:#d8d2c0}.lmdesc{margin:2px 0 0}
+.cinfo{position:absolute;left:10px;right:62px;top:var(--hudh,10px);z-index:6;background:rgba(23,42,54,.96);border:1px solid var(--line);border-left:4px solid var(--ochre);border-radius:12px;padding:9px 12px 10px;display:flex;flex-direction:column;gap:5px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.cinfo[hidden]{display:none}.cinfo p{margin:0;font-size:13.5px;line-height:1.45}.ctop{display:flex;align-items:center;gap:8px}.ctop h3{margin:0;font-family:var(--display);font-size:17px;letter-spacing:.04em}.ctop .lvl{font-size:11px;color:var(--muted)}
+.cix{margin-left:auto;background:none;border:0;color:var(--muted);font-size:18px;line-height:1;cursor:pointer;padding:2px 4px}
+.world.photo .cinfo{visibility:hidden}
+#fshud,.fsnav,.fssheet{display:none}
+body.fs3{overflow:hidden}
+body.fs3 .world{position:fixed;inset:0;z-index:60;border:0;border-radius:0;background:#10202a}
+body.fs3 #stage3{min-height:0}
+body.fs3 #fshud{display:flex;flex-direction:column;gap:6px;position:absolute;left:8px;right:62px;top:8px;z-index:7;pointer-events:none}
+body.fs3 #fshud>*{pointer-events:auto}
+body.fs3 #fshud .bar{gap:5px}body.fs3 #fshud .chip{flex:1 1 90px!important;padding:4px 9px;background:rgba(16,32,42,.86)}body.fs3 #fshud .chip b{font-size:15px}body.fs3 #fshud .prog{display:none}body.fs3 #fshud .sbtn{padding:6px 9px;background:rgba(30,53,68,.9)}
+body.fs3 #fshud .banner{padding:8px 11px;font-size:14px}
+body.fs3 .fsnav{display:flex;position:absolute;left:0;right:0;bottom:0;z-index:8;background:rgba(16,32,42,.95);border-top:1px solid var(--line);padding:3px 2px calc(3px + env(safe-area-inset-bottom));justify-content:space-around}
+.fsnav button{flex:1;min-width:0;background:none;border:0;color:var(--muted);font:600 10.5px var(--body);display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 0;position:relative;cursor:pointer}
+.fsnav .i{font-size:19px;line-height:22px}.fsnav button.on{color:var(--ochre)}
+.fsnav .dot{position:absolute;top:2px;left:calc(50% + 7px);width:7px;height:7px;border-radius:50%;background:var(--bad)}
+body.fs3 .fssheet:not([hidden]){display:flex;flex-direction:column;position:absolute;left:0;right:0;bottom:var(--navh,56px);max-height:60%;z-index:8;background:var(--ink);border-top:1px solid var(--line);border-radius:16px 16px 0 0;overflow:auto;padding:6px 10px 14px;gap:8px;box-shadow:0 -8px 24px rgba(0,0,0,.45);overscroll-behavior:contain}
+.fshead{display:flex;align-items:center;position:sticky;top:-6px;background:var(--ink);padding:6px 0 4px;z-index:1}.fshead b{font:700 14px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--ochre)}
+body.fs3 #fsbody .grid{grid-template-columns:1fr}
+body.fs3 .goalchip,body.fs3 .coach,body.fs3 .drive,body.fs3 .photobar{bottom:calc(var(--navh,56px) + 10px)}
+body.fs3 .wctl{top:8px}
 </style>
 </head>
 <body>
@@ -210,8 +232,9 @@ h1{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:.14e
 
   <div class="world" id="world">
     <div id="stage3" aria-label="3D Anadolu dünyası. Şehirleri Filo sekmesindeki listeden de seçebilirsin."></div><div id="labels3"></div><div id="load3">Anadolu yükleniyor…</div><div id="err3" hidden></div>
-    <div class="boostflag" id="boostflag" hidden></div><div class="scnflag" id="scnflag" hidden></div><div class="followcap" id="followcap" hidden></div><div class="coach" id="coach" hidden></div><div class="card3" id="card3" hidden></div><div class="photobar" id="photobar" hidden><button class="btn primary" data-a="phshot">📸 Çek ve paylaş</button><button class="btn" data-a="phlab">Şehir adları: Kapalı</button><button class="btn" data-a="phoff">Kapat</button></div><div class="drive" id="drive" hidden></div><div class="setpanel" id="setpanel" hidden><button class="wbtn sm" id="dn">GECE</button><button class="wbtn sm" id="snd">SES</button><button class="wbtn sm" id="gfx">GRAFİK</button><button class="wbtn sm" id="vib">TİTREŞİM</button><button class="wbtn sm" id="labq">ETİKET</button><button class="wbtn sm" id="ntf">BİLDİRİM</button><button class="wbtn sm" id="grade">RENK TONU</button></div><div class="goalchip" id="goalchip" hidden></div>
+    <div class="boostflag" id="boostflag" hidden></div><div class="scnflag" id="scnflag" hidden></div><div class="followcap" id="followcap" hidden></div><div class="coach" id="coach" hidden></div><div class="card3" id="card3" hidden></div><div id="fshud"></div><div class="cinfo" id="cinfo" hidden></div><div class="fssheet" id="fssheet" hidden><div class="fshead"><b id="fstitle"></b><button class="cix" data-a="fsx" aria-label="Kapat">✕</button></div><div id="fsbody"></div></div><nav class="fsnav" id="fsnav" aria-label="Oyun menüsü"></nav><div class="photobar" id="photobar" hidden><button class="btn primary" data-a="phshot">📸 Çek ve paylaş</button><button class="btn" data-a="phlab">Şehir adları: Kapalı</button><button class="btn" data-a="phoff">Kapat</button></div><div class="drive" id="drive" hidden></div><div class="setpanel" id="setpanel" hidden><button class="wbtn sm" id="dn">GECE</button><button class="wbtn sm" id="snd">SES</button><button class="wbtn sm" id="gfx">GRAFİK</button><button class="wbtn sm" id="vib">TİTREŞİM</button><button class="wbtn sm" id="labq">ETİKET</button><button class="wbtn sm" id="ntf">BİLDİRİM</button><button class="wbtn sm" id="grade">RENK TONU</button></div><div class="goalchip" id="goalchip" hidden></div>
     <div class="wctl">
+      <button class="wbtn" id="fsbtn" aria-label="Tam ekran"></button>
       <button class="wbtn" id="zin" aria-label="Yakınlaştır">+</button>
       <button class="wbtn" id="zout" aria-label="Uzaklaştır">−</button>
       <button class="wbtn sm" id="zfit" aria-label="Tüm ülkeyi göster">TÜMÜ</button>
@@ -1682,7 +1705,7 @@ function init3D(){adjustLandmarks();
   r.domElement.addEventListener('contextmenu',e=>e.preventDefault());
   buildLandmarks();try{buildForests()}catch(e){console.warn('forest',e)}E.skyU.sunDir.value.set(-0.52,0.68,-0.4).normalize();envReflections();resize3D();E.ready=true;gfxApply();const l=$('load3');if(l)l.hidden=true;
 }
-function resize3D(){if(!E.renderer)return;const w=$('world').clientWidth,h=Math.round(Math.max(360,Math.min(window.innerHeight*0.64,620)));E.VW=w;E.VH=h;E.renderer.setSize(w,h);E.camera.aspect=w/h;E.camera.fov=w<520?50:40;E.camera.updateProjectionMatrix()}
+function resize3D(){if(!E.renderer)return;const w=$('world').clientWidth,h=document.body.classList.contains('fs3')?window.innerHeight:Math.round(Math.max(360,Math.min(window.innerHeight*0.64,620)));E.VW=w;E.VH=h;E.renderer.setSize(w,h);E.camera.aspect=w/h;E.camera.fov=w<520?50:40;E.camera.updateProjectionMatrix()}
 function project(x,y,z){const v=_v.set(x,y,z).project(E.camera);return [(v.x+1)/2*E.VW,(1-v.y)/2*E.VH,v.z]}
 function cityBase(c){return Math.max(hAt(c.x,c.y),Y_LAND*0.9)}
 function pickAt(sx,sy){let best=null,bd=40;for(const c of CITIES){const L=cityLayout(c.id);const [px,py,pz]=project(c.x,cityBase(c)+Math.min(L.top,70)*0.35,c.y);if(pz>1)continue;const d=Math.hypot(px-sx,py-sy);if(d<bd){bd=d;best=c.id}}
@@ -2729,6 +2752,83 @@ const _v2Click=v2Click;v2Click=function(a,b){
   if(a==='phlab'){E.photoLab=!E.photoLab;$('world').classList.toggle('labs',E.photoLab);b.textContent=E.photoLab?'Şehir adları: Açık':'Şehir adları: Kapalı';return true}
   if(a==='phshot'){photoFlash();sfx('chime');shareNow('photo');return true}
   return _v2Click(a,b)};
+
+/* ================= arayüz 3: tam ekran, şehir ve turistik yer tanıtımları ================= */
+/* ---------- şehir tanıtımları ---------- */
+const CITY_DESC={
+ ist:'Asya ile Avrupa’yı birleştiren, Türkiye’nin en kalabalık şehri. Boğaz’ın iki yakasına yayılan şehir yüzyıllar boyunca Bizans’a ve Osmanlı’ya başkentlik yaptı. Bugün ülkenin ticaret, sanayi ve kültür merkezi.',
+ edi:'Trakya’nın kapısı, Bulgaristan ve Yunanistan sınırına çok yakın. 14. yüzyılda Osmanlı başkenti oldu; Selimiye Camii ve tarihî köprüleriyle tanınır. Yüzyıllardır süren Kırkpınar Yağlı Güreşleri her yaz burada yapılır.',
+ can:'Çanakkale Boğazı’nın iki yakasında kurulu, Asya ile Avrupa arasında bir geçit şehri. 1915 Çanakkale Savaşları’nın yaşandığı Gelibolu Yarımadası ve antik Truva bu ildedir.',
+ bur:'Uludağ’ın eteğinde, yeşilliği yüzünden “Yeşil Bursa” diye anılan şehir. Osmanlı’nın ilk başkentidir; ipekçilik ve tekstille ünlendi, bugün otomotiv sanayisinin merkezlerinden biri.',
+ izm:'Ege’nin incisi, Türkiye’nin üçüncü büyük şehri. Körfezi çevreleyen bu liman kenti antik Smyrna’nın mirasçısıdır; Kordon boyu ve Alsancak’ıyla tanınır.',
+ den:'Ege’nin iç kesiminde, tekstil ve özellikle havlu üretimiyle tanınan bir sanayi şehri. Pamukkale travertenleri ve Hierapolis antik kenti şehre çok yakındır.',
+ ant:'Toroslar ile Akdeniz arasında, Türkiye’nin turizm başkenti. Tarihî Kaleiçi, Hadrian Kapısı ve uzun plajlarıyla her yıl milyonlarca ziyaretçi ağırlar.',
+ esk:'Porsuk Çayı’nın ikiye böldüğü, üniversiteleriyle genç bir şehir. Demiryolu şehrin kaderini belirledi: lokomotif fabrikası TÜLOMSAŞ buradadır. Odunpazarı’nın renkli evleri ve lületaşı ünlüdür.',
+ ank:'Cumhuriyetin başkenti. Büyük Millet Meclisi 1920’de burada açıldı, şehir 1923’te başkent oldu. Anıtkabir ve Anadolu Medeniyetleri Müzesi şehrin simgelerindendir.',
+ kon:'Geniş ovasıyla Türkiye’nin tahıl ambarı. Anadolu Selçuklu Devleti’ne başkentlik yaptı; Mevlana’nın türbesi her yıl yüz binlerce ziyaretçi çeker.',
+ ada:'Çukurova’nın merkezi, Seyhan Nehri kıyısında. Verimli toprakları ve pamuğuyla ülkenin önemli tarım ve sanayi şehirlerindendir; kebabı ve şalgamı meşhurdur.',
+ kay:'Erciyes Dağı’nın eteğinde, ticaretiyle ünlü bir Anadolu şehri. Selçuklu eserleri, pastırması ve mantısıyla tanınır; bugün mobilya sanayisinde öndedir.',
+ sam:'Karadeniz’in en büyük liman kentlerinden biri. Mustafa Kemal’in 19 Mayıs 1919’da buraya çıkmasıyla Kurtuluş Savaşı başladı. Bafra ve Çarşamba ovaları şehri bereketli kılar.',
+ siv:'Anadolu’nun ortasında, yüksek bir platoda kurulu. 1919’daki Sivas Kongresi Kurtuluş Savaşı’nın dönüm noktalarındandır; Selçuklu medreseleri ve Divriği Ulu Camii buradadır.',
+ tra:'Doğu Karadeniz’in tarihî liman kenti. İpek Yolu’nun denize ulaştığı noktalardan biriydi ve bir dönem Trabzon İmparatorluğu’na başkentlik yaptı. Sümela Manastırı ve Uzungöl bu ildedir.',
+ mal:'Fırat’ın batısında, kayısısıyla dünyaca ünlü şehir. Kayısı bahçeleriyle çevrilidir; Nemrut Dağı’na Malatya tarafından da çıkılabilir.',
+ erz:'Doğu Anadolu’nun en büyük şehirlerinden; yaklaşık 1.900 metre yükseklikte, sert kışlarıyla bilinir. 1919’daki Erzurum Kongresi burada toplandı; Palandöken kayak merkezi kış turizminin gözdesidir.',
+ kar:'Ermenistan sınırına yakın, Rus döneminden kalan taş binalarıyla farklı bir şehir. Ankara’dan gelen Doğu Ekspresi ve karlı manzaraları kışın turistlerin gözdesidir; kaşarı ve gravyeri ünlüdür.',
+ gaz:'Mutfağıyla ünlü bir gastronomi kenti ve Güneydoğu’nun en büyük sanayi şehri. Antep fıstığı ve baklavanın merkezidir; Zeugma Mozaik Müzesi dünyanın en büyük mozaik müzelerindendir.',
+ diy:'Dicle Nehri kıyısında, kara bazalt surlarıyla tanınan çok eski bir şehir. Surları dünyanın en uzun ve en iyi korunmuş surları arasında sayılır; Hevsel Bahçeleri ve On Gözlü Köprü şehrin simgeleridir.',
+ bat:'Türkiye’nin petrol şehri. 1940’ta Raman Dağı’nda petrol bulunmasıyla küçük bir köyken hızla büyüdü; tarihî Hasankeyf de bu ildedir.',
+ cnk:'Kızılırmak havzasında küçük bir Anadolu şehri. Binlerce yıldır işletilen kaya tuzu yatakları ve ziyarete açık tuz mağarası şehrin simgesidir.',
+ zon:'Karadeniz kıyısında, Türkiye’nin taş kömürü başkenti. Şehir madenlerin çevresinde büyüdü; madencilik kültürü hâlâ hayatın merkezindedir.',
+ krb:'Cumhuriyetin ilk büyük sanayi hamlesiyle doğan çelik şehri. Demir-çelik fabrikası 1937’de kuruldu; hemen yanındaki Safranbolu, Osmanlı evleriyle UNESCO listesindedir.',
+ riz:'Yeşil dağların denize indiği, çayın başkenti. Yamaçlardaki çay bahçeleri ve Ayder gibi yaylalar şehrin kartpostal manzarasıdır.'};
+const LM_DESC={
+ kapadokya:'Erciyes ve Hasandağı gibi volkanların küllerinden oluşan peribacalarıyla ünlü bölge. Kayalara oyulmuş kiliseler, yeraltı şehirleri ve gün doğumunda uçan sıcak hava balonları görülmeye değer. 1985’ten beri UNESCO Dünya Mirası listesindedir.',
+ pamukkale:'Kalsiyumlu sıcak suların binlerce yılda bıraktığı bembeyaz traverten terasları. Hemen üstündeki Hierapolis antik kentinin tiyatrosu ve antik havuzu da gezilebilir. 1988’den beri UNESCO listesindedir.',
+ efes:'Antik çağın en büyük liman kentlerinden biri. Celsus Kütüphanesi, büyük tiyatrosu ve mermer caddeleriyle Türkiye’nin en çok ziyaret edilen ören yerlerindendir. Dünyanın yedi harikasından Artemis Tapınağı da buradaydı.',
+ sumela:'Maçka’da, Altındere Vadisi’nde sarp bir kayalığın yamacına kurulmuş tarihî manastır. Rivayete göre 4. yüzyılda kuruldu; bugün her yıl çok sayıda ziyaretçi ağırlar.',
+ nemrut:'2.100 metreyi aşan dağın tepesinde Kommagene Kralı I. Antiokhos’un dev heykelleri bulunur. Gün doğumu ve gün batımı manzarası çok ünlüdür; 1987’den beri UNESCO listesindedir.',
+ truva:'Homeros’un İlyada destanında anlatılan Truva Savaşı’nın kenti. Üst üste kurulmuş dokuz yerleşim katmanı 4.000 yılı aşan bir geçmişi gösterir; girişteki tahta at ziyaretçileri karşılar.',
+ abide:'Çanakkale Savaşları’nda hayatını kaybedenlerin anısına Gelibolu Yarımadası’na yapılan 41,7 metrelik anıt. 1960’ta tamamlandı; Boğaz’ın girişine bakan tepeden Morto Koyu’nu gözetler.'};
+const _cityCard=cityCard;cityCard=function(id){const h=_cityCard(id),d=CITY_DESC[id];return d?h.replace('</h3>',`</h3><p class="cdesc">${d}</p>`):h};
+const _lmCard=lmCard;lmCard=function(id){const h=_lmCard(id);if(!h)return h;return h+lmOf(id).map(l=>LM_DESC[l.id]?`<p class="note lmdesc"><b>🏛 ${l.n}:</b> ${LM_DESC[l.id]}</p>`:'').join('')};
+/* ---------- haritada kısa tanıtım balonu ---------- */
+let cinfoT=null;
+function cinfoShow(html,ms){const el=$('cinfo');if(!el)return;el.innerHTML=html;el.hidden=false;clearTimeout(cinfoT);cinfoT=setTimeout(cinfoHide,ms||9000)}
+function cinfoHide(){const el=$('cinfo');if(el)el.hidden=true;clearTimeout(cinfoT)}
+function cityInfo(id){const c=C[id],st=cs(id),a=ALBUM[id];cinfoShow(`<div class="ctop"><h3>${c.n}</h3><span class="lvl">${LEVELS[st.lv-1]}</span><button class="cix" data-a="cix" aria-label="Kapat">✕</button></div><p>${CITY_DESC[id]||''}</p>${a?`<small class="note">Yöresel ürün: <b>${a.u}</b>${connected(id)?'':' · ağa bağlayınca albüme girer'}</small>`:''}<div class="row2"><button class="mini" data-a="cidet">Ayrıntılar ve yatırımlar</button></div>`)}
+function lmInfo(l){const c=C[l.city];cinfoShow(`<div class="ctop"><h3>🏛 ${l.n}</h3><span class="lvl">${c.n} yakınında</span><button class="cix" data-a="cix" aria-label="Kapat">✕</button></div><p>${LM_DESC[l.id]||''}</p><small class="note">${connected(l.city)?`${nSuf(c.n,'dat')} gelen turistler yolcu gelirini artırıyor (×${tourMul(l.city).toFixed(2)}). En çok yazın gelirler.`:`${accSuf(c.n)} ağa bağlarsan turist yolcu kazanırsın.`}</small>`,11000)}
+const _tapCity=tapCity;tapCity=function(id){_tapCity(id);if(sel.length===1)cityInfo(sel[0]);else{cinfoHide();if(sel.length===2&&FS.on)fsOpen('sec')}};
+$('labels3').addEventListener('click',e=>{const d=e.target.closest('.lab3.lm');if(!d)return;const L=(E.lmLabels||[]).find(x=>x.el===d);if(L)lmInfo(L.l)});
+/* ---------- tam ekran: harita bütün ekranı kaplar, sekmeler alt çubukta ---------- */
+const FS={on:false,tab:null,marks:[]};
+const FS_TABS=[['sec','📍','Seçim'],['goal','🎯','Görevler'],['scn','📜','Senaryo'],['co','🏢','Şirket'],['fleet','🚂','Filo'],['alb','📇','Albüm'],['shop','🛍','Mağaza']];
+function fsMove(el,to){const m=document.createComment('fs');el.parentNode.insertBefore(m,el);FS.marks.push([m,el]);to.appendChild(el)}
+function fsEnter(){if(FS.on)return;FS.on=true;if(E.photo)photoOff();document.body.classList.add('fs3');
+  fsMove(document.querySelector('.bar'),$('fshud'));fsMove($('banner'),$('fshud'));document.querySelectorAll('.grid[data-pane]').forEach(g=>fsMove(g,$('fsbody')));
+  $('fsbtn').innerHTML=FS_ICON.off;$('fsbtn').setAttribute('aria-label','Tam ekrandan çık');fsNav();
+  try{if(window.AndroidBridge&&AndroidBridge.setImmersive)AndroidBridge.setImmersive(true);else if(document.documentElement.requestFullscreen&&!document.fullscreenElement)document.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>{})}catch(e){}
+  fsLayout()}
+function fsExit(){if(!FS.on)return;FS.on=false;fsClose();for(const [m,el] of FS.marks.reverse()){m.parentNode.insertBefore(el,m);m.remove()}FS.marks=[];document.body.classList.remove('fs3');
+  $('fsbtn').innerHTML=FS_ICON.on;$('fsbtn').setAttribute('aria-label','Tam ekran');setTab(tab||'sec');
+  try{if(window.AndroidBridge&&AndroidBridge.setImmersive)AndroidBridge.setImmersive(false);else if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{})}catch(e){}
+  fsLayout()}
+function fsLayout(){setTimeout(()=>{const h=$('fshud'),n=$('fsnav'),w=$('world');if(w){w.style.setProperty('--hudh',(FS.on&&h?h.offsetHeight+16:10)+'px');w.style.setProperty('--navh',(FS.on&&n?n.offsetHeight:0)+'px')}if(E.ready)resize3D()},60)}
+function fsOpen(t){FS.tab=t;setTab(t);const s=$('fssheet');s.hidden=false;$('fstitle').textContent=(FS_TABS.find(x=>x[0]===t)||[])[2]||'';s.scrollTop=0;fsNav()}
+function fsClose(){FS.tab=null;const s=$('fssheet');if(s)s.hidden=true;fsNav()}
+function fsNav(){const n=$('fsnav');if(!n)return;const dots={goal:'goaldot',shop:'shopdot',alb:'albdot'};
+  n.innerHTML=FS_TABS.filter(([t])=>t!=='scn'||unl('scn')).map(([t,i,l])=>{const d=dots[t]&&$(dots[t]),on=d&&!d.hidden;return `<button data-a="fs:${t}" class="${FS.tab===t?'on':''}" aria-label="${l}"><span class="i">${i}</span>${l}${on?'<i class="dot"></i>':''}</button>`}).join('')}
+window.fsBack=()=>{if(E.photo){photoOff();return true}if(FS.on&&FS.tab){fsClose();return true}if(FS.on){fsExit();return true}return false};
+const FS_ICON={on:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',off:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>'};
+$('fsbtn').innerHTML=FS_ICON.on;$('fsbtn').onclick=()=>FS.on?fsExit():fsEnter();
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&FS.on&&!window.AndroidBridge)fsExit()});
+addEventListener('resize',()=>{if(FS.on)fsLayout()});
+let fsDotT=0;const _featHud2=featHud;featHud=function(){_featHud2();if(!FS.on)return;const n=performance.now();if(n-fsDotT<1000)return;fsDotT=n;fsNav()};
+const _v2Click2=v2Click;v2Click=function(a,b){
+  if(a.startsWith('fs:')){const t=a.slice(3);if(FS.tab===t)fsClose();else fsOpen(t);return true}
+  if(a==='fsx'){fsClose();return true}
+  if(a==='cix'){cinfoHide();return true}
+  if(a==='cidet'){cinfoHide();if(FS.on)fsOpen('sec');else{setTab('sec');$('act').scrollIntoView({behavior:'smooth',block:'start'})}return true}
+  return _v2Click2(a,b)};
 
 window.claude?.hot?.snapshot?.(()=>({S:JSON.parse(serial())}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
