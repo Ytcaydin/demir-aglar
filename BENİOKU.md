@@ -7,6 +7,7 @@ Türk şehirleriyle, şehirlerin ihtiyaçlarını taşıyarak büyüttüğün bi
 - 23 Eylül 1856'da İzmir–Aydın imtiyazıyla başlarsın. Hat 1857'de başlayıp 1866'da tamamlanan inşaatı kısa bir prologla izlersin; yolda Alsancak Garı ve zorlu arazi için kararlar verirsin. İstersen "Hızlandır" ya da "Açılışa geç".
 - Hat açılınca oyun başlar. Yolda Süveyş Kanalı (1869), Şark Demiryolları'nın İstanbul–Edirne hattıyla rakip olarak gelişi (1873), Osmanlı'nın iflası (1875), 93 Harbi (1877), Düyun-u Umumiye (1881), Anadolu Demiryolu imtiyazı (1888), Ankara'ya demiryolu (1893), Hicaz Demiryolu (1908), Birinci Dünya Savaşı (1914) ve Ankara'da Meclis'in açılışı (1920) karar kartı olarak gelir.
 - 6 şehri bağlayınca 1923'e atlayabilirsin. 29 Ekim 1923'te Cumhuriyet ilan edilir; ardından demiryollarının millîleştirilmesi (rakibin hatlarını yarı fiyatına alma) ve Devlet Demiryolları'nın kuruluşu (1927) gelir. Oyun oradan günümüze devam eder.
+- İmtiyaz sözleşmesi (kilometre garantisi): Osmanlı döneminde hat bakımının %70'ini ve tren giderlerinin %25'ini devlet üstlenir. Cumhuriyet'ten sonra 12 yıl içinde azalıp biter. Otomatik oyuncuyla yapılan denemelerde bu destek olmadan Osmanlı oyunu 1880'lerde batıyordu (aşağıda "Denge").
 - Haritaya Aydın şehri eklendi. Osmanlı döneminde ekran daha koyu bir gravür tonundadır.
 - Eski kayıtlar olduğu gibi açılır; 1927 oyunu olarak devam eder.
 
@@ -85,6 +86,16 @@ Not: Dosyayı doğrudan açınca uygulama olarak kurma ve çevrimdışı çalı�
 ## Kayıtlar
 
 İlerleme tarayıcının kendi hafızasında (localStorage) tutulur. Farklı adres veya tarayıcıda açarsan kayıt oradan başlar.
+
+**Yedek:** Ayarlar (⚙) → YEDEK. "Kodu kopyala" ya da "Dosya olarak indir" ile bütün ilerlemen (oyun, rekorlar, albüm, nesiller, ayarlar) tek bir metin olur; yeni cihazda "Koddan yükle" ya da "Dosyadan yükle" ile devam edersin. Yükleme, bu cihazdaki oyunun yerine geçer; önce onay ister.
+
+## Denge
+
+Oyunun ekonomisi, tarayıcıda gerçek oyun kodunu çalıştıran otomatik bir oyuncuyla (hat kurar, tren alır, bakım yapar, tren yükseltir) 1866–2026 arası denendi. Bulgular:
+
+- Hat başına 1 tren oynayan oyuncu Osmanlı'dan günümüze rahat geçer; 2 tren/hat dar bir marjla geçer; 3 tren/hat batar. Yani gereğinden fazla tren almak ceza getirir, bu bilerek böyle bırakıldı.
+- Osmanlı'da (1866–1923) buharlıdan başka tren olmadığı için ekonomi 1927 başlangıcından daha dardı; bu yüzden imtiyaz sözleşmesi desteği eklendi.
+- Otomatik oyuncu mal ihtiyaçlarını (buğday, kömür) yönetmediği için şehirleri büyütemiyor; gerçek oyuncu bunu yaparak çok daha fazla kazanır. Bu yüzden sonuçlar "en kötü makul oyun" gibi okunmalı.
 
 ## Android uygulaması (APK)
 

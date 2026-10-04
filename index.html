@@ -3001,6 +3001,46 @@ let FIRST_RUN=false;try{FIRST_RUN=!localStorage.getItem(SAVE)&&!localStorage.get
 let proLast=performance.now();const _hud2=hud;hud=function(){const n=performance.now(),dt=Math.min(0.1,(n-proLast)/1000);proLast=n;try{proStep(dt)}catch(e){console.warn('pro',e)}_hud2()};
 setTimeout(()=>{try{if(S&&S.pro){if(S.pro.go){proShow()}else proBegin()}else if(FIRST_RUN&&!S.scn)newGameAsk(true)}catch(e){console.warn('osm',e)}},700);
 
+/* ================= kayıt yedeği: kod ver / kod al ================= */
+const BK_KEYS=()=>[SAVE,SAVE_SCN,META_KEY,'demir-aglar-opt',STAR_KEY,'demir-aglar-slot'];
+async function bkPack(){persist();const o={app:'demir-aglar',ver:1,at:Date.now(),d:{}};for(const k of BK_KEYS()){try{const v=localStorage.getItem(k);if(v!=null)o.d[k]=v}catch(e){}}
+  const js=JSON.stringify(o),u8=new TextEncoder().encode(js);let bytes=u8,pre='DA1:';
+  if(window.CompressionStream){try{const cs=new Blob([u8]).stream().pipeThrough(new CompressionStream('gzip'));bytes=new Uint8Array(await new Response(cs).arrayBuffer());pre='DA2:'}catch(e){bytes=u8;pre='DA1:'}}
+  let bin='';for(let i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return pre+btoa(bin)}
+async function bkUnpack(code){code=(code||'').trim().replace(/\s+/g,'');const pre=code.slice(0,4);if(pre!=='DA1:'&&pre!=='DA2:')throw new Error('Kod tanınmadı');
+  let bin;try{bin=atob(code.slice(4))}catch(e){throw new Error('Kod bozuk ya da eksik kopyalanmış')}const b=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);let txt;
+  if(pre==='DA2:'){if(!window.DecompressionStream)throw new Error('Bu tarayıcı sıkıştırılmış kodu açamıyor');try{const ds=new Blob([b]).stream().pipeThrough(new DecompressionStream('gzip'));txt=new TextDecoder().decode(await new Response(ds).arrayBuffer())}catch(e){throw new Error('Kod bozuk ya da eksik kopyalanmış')}}else txt=new TextDecoder().decode(b);
+  const o=JSON.parse(txt);if(!o||o.app!=='demir-aglar'||!o.d)throw new Error('Bu bir Demir Ağlar yedeği değil');
+  const m=o.d[SAVE]&&JSON.parse(o.d[SAVE]);if(!m&&!o.d[SAVE_SCN])throw new Error('Kodda oyun kaydı yok');return o}
+function bkEl(){let el=$('bkpanel');if(el)return el;el=document.createElement('div');el.id='bkpanel';el.className='bkp';el.hidden=true;
+  el.innerHTML=`<div class="bkbox"><div class="fshead"><b>💾 Kayıt yedeği</b><button class="cix" id="bkx" aria-label="Kapat">✕</button></div>
+  <p class="note">Oyunun bu cihazda saklanıyor. Telefon değiştirirsen ya da tarayıcı verisini silersen kaybolur. Kodu kopyalayıp güvenli bir yere (not, e-posta) kaydet; yeni cihazda “Koddan yükle” ile devam et.</p>
+  <div class="bkrow"><button class="btn primary" id="bkcopy">Kodu kopyala</button><button class="btn" id="bkfile">Dosya olarak indir</button></div>
+  <textarea id="bkta" rows="4" spellcheck="false" placeholder="Yedek kodunu buraya yapıştır…"></textarea>
+  <div class="bkrow"><button class="btn" id="bkload">Koddan yükle</button><label class="btn" for="bkpick">Dosyadan yükle</label><input type="file" id="bkpick" accept=".txt,.json,text/plain" hidden></div>
+  <div class="note" id="bkmsg" role="status"></div></div>`;document.body.appendChild(el);
+  const msg=(t,bad)=>{const m=$('bkmsg');m.textContent=t;m.style.color=bad?'#e0705f':'#8ad2a0'};
+  const doLoad=async code=>{try{const o=await bkUnpack(code);if(!confirm('Bu cihazdaki mevcut oyunun yedekteki oyunla DEĞİŞTİRİLECEK. Devam edilsin mi?'))return;
+      for(const k of BK_KEYS())try{if(o.d[k]!=null)localStorage.setItem(k,o.d[k]);else if(k!==SAVE)localStorage.removeItem(k)}catch(e){}
+      msg('Yüklendi, oyun yenileniyor…');window.__bkNoSave=true;setTimeout(()=>location.reload(),500)}catch(e){msg(e.message||'Kod okunamadı',true)}};
+  $('bkx').onclick=()=>{el.hidden=true};el.onclick=e=>{if(e.target===el)el.hidden=true};
+  $('bkcopy').onclick=async()=>{try{const c=await bkPack();$('bkta').value=c;try{await navigator.clipboard.writeText(c);msg('Kod kopyalandı ('+Math.round(c.length/1024)+' KB)')}catch(e){$('bkta').select();msg('Kodu elle kopyala: metin kutusu seçildi')}}catch(e){msg('Kod üretilemedi',true)}};
+  $('bkfile').onclick=async()=>{try{const c=await bkPack(),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:'text/plain'}));a.download='demir-aglar-yedek.txt';document.body.appendChild(a);a.click();a.remove();msg('Dosya indirildi')}catch(e){msg('Dosya oluşturulamadı',true)}};
+  $('bkload').onclick=()=>doLoad($('bkta').value);
+  $('bkpick').onchange=async e=>{const f=e.target.files[0];if(f)doLoad(await f.text());e.target.value=''};
+  return el}
+{const b=document.createElement('button');b.className='wbtn sm';b.id='bkbtn';b.textContent='YEDEK';$('setpanel').appendChild(b);b.onclick=()=>{bkEl().hidden=false;$('bkmsg').textContent='';$('setpanel').hidden=true;$('setbtn').classList.remove('on')}}
+{const st=document.createElement('style');st.textContent=`.bkp{position:fixed;inset:0;z-index:60;background:#000a;display:flex;align-items:center;justify-content:center;padding:16px}.bkp[hidden]{display:none}.bkbox{background:#14242e;border:1px solid #2c4452;border-radius:12px;padding:14px;max-width:460px;width:100%;color:#e8eef2;display:flex;flex-direction:column;gap:10px}.bkbox textarea{width:100%;background:#0c171e;color:#cfe0e8;border:1px solid #2c4452;border-radius:8px;padding:8px;font:11px/1.3 monospace;resize:vertical}.bkrow{display:flex;gap:8px;flex-wrap:wrap}.bkrow .btn{flex:1;text-align:center}`;document.head.appendChild(st)}
+/* sayfa yenilenirken yüklenen yedeğin üzerine yazılmasın */
+{const _p=persist;persist=function(){if(window.__bkNoSave)return;_p()}}
+
+/* ================= denge: Osmanlı imtiyaz sözleşmesi (kilometre garantisi) =================
+   Bot testleri (1866–1923, hat başına 1–2 tren oynayan otomatik oyuncu): bu destek olmadan 3/3 oyun 1880'lerde batıyor,
+   destekle 3/3 oyun 1923'e 2–5 bin kasayla ulaşıyor. Tarihte de imtiyazlara kilometre garantisi verilirdi. */
+const OTT_KM_SUP=0.7,OTT_TRAIN_SUP=0.25;
+function ottSupport(){if(!S||!S.osm||S.scn)return 0;const f=Math.max(0,Math.min(1,1-(S.t/12+START_YEAR-OTT_END)/12));if(f<=0)return 0;return f*upkeepMul()*(trackKm()*0.015*OTT_KM_SUP+S.trains.reduce((s,t)=>s+TYPES[t.type].up*OTT_TRAIN_SUP,0))}
+{const _up=upkeep;upkeep=function(){return Math.max(0,_up()-ottSupport())}}
+{const _pd=proDone;proDone=function(){const had=!!(S&&S.pro);_pd();if(had&&!FF.on)info('<b>📜 İmtiyaz sözleşmesi</b><span class="note">Devlet, hat kilometresi başına garanti verdi: Osmanlı döneminde hat bakımı ve tren giderlerinin büyük kısmını o üstleniyor. Cumhuriyet’ten sonra bu destek 12 yıl içinde yavaşça azalıp biter.</span>')}}
 window.claude?.hot?.snapshot?.(()=>({S:JSON.parse(serial())}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
