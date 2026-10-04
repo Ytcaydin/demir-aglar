@@ -206,6 +206,11 @@ body.fs3 .fssheet:not([hidden]){display:flex;flex-direction:column;position:abso
 body.fs3 #fsbody .grid{grid-template-columns:1fr}
 body.fs3 .goalchip,body.fs3 .coach,body.fs3 .drive,body.fs3 .photobar{bottom:calc(var(--navh,56px) + 10px)}
 body.fs3 .wctl{top:8px}
+.procard{position:absolute;left:10px;right:62px;bottom:10px;z-index:4;background:rgba(23,42,54,.96);border:1px solid var(--ochre);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.procard[hidden]{display:none}.procard h3{margin:0;font-family:var(--display);font-size:17px;letter-spacing:.04em}.procard p{margin:0}
+.world.pro .goalchip,.world.pro .coach{display:none!important}body.fs3 .procard{bottom:calc(var(--navh,56px) + 10px)}
+.ngb{text-align:left;line-height:1.3}.ngb .note{font-weight:400}.ngb.primary .note{color:#3a2a08}
+.lnk{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:600 13px var(--body);align-self:center}
 </style>
 </head>
 <body>
@@ -232,7 +237,7 @@ body.fs3 .wctl{top:8px}
 
   <div class="world" id="world">
     <div id="stage3" aria-label="3D Anadolu dünyası. Şehirleri Filo sekmesindeki listeden de seçebilirsin."></div><div id="labels3"></div><div id="load3">Anadolu yükleniyor…</div><div id="err3" hidden></div>
-    <div class="boostflag" id="boostflag" hidden></div><div class="scnflag" id="scnflag" hidden></div><div class="followcap" id="followcap" hidden></div><div class="coach" id="coach" hidden></div><div class="card3" id="card3" hidden></div><div id="fshud"></div><div class="cinfo" id="cinfo" hidden></div><div class="fssheet" id="fssheet" hidden><div class="fshead"><b id="fstitle"></b><button class="cix" data-a="fsx" aria-label="Kapat">✕</button></div><div id="fsbody"></div></div><nav class="fsnav" id="fsnav" aria-label="Oyun menüsü"></nav><div class="photobar" id="photobar" hidden><button class="btn primary" data-a="phshot">📸 Çek ve paylaş</button><button class="btn" data-a="phlab">Şehir adları: Kapalı</button><button class="btn" data-a="phoff">Kapat</button></div><div class="drive" id="drive" hidden></div><div class="setpanel" id="setpanel" hidden><button class="wbtn sm" id="dn">GECE</button><button class="wbtn sm" id="snd">SES</button><button class="wbtn sm" id="gfx">GRAFİK</button><button class="wbtn sm" id="vib">TİTREŞİM</button><button class="wbtn sm" id="labq">ETİKET</button><button class="wbtn sm" id="ntf">BİLDİRİM</button><button class="wbtn sm" id="grade">RENK TONU</button></div><div class="goalchip" id="goalchip" hidden></div>
+    <div class="boostflag" id="boostflag" hidden></div><div class="scnflag" id="scnflag" hidden></div><div class="followcap" id="followcap" hidden></div><div class="coach" id="coach" hidden></div><div class="card3" id="card3" hidden></div><div class="procard" id="procard" hidden></div><div id="fshud"></div><div class="cinfo" id="cinfo" hidden></div><div class="fssheet" id="fssheet" hidden><div class="fshead"><b id="fstitle"></b><button class="cix" data-a="fsx" aria-label="Kapat">✕</button></div><div id="fsbody"></div></div><nav class="fsnav" id="fsnav" aria-label="Oyun menüsü"></nav><div class="photobar" id="photobar" hidden><button class="btn primary" data-a="phshot">📸 Çek ve paylaş</button><button class="btn" data-a="phlab">Şehir adları: Kapalı</button><button class="btn" data-a="phoff">Kapat</button></div><div class="drive" id="drive" hidden></div><div class="setpanel" id="setpanel" hidden><button class="wbtn sm" id="dn">GECE</button><button class="wbtn sm" id="snd">SES</button><button class="wbtn sm" id="gfx">GRAFİK</button><button class="wbtn sm" id="vib">TİTREŞİM</button><button class="wbtn sm" id="labq">ETİKET</button><button class="wbtn sm" id="ntf">BİLDİRİM</button><button class="wbtn sm" id="grade">RENK TONU</button></div><div class="goalchip" id="goalchip" hidden></div>
     <div class="wctl">
       <button class="wbtn" id="fsbtn" aria-label="Tam ekran"></button>
       <button class="wbtn" id="zin" aria-label="Yakınlaştır">+</button>
@@ -311,6 +316,7 @@ const CITIES=[
  {id:'can',n:'Çanakkale',lat:40.15,lon:26.41,lv:1,p:['gıda']},
  {id:'bur',n:'Bursa',lat:40.19,lon:29.06,lv:2,p:[],ind:'pamuk'},
  {id:'izm',n:'İzmir',lat:38.42,lon:27.14,lv:3,p:['gıda']},
+ {id:'aydin',n:'Aydın',lat:37.85,lon:27.84,lv:1,p:['buğday','pamuk','gıda']},
  {id:'den',n:'Denizli',lat:37.78,lon:29.09,lv:1,p:[],ind:'pamuk'},
  {id:'ant',n:'Antalya',lat:36.90,lon:30.70,lv:1,p:['gıda']},
  {id:'esk',n:'Eskişehir',lat:39.78,lon:30.52,lv:2,p:['buğday']},
@@ -341,7 +347,7 @@ const WX=lon=>(lon-LON0)*KX,WY=lat=>(LAT0-lat)*KY;
 const WORLD={x0:-90,y0:-100,x1:1680,y1:450};
 CITIES.forEach(c=>{c.x=WX(c.lon);c.y=WY(c.lat)});
 
-const SEC_PER_MONTH=8,START_YEAR=1927,DECAY=0.12,RIVAL_NAME='Toros Demiryolları';
+const SEC_PER_MONTH=8,START_YEAR=1856,DECAY=0.12,RIVAL_NAME='Toros Demiryolları';
 const TYPES={
   buhar:{n:'Buharlı',year:1927,speed:168,kmh:45,cap:1,cost:80,up:4,next:'dizel'},
   dizel:{n:'Dizel',year:1932,speed:243,kmh:65,cap:1.35,cost:170,up:6,next:'hizli'},
@@ -367,7 +373,7 @@ let S,sel=[],speed=1,fx=[],confirmNew=false,bannerTimer=null,tab='sec',offerBann
 /* ---------- state ---------- */
 function freshState(){
   const cities={};for(const c of CITIES)cities[c.id]={lv:c.lv,gr:0,m:{},im:0,ambar:false,fab:null};
-  return {v:5,money:700,t:3,cities,ports:[],ships:[],tut:META.tutDone?-1:0,unl:[],stk:{pub:6,riv:0,mine:0,rcash:60},tracks:[{a:'ist',b:'esk'}],trains:[{a:'ist',b:'esk',type:'buhar',trips:0,earned:0,pos:0,dir:1}],
+  return {v:5,y0:1856,t0:855,money:700,t:855,cities,ports:[],ships:[],tut:META.tutDone?-1:0,unl:[],stk:{pub:6,riv:0,mine:0,rcash:60},tracks:[{a:'ist',b:'esk'}],trains:[{a:'ist',b:'esk',type:'buhar',trips:0,earned:0,pos:0,dir:1}],
     done:[],ach:[],flags:{},grantYear:-1,boostYear:-1,boostUntil:-1,last:null,inc:0,exp:0,over:null,
     debt:0,everLoan:false,hist:[],events:[],blocks:[],orders:[],ordersDone:0,
     rival:{tracks:[{a:'ada',b:'gaz'}],trains:[{a:'ada',b:'gaz',pos:0,dir:1}],bought:false},
@@ -649,7 +655,7 @@ function rivalMove(m){
   const mine=new Set(R.tracks.flatMap(t=>[t.a,t.b]));let best=null,bd=1e9;
   for(const a of mine)for(const c of CITIES){if(mine.has(c.id)||c.lon<31.8)continue;const d=dist(C[a],c);if(d<bd&&d<480){bd=d;best=[a,c.id]}}
   if(!best)return;R.tracks.push({a:best[0],b:best[1]});R.trains.push({a:best[0],b:best[1],pos:0,dir:1});
-  info(`<b>${RIVAL_NAME} ${C[best[0]].n}–${C[best[1]].n} hattını açtı.</b><span class="note">Rakibin olduğu şehirlerde gelirin %30 düşük olur. Borsa açılınca hisselerini toplayıp rakibi satın alabilirsin.</span>`);
+  info(`<b>${rivalName()} ${C[best[0]].n}–${C[best[1]].n} hattını açtı.</b><span class="note">Rakibin olduğu şehirlerde gelirin %30 düşük olur. Borsa açılınca hisselerini toplayıp rakibi satın alabilirsin.</span>`);
 }
 function buyoutPrice(){return 250+110*S.rival.tracks.length}
 /* orders */
@@ -667,7 +673,7 @@ function orderProgress(city,g){for(const o of S.orders)if(o.city===city&&o.g===g
 /* banners */
 function showBanner(html,kind,ms){if(S.over==='lose'||offerBanner)return;$('banner').innerHTML=`<div class="banner ${kind||''}">${html}</div>`;clearTimeout(bannerTimer);if(ms)bannerTimer=setTimeout(()=>{if(!offerBanner)$('banner').innerHTML=''},ms)}
 const good=(h,ms)=>showBanner(h,'good',ms||3800),bad=(h)=>showBanner(h,'',4200),info=(h)=>showBanner(h,'info',4200);
-function renderBannerState(){if(S.over==='lose')$('banner').innerHTML=`<div class="banner">${S.loseWhy==='takeover'?`<b>Şirketin el değiştirdi.</b><span class="note">${RIVAL_NAME} hisselerinin yarısını topladı.</span>`:`<b>İflas ettin.</b><span class="note">Kasa −300 bin ₺'nin altına düştü. Hat bakımı, tren ve faiz giderleri gelirini aştı.</span>`}<button class="btn primary" data-a="new2">Yeni oyun</button></div>`}
+function renderBannerState(){if(S.over==='lose')$('banner').innerHTML=`<div class="banner">${S.loseWhy==='takeover'?`<b>Şirketin el değiştirdi.</b><span class="note">${rivalName()} hisselerinin yarısını topladı.</span>`:`<b>İflas ettin.</b><span class="note">Kasa −300 bin ₺'nin altına düştü. Hat bakımı, tren ve faiz giderleri gelirini aştı.</span>`}<button class="btn primary" data-a="new2">Yeni oyun</button></div>`}
 function checkMissions(quiet){
   let changed=false;
   for(const m of MISSIONS)if(!S.done.includes(m.id)&&m.ok()){S.done.push(m.id);S.money+=m.r;changed=true;passXP(30);vib([30,40,30]);good(`<b>Görev tamam: ${m.t}</b><span class="note">Ödül +${m.r} bin ₺</span>`)}
@@ -685,7 +691,7 @@ function cityCard(id){
   else if(st.lv>=maxLv(id))status=`<span class="ok">Bu şehrin tavanına ulaştı (${LEVELS[maxLv(id)-1]}).</span>`;
   else if(met===needs.length)status=`<span class="ok">Büyüyor · ${gneed-st.gr} ay sonra ${LEVELS[st.lv]}</span>`;
   else status=`<span class="no">Durgun · ${needs.length-met} ihtiyaç eksik</span>`;
-  let html=`<h2>Şehir</h2><h3>${c.n}</h3><div class="tags"><span class="lvl">${LEVELS[st.lv-1]}</span>${fair(id)?'<span class="tag p">Panayır: yolcu ×2</span>':''}${drought(id)?'<span class="tag e">Kuraklık</span>':''}${rivalHas(id)?`<span class="tag r">${RIVAL_NAME} burada</span>`:''}</div>
+  let html=`<h2>Şehir</h2><h3>${c.n}</h3><div class="tags"><span class="lvl">${LEVELS[st.lv-1]}</span>${fair(id)?'<span class="tag p">Panayır: yolcu ×2</span>':''}${drought(id)?'<span class="tag e">Kuraklık</span>':''}${rivalHas(id)?`<span class="tag r">${rivalName()} burada</span>`:''}</div>
   <div class="kv"><span>Durum</span><span style="text-align:right">${status}</span></div>
   <div class="kv"><span>Nüfus</span><span>≈ ${popFmt(popEst(id))}</span></div>
   ${con&&st.lv<maxLv(id)?`<div class="kv"><span>Büyüme</span><span>${st.gr} / ${gneed} ay</span></div>${meterBar(st.gr/gneed,'#e2b85c')}`:''}
@@ -711,7 +717,7 @@ function renderAct(msg){
   if(S.over==='lose'){box.innerHTML=`<h2>İşlem</h2><p class="note">Şirket iflas etti. Yeni oyun başlatabilirsin.</p>`;return}
   if(sel.length===0){box.innerHTML=`<h2>Nasıl oynanır</h2><h3>Şehirler ne istiyorsa onu taşı</h3>
     <p class="note">Köyler buğday, kasabalar kömür, şehirler mamul mal ister. Etiketteki simgeler ihtiyaçları gösterir; hepsi karşılanan şehir büyür.</p>
-    <p class="note">Trenler geçtikleri her durağa mal bırakır. Fabrikalar hammaddesi gelince mamul mal üretir. Siparişler, kar fırtınaları, panayırlar ve mavi hatlarıyla büyüyen rakip ${RIVAL_NAME} seni bekliyor.</p>
+    <p class="note">Trenler geçtikleri her durağa mal bırakır. Fabrikalar hammaddesi gelince mamul mal üretir. Siparişler, kar fırtınaları, panayırlar ve mavi hatlarıyla büyüyen rakip ${rivalName()} seni bekliyor.</p>
     <p class="note">Kıyı şehirlerinde liman kurup kargo gemisiyle deniz yolundan da taşıyabilirsin; gemi ray istemez.</p>
     <p class="note">Başlamak için dünyada bir şehre dokun.</p>`;return}
   if(sel.length===1){box.innerHTML=(msg?`<p class="warn">${msg}</p>`:'')+cityCard(sel[0]);return}
@@ -779,7 +785,7 @@ function renderCompany0(){
     ...S.events.map(e=>`<div class="li"><div class="top"><b>${e.t==='kurak'?'Kuraklık':'Panayır'} · ${C[e.city].n}</b><span class="tag ${e.t==='kurak'?'e':'p'}">${Math.max(0,e.until-month())} ay</span></div><small>${e.t==='kurak'?'Bu şehir ürün veremiyor.':'Bu şehre giden yolcu geliri iki katı.'}</small></div>`)];
   $('events').innerHTML=ev.length?ev.join(''):'<p class="note">Şu an etkin olay yok. Kışın doğuda kar fırtınası, yıl boyunca kuraklık ve panayırlar çıkabilir.</p>';
   const R=S.rival;
-  $('rival').innerHTML=R.bought?`<p class="ok">${RIVAL_NAME} artık senin. Hatları ve trenleri ağına katıldı.</p>`:`<div class="kv"><span>Şirket</span><span style="color:var(--rival)">${RIVAL_NAME}</span></div>
+  $('rival').innerHTML=R.bought?`<p class="ok">${rivalName()} artık senin. Hatları ve trenleri ağına katıldı.</p>`:`<div class="kv"><span>Şirket</span><span style="color:var(--rival)">${rivalName()}</span></div>
     <div class="kv"><span>Hat sayısı</span><span>${R.tracks.length}</span></div><div class="kv"><span>Şehirleri</span><span style="text-align:right">${[...new Set(R.tracks.flatMap(t=>[t.a,t.b]))].map(x=>C[x].n).join(', ')}</span></div>
     <p class="note">Rakip yaklaşık 9 ayda bir yeni hat açar. Onun da bulunduğu şehirlerde gelirin %30 düşer.</p>
     <button class="btn primary" data-a="buyout">Satın al · ${fmt(buyoutPrice())} bin ₺</button>`;
@@ -848,7 +854,7 @@ document.addEventListener('click',e=>{
   else if(a==='repay'){if(!spend(300)){bad('<b>Geri ödeme için kasada 300 bin ₺ olmalı.</b>');return}S.debt-=300;checkMissions();persist();renderCompany()}
   else if(a==='buyout'){const p=buyoutPrice();if(!spend(p)){bad(`<b>Satın almak için ${fmt(p-S.money)} bin ₺ daha lazım.</b><span class="note">Kredi çekmeyi düşünebilirsin.</span>`);return}
     const R=S.rival;for(const t of R.tracks)if(!hasTrack(t.a,t.b))S.tracks.push({a:t.a,b:t.b});for(const t of R.trains){const tr={a:t.a,b:t.b,type:'buhar',trips:0,earned:0,pos:0,dir:1};S.trains.push(tr)}
-    R.bought=true;S.trains.forEach(prepTrain);good(`<b>${RIVAL_NAME} artık senin!</b><span class="note">${R.tracks.length} hat ve ${R.trains.length} tren ağına katıldı.</span>`,5000);checkMissions();persist();renderSide();renderAct()}
+    R.bought=true;S.trains.forEach(prepTrain);good(`<b>${rivalName()} artık senin!</b><span class="note">${R.tracks.length} hat ve ${R.trains.length} tren ağına katıldı.</span>`,5000);checkMissions();persist();renderSide();renderAct()}
   else if(a==='daily'){const ns=nextStreak();S.daily={date:today(),streak:ns};S.money+=ns*40;popup('ank','+'+ns*40,true);persist();renderShop()}
   else if(a==='boost')fakeAd(b,()=>{S.boostUntil=S.t+3;S.boostYear=year();persist();renderShop()});
   else if(a==='grant')fakeAd(b,()=>{S.money+=100;S.grantYear=year();popup('ank','+100');persist();renderShop()});
@@ -1003,22 +1009,22 @@ function rivalPrice(){const R=S.rival;return Math.round((150+110*R.tracks.length
 function myShare(){const k=stk();return 4+(6-k.pub-k.riv)}
 function stockMonth(m){const k=stk(),R=S.rival;if(R.bought)return;k.rcash+=18+3*R.tracks.length;if(!unl('stock'))return;
   if(k.mine)S.money+=k.mine*2,S.inc+=k.mine*2;
-  if(m%6===3&&S.t>=36&&k.pub>0&&k.rcash>=myPrice()*1.5&&Math.random()<(hasStaff('diplomat')?0.3:0.6)){k.rcash-=myPrice();k.pub--;k.riv++;
-    bad(`<b>${RIVAL_NAME} senin hisseni topluyor: %${k.riv*10}.</b><span class="note">Elindeki her hisse için gelirinin %3’ünü temettü olarak alıyor (şu an %${k.riv*3}). Şirket sekmesinden hisseni geri alabilirsin.</span>`)}}
-function renderStock(){const el=$('rival');if(!el)return;const R=S.rival,k=stk();if(!unl('stock')&&!R.bought){el.innerHTML=`<div class="kv"><span>Şirket</span><span style="color:var(--rival)">${RIVAL_NAME}</span></div><div class="kv"><span>Hat sayısı</span><span>${R.tracks.length}</span></div><p class="note">Rakip yaklaşık 9 ayda bir yeni hat açar; onun da olduğu şehirlerde gelirin %30 düşer.</p>`+lockNote('stock');return}
-  if(R.bought){el.innerHTML=`<p class="ok">${RIVAL_NAME} artık senin. Hatları ve trenleri ağına katıldı.</p><div class="kv"><span>Senin şirketinde payın</span><span>%${myShare()*10}</span></div>`;return}
+  if(m%6===3&&gT()>=36&&k.pub>0&&k.rcash>=myPrice()*1.5&&Math.random()<(hasStaff('diplomat')?0.3:0.6)){k.rcash-=myPrice();k.pub--;k.riv++;
+    bad(`<b>${rivalName()} senin hisseni topluyor: %${k.riv*10}.</b><span class="note">Elindeki her hisse için gelirinin %3’ünü temettü olarak alıyor (şu an %${k.riv*3}). Şirket sekmesinden hisseni geri alabilirsin.</span>`)}}
+function renderStock(){const el=$('rival');if(!el)return;const R=S.rival,k=stk();if(!unl('stock')&&!R.bought){el.innerHTML=`<div class="kv"><span>Şirket</span><span style="color:var(--rival)">${rivalName()}</span></div><div class="kv"><span>Hat sayısı</span><span>${R.tracks.length}</span></div><p class="note">Rakip yaklaşık 9 ayda bir yeni hat açar; onun da olduğu şehirlerde gelirin %30 düşer.</p>`+lockNote('stock');return}
+  if(R.bought){el.innerHTML=`<p class="ok">${rivalName()} artık senin. Hatları ve trenleri ağına katıldı.</p><div class="kv"><span>Senin şirketinde payın</span><span>%${myShare()*10}</span></div>`;return}
   const mp=myPrice(),rp=rivalPrice();
   el.innerHTML=`<span class="note">Senin şirketin · hisse ${fmt(mp)} bin ₺</span>
   <div class="shares">${[...Array(10)].map((_,i)=>`<i class="${i<myShare()?'me':i<myShare()+k.riv?'rv':''}"></i>`).join('')}</div>
-  <div class="kv"><span>Sen %${myShare()*10} · ${RIVAL_NAME} %${k.riv*10}</span><span>Halkta %${k.pub*10}</span></div>${k.riv?`<p class="no" style="font-size:13px">Rakip gelirinin ${pctAcc(k.riv*3)} alıyor.</p>`:''}
+  <div class="kv"><span>Sen %${myShare()*10} · ${rivalName()} %${k.riv*10}</span><span>Halkta %${k.pub*10}</span></div>${k.riv?`<p class="no" style="font-size:13px">Rakip gelirinin ${pctAcc(k.riv*3)} alıyor.</p>`:''}
   <div class="row2">${k.pub>0?`<button class="mini" data-a="stk:buyme">Halktan hisse al · ${fmt(mp)}</button>`:''}${k.riv>0?`<button class="mini" data-a="stk:backme">Rakipten geri al · ${fmt(Math.round(mp*1.5))}</button>`:''}</div>
-  <span class="note" style="margin-top:6px">${RIVAL_NAME} · hisse ${fmt(rp)} bin ₺</span>
+  <span class="note" style="margin-top:6px">${rivalName()} · hisse ${fmt(rp)} bin ₺</span>
   <div class="shares">${[...Array(10)].map((_,i)=>`<i class="${i<k.mine?'me':i<k.mine+4?'rv':''}"></i>`).join('')}</div>
   <div class="kv"><span>Sende %${k.mine*10}</span><span>Temettü ${k.mine*2} bin ₺/ay</span></div>
   <div class="row2">${k.mine<6?`<button class="mini" data-a="stk:buyr">Rakip hissesi al · ${fmt(rp)}</button>`:''}${k.mine>0?`<button class="mini" data-a="stk:sellr">Sat · ${fmt(Math.round(rp*0.9))}</button>`:''}</div>
-  <p class="note">%60’ı toplarsan ${RIVAL_NAME} senin olur: ${R.tracks.length} hat, ${R.trains.length} tren. Rakip de 1930’dan sonra senin halktaki hisselerini toplar ve elindeki her hisse için gelirinin %3’ünü alır. Rakip ${R.tracks.length>=7?'büyümeyi durdurdu':'yaklaşık 9 ayda bir yeni hat açar'}; onun da olduğu şehirlerde gelirin %30 düşer.</p>`}
+  <p class="note">%60’ı toplarsan ${rivalName()} senin olur: ${R.tracks.length} hat, ${R.trains.length} tren. Rakip de 1930’dan sonra senin halktaki hisselerini toplar ve elindeki her hisse için gelirinin %3’ünü alır. Rakip ${R.tracks.length>=7?'büyümeyi durdurdu':'yaklaşık 9 ayda bir yeni hat açar'}; onun da olduğu şehirlerde gelirin %30 düşer.</p>`}
 function takeover(){const R=S.rival;for(const t of R.tracks)if(!hasTrack(t.a,t.b))S.tracks.push({a:t.a,b:t.b});for(const t of R.trains)S.trains.push({a:t.a,b:t.b,type:'buhar',trips:0,earned:0,pos:0,dir:1});
-  R.bought=true;stk().riv=0;S.trains.forEach(prepTrain);sfx('fanfare');good(`<b>${RIVAL_NAME} artık senin!</b><span class="note">${R.tracks.length} hat ve ${R.trains.length} tren ağına katıldı.</span>`,5000);checkMissions();persist();renderSide();renderAct()}
+  R.bought=true;stk().riv=0;S.trains.forEach(prepTrain);sfx('fanfare');good(`<b>${rivalName()} artık senin!</b><span class="note">${R.tracks.length} hat ve ${R.trains.length} tren ağına katıldı.</span>`,5000);checkMissions();persist();renderSide();renderAct()}
 
 /* ---------- scenarios ---------- */
 const SCN=[
@@ -1026,12 +1032,12 @@ const SCN=[
  {id:'ege',t:'Ege’nin İncisi',d:'İzmir’i Büyükşehir yap.',mo:48,setup:s=>{s.tracks=[{a:'izm',b:'den'}];s.trains=[{a:'izm',b:'den',type:'buhar',trips:0,earned:0,pos:0,dir:1}];s.money=900},ok:()=>cs('izm').lv>=4},
  {id:'mavi',t:'Mavi Yol',d:'4 liman şehrini deniz hattıyla bağla ve kasayı 2.000 bin ₺’ye çıkar.',mo:48,setup:s=>{s.money=1000},ok:()=>Object.keys(PORTS).filter(p=>seaLinked(p)).length>=4&&S.money>=2000},
  {id:'celik',t:'Çelik Yolu',d:'Sivas’ın demir cevherini Karabük’e taşı ve çelik fabrikasını çalıştır.',mo:60,setup:s=>{s.money=1300;s.tracks.push({a:'esk',b:'ank'})},ok:()=>factoryOn('krb')},
- {id:'dogu',t:'Doğu Seferi',d:'1935. Erzurum ve Kars’ı ağa bağla.',mo:48,setup:s=>{s.t=99;s.money=1600;s.tracks=[{a:'ist',b:'esk'},{a:'esk',b:'ank'},{a:'ank',b:'kay'}];s.trains.push({a:'ist',b:'ank',type:'dizel',trips:0,earned:0,pos:0,dir:1})},ok:()=>pathExists('ank','erz')&&pathExists('ank','kar')},
+ {id:'dogu',t:'Doğu Seferi',d:'1935. Erzurum ve Kars’ı ağa bağla.',mo:48,setup:s=>{s.t=(1935-START_YEAR)*12+3;s.money=1600;s.tracks=[{a:'ist',b:'esk'},{a:'esk',b:'ank'},{a:'ank',b:'kay'}];s.trains.push({a:'ist',b:'ank',type:'dizel',trips:0,earned:0,pos:0,dir:1})},ok:()=>pathExists('ank','erz')&&pathExists('ank','kar')},
  {id:'borsa',t:'Rakibi Yut',d:'Toros Demiryolları’nı borsada ele geçir.',mo:60,setup:s=>{s.money=900;s.rival.tracks.push({a:'gaz',b:'mal'},{a:'ada',b:'kay'});s.rival.trains.push({a:'gaz',b:'mal',pos:0,dir:1},{a:'ada',b:'kay',pos:0,dir:1})},ok:()=>S.rival.bought}];
 function stars(){try{return JSON.parse(localStorage.getItem(STAR_KEY))||{}}catch(e){return {}}}
 function scnDef(){return S.scn&&SCN.find(x=>x.id===S.scn.id)}
 function loadKey(k){try{const s=JSON.parse(localStorage.getItem(k));if(s&&s.v===5&&s.cities)return s}catch(e){}return null}
-function migrate(){if(!S.unl)S.unl=S.t>6?UNLOCKS.map(u=>u.id):[];S.ports=S.ports||[];S.ships=S.ships||[];for(const c of CITIES)if(!S.cities[c.id])S.cities[c.id]={lv:c.lv,gr:0,m:{},im:0,ambar:false,fab:null};if(S.tut===undefined)S.tut=-1;stk()}
+function migrate(){if(!S.unl)S.unl=gT()>6?UNLOCKS.map(u=>u.id):[];S.ports=S.ports||[];S.ships=S.ships||[];for(const c of CITIES)if(!S.cities[c.id])S.cities[c.id]={lv:c.lv,gr:0,m:{},im:0,ambar:false,fab:null};if(S.tut===undefined)S.tut=-1;stk()}
 function resetWorld(){migrate();if($('card3')){$('card3').hidden=true;if(S.card)setTimeout(showCard,0)}if($('eracard'))$('eracard').hidden=true;if(E.follow)followStop();DRV.on=false;DRV.thr=1;S.trains.forEach(prepTrain);S.ships.forEach(prepShip);layoutCache.clear();sel=[];offerBanner=null;E.follow=null;speed=S.over||(S.scn&&S.scn.end)?0:1;setSpeedUI();$('banner').innerHTML='';renderAct();renderSide();renderBannerState();tutShown=-2}
 function carryMeta(from,to){to.skin=from.skin;to.skins=[...from.skins];to.daily=from.daily}
 function startScn(id){const def=SCN.find(x=>x.id===id);const prev=S;if(!S.scn)persist();else persist();
@@ -1114,13 +1120,13 @@ function featClick(a,b){const spend=c=>{if(S.money<c)return false;S.money-=c;ret
 const nCon=()=>CITIES.filter(c=>connected(c.id)).length;
 const UNLOCKS=[
  {id:'daily',t:'Günlük görevler ve Sefer Kartı',d:'Görevler sekmesinde her gün 3 yeni görev ve aylık ödül yolu.',ok:()=>(S.tut??-1)<0,lock:'Rehberi bitirince açılır.'},
- {id:'scn',t:'Senaryolar',d:'Senaryo sekmesinde yıldızlı tarihî bölümler.',ok:()=>(S.tut??-1)<0&&S.t>=6,lock:''},
- {id:'gar',t:'Gar yükseltmeleri',d:'Bir şehre dokun: istasyonu gara, büyük gara ve tarihî gara dönüştür.',ok:()=>nCon()>=3&&S.t>=8,lock:''},
- {id:'cards',t:'Karar kartları',d:'Ara sıra zor kararlar vermen gerekecek.',ok:()=>S.t>=14&&(S.tut??-1)<0,lock:''},
- {id:'port',t:'Limanlar ve kargo gemileri',d:'Kıyı şehirlerinde liman kur, deniz yolundan yük taşı.',ok:()=>nCon()>=4||S.t>=24,lock:'4 şehri ağa bağlayınca ya da 1929’da açılır.'},
- {id:'tunnel',t:'Tüneller',d:'Dağlık hatları tünelle kur, trenler yavaşlamasın.',ok:()=>S.t>=18||S.tracks.some(t=>terrainMul(C[t.a],C[t.b])>=1.3),lock:'Dağlık bir bölgeye ulaşınca ya da Temmuz 1928’de açılır.'},
- {id:'staff',t:'Personel',d:'Şirket sekmesinden uzman işe al: makinist, mühendis, şef…',ok:()=>nCon()>=6||S.t>=30,lock:'6 şehri ağa bağlayınca ya da Temmuz 1929’da açılır.'},
- {id:'stock',t:'Borsa',d:'Ekim 1929: borsa açıldı. Rakibin hisselerini topla, kendi hisseni koru.',ok:()=>S.t>=33,lock:'Ekim 1929’da açılır.'}];
+ {id:'scn',t:'Senaryolar',d:'Senaryo sekmesinde yıldızlı tarihî bölümler.',ok:()=>(S.tut??-1)<0&&gT()>=6,lock:''},
+ {id:'gar',t:'Gar yükseltmeleri',d:'Bir şehre dokun: istasyonu gara, büyük gara ve tarihî gara dönüştür.',ok:()=>nCon()>=3&&gT()>=8,lock:''},
+ {id:'cards',t:'Karar kartları',d:'Ara sıra zor kararlar vermen gerekecek.',ok:()=>gT()>=14&&(S.tut??-1)<0,lock:''},
+ {id:'port',t:'Limanlar ve kargo gemileri',d:'Kıyı şehirlerinde liman kur, deniz yolundan yük taşı.',ok:()=>nCon()>=4||gT()>=24,lock:'4 şehri ağa bağlayınca ya da oyunun 2. yılında açılır.'},
+ {id:'tunnel',t:'Tüneller',d:'Dağlık hatları tünelle kur, trenler yavaşlamasın.',ok:()=>gT()>=18||S.tracks.some(t=>terrainMul(C[t.a],C[t.b])>=1.3),lock:'Dağlık bir bölgeye ulaşınca ya da oyunun 2. yılında açılır.'},
+ {id:'staff',t:'Personel',d:'Şirket sekmesinden uzman işe al: makinist, mühendis, şef…',ok:()=>nCon()>=6||gT()>=30,lock:'6 şehri ağa bağlayınca ya da oyunun 3. yılında açılır.'},
+ {id:'stock',t:'Borsa',d:'Borsa açıldı. Rakibin hisselerini topla, kendi hisseni koru.',ok:()=>gT()>=33,lock:'Oyunun 3. yılında açılır.'}];
 function unl(id){return !S||!S.unl||S.unl.includes(id)}
 function lockNote(id){const u=UNLOCKS.find(x=>x.id===id);return `<p class="note lockn">🔒 ${u.t}: ${u.lock||'yakında açılır.'}</p>`}
 function unlockCheck(){if(!S.unl)return;for(const u of UNLOCKS){if(S.unl.includes(u.id)||!u.ok())continue;S.unl.push(u.id);
@@ -1204,9 +1210,9 @@ function garCard(id){if(!S.tracks.some(t=>t.a===id||t.b===id))return '';if(!unl(
   if(nx)h+=cs(id).lv>=nx.lv?`<div class="btns"><button class="btn" data-a="gar">${g===2?(GAR_NAMES[id]||'Tarihî gar')+' inşa et':nx.n+'a yükselt'} · ${nx.cost} bin ₺<br><span class="note">Bu şehre gelen yolcu geliri ×${nx.mul}${g===1?', şehir 1 ay erken büyür':''}</span></button></div>`:`<p class="note">${nx.n} için şehir ${LEVELS[nx.lv-1]} olmalı.</p>`;
   return h}
 /* ---------- holidays (bayram) ---------- */
-function bayramAt(m){const y=Math.floor(m/12),mo=m%12;for(const [n,d0] of [['Ramazan Bayramı',92],['Kurban Bayramı',160]]){const doy=((d0-y*10.9)%365+365)%365;if(Math.floor(doy/30.42)%12===mo)return n}return null}
+function bayramAt(m){const y=Math.floor(m/12)-(1927-START_YEAR),mo=m%12;for(const [n,d0] of [['Ramazan Bayramı',92],['Kurban Bayramı',160]]){const doy=((d0-y*10.9)%365+365)%365;if(Math.floor(doy/30.42)%12===mo)return n}return null}
 /* ---------- city size caps: only the big five can become metropolises ---------- */
-const MAXLV={ist:5,ank:5,izm:5,ada:5,bur:5,kon:4,kay:4,gaz:4,sam:4,esk:4,tra:4,ant:4,den:4,erz:4,diy:4,mal:3,siv:3,zon:3,krb:3,edi:3,can:3,kar:3,riz:3,bat:3,cnk:3};
+const MAXLV={aydin:3,ist:5,ank:5,izm:5,ada:5,bur:5,kon:4,kay:4,gaz:4,sam:4,esk:4,tra:4,ant:4,den:4,erz:4,diy:4,mal:3,siv:3,zon:3,krb:3,edi:3,can:3,kar:3,riz:3,bat:3,cnk:3};
 const maxLv=id=>Math.max(Math.min(5,(MAXLV[id]||4)+eraCapBonus(id)),S&&S.cities[id]?S.cities[id].lv:0);
 /* ---------- passenger pools: each city produces a limited number of travellers ---------- */
 const paxRate=id=>pop(id)*0.4*ERA_POP[eraIdx()]*megaPop(id),paxCap=id=>paxRate(id)*2.5;
@@ -1351,13 +1357,13 @@ TYPES.dizel.dat='Dizele';TYPES.hizli.dat='Mavi Trene';TYPES.elek.dat='Elektrikli
 function newestType(){const ks=Object.keys(TYPES).filter(x=>year()>=TYPES[x].year);return ks[ks.length-1]}
 function typeShown(k){const ks=Object.keys(TYPES),av=ks.filter(x=>year()>=TYPES[x].year),up=ks.find(x=>year()<TYPES[x].year);return av.slice(-3).includes(k)||k===up}
 /* real population (TÜİK 2023, million) — used for city caps in later eras and the population readout */
-const POP23={ist:15.66,ank:5.80,izm:4.48,bur:3.21,ant:2.70,kon:2.32,ada:2.27,gaz:2.16,diy:1.82,kay:1.44,sam:1.37,den:1.06,esk:0.91,tra:0.82,erz:0.75,mal:0.74,siv:0.64,bat:0.63,zon:0.59,can:0.56,edi:0.41,riz:0.34,kar:0.27,krb:0.25,cnk:0.20};
+const POP23={aydin:1.16,ist:15.66,ank:5.80,izm:4.48,bur:3.21,ant:2.70,kon:2.32,ada:2.27,gaz:2.16,diy:1.82,kay:1.44,sam:1.37,den:1.06,esk:0.91,tra:0.82,erz:0.75,mal:0.74,siv:0.64,bat:0.63,zon:0.59,can:0.56,edi:0.41,riz:0.34,kar:0.27,krb:0.25,cnk:0.20};
 function capBonusAt(id,e){const p=POP23[id]||0.3;return (e>=1&&p>=2?1:0)+(e>=2&&p>=1&&p<2?1:0)+(e>=3&&p>=0.5?1:0)}
 function capAt(id,e){return Math.min(5,(MAXLV[id]||4)+capBonusAt(id,e))}
 function eraCapBonus(id){return S?capBonusAt(id,eraIdx()):0}
 function finalCap(id){return capAt(id,3)}
 function popEst(id){const P=POP23[id]||0.3,cap=finalCap(id),G=cap>=5?20:cap===4?10:5,l0=C[id].lv,lv=cs(id).lv,y=year();
-  const lp=cap>l0?Math.min(1,Math.max(0,(lv-l0)/(cap-l0))):1,yp=Math.min(1,Math.max(0,(y-START_YEAR)/(2023-START_YEAR)));
+  const lp=cap>l0?Math.min(1,Math.max(0,(lv-l0)/(cap-l0))):1,yp=Math.min(1,Math.max(0,(y-1927)/(2023-1927)));
   let p=P/G*Math.pow(G,0.4*lp+0.6*yp);if(y>2023)p*=Math.pow(1.008,y-2023);return p}
 function popFmt(p,short){if(p>=1)return (p>=10?p.toFixed(1):p.toFixed(2)).replace('.',',')+(short?' mn':' milyon');return Math.round(p*1000/5)*5+' bin'}
 /* competition from roads and airlines */
@@ -1377,7 +1383,7 @@ function eraMonth(m){megaMonth(m);const e=eraIdx();if(S.era==null){S.era=e;if(e>
   const y=year();S.flags=S.flags||{};
   if(y>=2023&&!S.flags.cum100){S.flags.cum100=1;const g=Math.round(300+nCon()*40);S.money+=g;S.inc+=g;good(`<b>🇹🇷 Cumhuriyetin 100. yılı!</b><span class="note">Kutlama seferleri için devlet desteği: +${fmt(g)} bin ₺</span>`,5200)}
   if(y>=2026&&!S.flags.today&&!S.scn){S.flags.today=1;if(FF.on)FF.today=1;else todayCard()}
-  if(!S.scn&&e<ERAS.length-1&&nCon()>=ERA_GOAL[e]&&!S.flags['ej'+e]&&!FF.on){S.flags['ej'+e]=1;good(`<b>⏩ Çağ atlama açıldı</b><span class="note">${ERA_GOAL[e]} şehri bağladın. Görevler sekmesinden ${yCase(ERAS[e+1].y,'dat')} atlayabilirsin.</span><div class="btns"><button class="btn primary" data-a="erajump">⏩ ${ERAS[e+1].n} çağına atla</button></div>`,9000)}}
+  {const ot=isOtt(),ek='ej'+(ot?'o':e);if(!S.scn&&(ot||e<ERAS.length-1)&&nCon()>=eraGoalNow()&&!S.flags[ek]&&!FF.on){S.flags[ek]=1;good(`<b>⏩ Çağ atlama açıldı</b><span class="note">${eraGoalNow()} şehri bağladın. Görevler sekmesinden ${yCase(eraNextY(),'dat')} atlayabilirsin.</span><div class="btns"><button class="btn primary" data-a="erajump">⏩ ${ot?'Cumhuriyet’e':ERAS[e+1].n+' çağına'} atla</button></div>`,9000)}}}
 function capList(e){return CITIES.filter(c=>capAt(c.id,e)>capAt(c.id,e-1)).map(c=>`${c.n} → ${LEVELS[capAt(c.id,e)-1]}`)}
 function eraNews(e){const L=[];
   if(e===1)L.push(`🚆 Yeni tren: <b>Mavi Tren</b> · ${TYPES.hizli.kmh} km/sa, kapasite ×${String(TYPES.hizli.cap).replace('.',',')}`,'🚚 Rakip: <b>karayolu</b> · yük geliri −%12, 300 km altı yolculukta −%15','👥 Şehirler kalabalıklaştı: yolcu havuzu ×1,4',`🏙 Yeniden büyüyebilir: ${capList(1).join(', ')}`,'🏢 Şehirlerde apartmanlar ve ilk yüksek binalar','🏗 Yeni büyük projeler: Banliyö hatları, Lokomotif fabrikası');
@@ -1390,15 +1396,15 @@ function eraClose(){eraEl().hidden=true;speed=S.card&&$('card3')&&!$('card3').hi
 function eraCard(e,sum){const E2=ERAS[e];
   eraShow(`${sum||''}<span class="note">Yeni çağ · ${eraSpan(e)}</span><h3>${E2.ic} ${E2.n} Çağı</h3><p>${E2.d}</p><ul class="eralist">${eraNews(e).map(x=>`<li>${x}</li>`).join('')}</ul><div class="btns"><button class="btn primary" data-a="erago">Yeni çağa başla</button></div>`)}
 function todayCard(){const big=CITIES.filter(c=>cs(c.id).lv>=5).length,net=CITIES.filter(c=>connected(c.id)),ppl=net.reduce((s,c)=>s+popEst(c.id),0);
-  eraShow(`<span class="note">${year()}</span><h3>🇹🇷 Günümüze ulaştın!</h3><p>1927’de tek bir buharlı trenle başlayan şirketin, bugün Anadolu’nun demir ağı.</p><ul class="eralist"><li>🏙 Ağda ${net.length} şehir · ${big} metropol</li><li>👥 Ağındaki şehirlerde yaklaşık ${popFmt(ppl)} insan</li><li>🛤 ${fmt(trackKm())} km hat · ${S.trains.length} tren · ${S.ships.length} gemi</li><li>💰 Şirket değeri ${fmt(myValue())} bin ₺</li></ul><p class="note">Oyun sürüyor: ağını büyütmeye devam edebilirsin.</p><div class="btns"><button class="btn primary" data-a="erago">Devam</button></div>`)}
+  eraShow(`<span class="note">${year()}</span><h3>🇹🇷 Günümüze ulaştın!</h3><p>${S.osm?'1856’da İzmir–Aydın hattının imtiyazıyla başlayan':'1927’de tek bir buharlı trenle başlayan'} şirketin, bugün Anadolu’nun demir ağı.</p><ul class="eralist"><li>🏙 Ağda ${net.length} şehir · ${big} metropol</li><li>👥 Ağındaki şehirlerde yaklaşık ${popFmt(ppl)} insan</li><li>🛤 ${fmt(trackKm())} km hat · ${S.trains.length} tren · ${S.ships.length} gemi</li><li>💰 Şirket değeri ${fmt(myValue())} bin ₺</li></ul><p class="note">Oyun sürüyor: ağını büyütmeye devam edebilirsin.</p><div class="btns"><button class="btn primary" data-a="erago">Devam</button></div>`)}
 /* ---------- era jump (fast-forward) ---------- */
-function eraCanJump(){const e=eraIdx();return !S.scn&&!FF.on&&!S.over&&S.money>=0&&e<ERAS.length-1&&nCon()>=ERA_GOAL[e]}
-function eraJump(){if(!eraCanJump())return;const e=eraIdx(),target=(ERAS[e+1].y-START_YEAR)*12+0.02;
+function eraCanJump(){const e=eraIdx();return !S.scn&&!FF.on&&!S.over&&S.money>=0&&(isOtt()||e<ERAS.length-1)&&nCon()>=eraGoalNow()}
+function eraJump(){if(!eraCanJump())return;const e=eraIdx(),target=isOtt()?(OTT_END-START_YEAR)*12+9.6:(ERAS[e+1].y-START_YEAR)*12+0.02;
   Object.assign(FF,{on:true,t0:S.t,target,m0:S.money,v0:myValue(),lv0:CITIES.map(c=>cs(c.id).lv),trips0:S.trains.reduce((s,t)=>s+t.trips,0),newEra:null,today:0,stop:0,prev:speed||1});
   if(E.follow)followStop();DRV.on=false;sel=[];renderAct();{let bl=$('ffblock');if(!bl){bl=document.createElement('div');bl.id='ffblock';bl.className='ffblock';document.body.appendChild(bl)}bl.hidden=false}
   const stub=['renderAct','renderSide','persist','showBanner','popup','sfx','celebrate','showCard','vib','renderBannerState'];FF.saved={};
   for(const k of stub){FF.saved[k]=window[k];window[k]=()=>{}}
-  const ov=eraEl();ov.hidden=false;ov.innerHTML=`<span class="note">Zaman akıyor…</span><h3>⏩ ${ERAS[e+1].n} çağına</h3><div class="ffy" id="ffy"></div><div class="meter"><i id="ffbar" style="width:0%;background:#e2b85c"></i></div><p class="note">Trenlerin çalışmaya, şehirler büyümeye devam ediyor. Kararlar ve olaylar kendiliğinden geçiyor.</p>`;
+  const ov=eraEl();ov.hidden=false;ov.innerHTML=`<span class="note">Zaman akıyor…</span><h3>⏩ ${isOtt()?'Cumhuriyet’e':ERAS[e+1].n+' çağına'}</h3><div class="ffy" id="ffy"></div><div class="meter"><i id="ffbar" style="width:0%;background:#e2b85c"></i></div><p class="note">Trenlerin çalışmaya, şehirler büyümeye devam ediyor. Kararlar ve olaylar kendiliğinden geçiyor.</p>`;
   const step=()=>{const t1=performance.now();speed=1;
     try{while(S.t<FF.target&&!S.over&&!FF.stop&&!S.scn&&performance.now()-t1<28){for(let i=0;i<16;i++){speed=1;tick(0.5);if(S.money<0){FF.stop=1;break}if(S.t>=FF.target||S.over)break}S.card=null}}catch(err){FF.stop=1;FF.err=err}
     const f=Math.min(1,(S.t-FF.t0)/(FF.target-FF.t0));const b=$('ffbar'),y=$('ffy');if(b)b.style.width=(f*100).toFixed(1)+'%';if(y)y.textContent=`${year()} · Kasa ${fmt(S.money)} bin ₺`;
@@ -1411,7 +1417,7 @@ function eraJumpDone(){for(const k in FF.saved)window[k]=FF.saved[k];FF.on=false
   speed=0;eraPrev=FF.prev;setSpeedUI();eraEl().hidden=true;
   if(S.over){renderBannerState();renderAct();renderSide();persist();return}
   if(FF.stop&&FF.newEra==null){eraShow(`${sum}<span class="note">${MONTHS[month()%12]} ${year()}</span><h3>⏸ Atlama durdu</h3><p>Kasa eksiye düştü. Zarar eden hatlara tren ekle ya da bakım giderlerini azalt, sonra yeniden dene.</p><div class="btns"><button class="btn primary" data-a="erago">Tamam</button></div>`);persist();return}
-  const e=FF.newEra??eraIdx();eraCard(e,sum);checkMissions();persist()}
+  const e=FF.newEra??eraIdx();if(FF.ottPending){FF.ottPending=0;cumCard(sum)}else eraCard(e,sum);checkMissions();persist()}
 /* ---------- panel ---------- */
 function renderEra(){const el=$('erap');if(!el)return;const e=eraIdx(),E2=ERAS[e],last=e>=ERAS.length-1;
   let h=`<div class="erarow">${ERAS.map((x,i)=>`<span class="erast ${i<e?'past':i===e?'now':''}">${x.ic}<small>${x.n}</small></span>`).join('<i></i>')}</div>
@@ -2443,6 +2449,7 @@ const ALBUM={
  can:{r:'mar',u:'Ezine peyniri',f:'Truva antik kenti Çanakkale’dedir ve 1998’de UNESCO Dünya Mirası listesine girdi.'},
  bur:{r:'mar',u:'Kestane şekeri',f:'1326’da Osmanlı Devleti’nin ilk başkenti oldu. İskender kebap da Uludağ kayak merkezi de buradadır.'},
  izm:{r:'ege',u:'Boyoz',f:'1927’de 9 Eylül Panayırı olarak başlayan fuar, 1936’da İzmir Enternasyonal Fuarı’na dönüştü.'},
+ aydin:{r:'ege',u:'İncir',f:'Anadolu’nun ilk demiryolu 1866’da İzmir’den Aydın’a ulaştı. Bölge, dünyanın başlıca kuru incir üretim yerlerindendir.'},
  den:{r:'ege',u:'Buldan bezi',f:'Pamukkale travertenleri ve antik Hierapolis kenti 1988’de UNESCO Dünya Mirası listesine girdi.'},
  ant:{r:'akd',u:'Finike portakalı',f:'Türkiye’nin en çok turist ağırlayan illerindendir; antik Perge, Aspendos ve Side bu ildedir.'},
  ada:{r:'akd',u:'Adana kebabı',f:'Çukurova pamuğunun merkezidir. Roma döneminden kalan Taşköprü bugün de ayaktadır.'},
@@ -2538,7 +2545,7 @@ function renderNesil(){const el=$('nesilp');if(!el)return;const N=nesil(),open=n
   let h=`<div class="kv"><span>Şirketin nesli</span><span><b>${N.n+1}. nesil</b></span></div><div class="kv"><span>Demiryolcu nişanı</span><span><b>${N.pts}</b></span></div>`;
   h+=Object.entries(NESIL).map(([k,p])=>{const l=N.perks[k]||0,c=l+1,max=l>=p.max;return `<div class="perk"><div><b>${p.n} ${'●'.repeat(l)}${'○'.repeat(p.max-l)}</b><br><small class="note">${l?p.d(l):'Henüz yok'}${max?'':` → ${p.d(l+1)}`}${k==='kasa'?' · sonraki oyunda':''}</small></div>${max?'<span class="ok">Tam</span>':`<button class="mini" data-a="nes:${k}" ${N.pts>=c?'':'disabled'}>${c} nişan</button>`}</div>`}).join('');
   if(S.scn)h+='<p class="note">Yeni Nesil güçleri senaryolarda geçerli değil.</p>';
-  else if(open){const p=nesilPts();h+=`<p class="note">Şirketini gelecek nesle devret: ${START_YEAR}’den yeniden başla, <b>${p} nişan</b> kazan. Albüm, görünümler ve Yeni Nesil güçlerin seninle kalır; hatlar, trenler ve kasa sıfırlanır.</p><button class="btn primary" data-a="nesil">${nesilConfirm?'Emin misin? Tekrar dokun':`🌱 Yeni nesle geç · +${p} nişan`}</button>`}
+  else if(open){const p=nesilPts();h+=`<p class="note">Şirketini gelecek nesle devret: baştan başla, <b>${p} nişan</b> kazan. Albüm, görünümler ve Yeni Nesil güçlerin seninle kalır; hatlar, trenler ve kasa sıfırlanır.</p><button class="btn primary" data-a="nesil">${nesilConfirm?'Emin misin? Tekrar dokun':`🌱 Yeni nesle geç · +${p} nişan`}</button>`}
   else h+=`<p class="note">Günümüze (2026) ulaşınca ya da Hızlı Tren çağında 22 şehri bağlayınca şirketini yeni nesle devredebilirsin. Her nesil, nişanlarla alınan kalıcı güçlerle başlar.</p>`;
   el.innerHTML=h}
 function nesilGo(){if(!nesilOpen())return;const p=nesilPts(),N=nesil();N.pts+=p;N.n++;N.last={y:year(),n:nCon(),v:Math.round(myValue()),p};saveMeta();nesilConfirm=false;startNew();setTab('co');sfx('fanfare');
@@ -2638,8 +2645,8 @@ function gradeOn(){return OPT.grade!=='off'}
 function gradeOverlay(){let ov=$('gradeov');if(!ov){ov=document.createElement('div');ov.id='gradeov';ov.className='gradeov';
   const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d'),im=g.createImageData(128,128);for(let i=0;i<im.data.length;i+=4){const v=Math.random()*255|0;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255}g.putImageData(im,0,0);
   ov.style.setProperty('--noise',`url(${c.toDataURL()})`);$('stage3').appendChild(ov)}return ov}
-function gradeApply(){const cv=E.renderer&&E.renderer.domElement;if(!cv)return;const e=eraIdx(),on=gradeOn(),k=(on?e:-1)+'|'+GFXQ;if(cv.dataset.g===k)return;cv.dataset.g=k;
-  const G=GRADE[e];cv.style.filter=on?G.f:'none';const ov=gradeOverlay();ov.style.setProperty('--vig',on?G.v:.12);ov.style.setProperty('--grain',on&&GFXQ>0?G.g:0);ov.classList.toggle('still',GFXQ===0)}
+function gradeApply(){const cv=E.renderer&&E.renderer.domElement;if(!cv)return;const e=eraIdx(),ot=year()<1923,on=gradeOn(),k=(on?(ot?'o':e):-1)+'|'+GFXQ;if(cv.dataset.g===k)return;cv.dataset.g=k;
+  const G=gradeNow();cv.style.filter=on?G.f:'none';const ov=gradeOverlay();ov.style.setProperty('--vig',on?G.v:.12);ov.style.setProperty('--grain',on&&GFXQ>0?G.g:0);ov.classList.toggle('still',GFXQ===0)}
 function gradeLabel(){const b=$('grade');if(!b)return;b.textContent='Renk tonu: '+(gradeOn()?'Çağa göre':'Doğal');b.classList.toggle('on',gradeOn());b.setAttribute('aria-pressed',String(gradeOn()))}
 /* ---------- yollar ve karayolu araçları (Kalkınma çağından itibaren) ---------- */
 function roadEdges(){if(E.roadE)return E.roadE;const L=[],seen=new Set();
@@ -2722,8 +2729,8 @@ function photoOn(){if(!E.ready||E.photo)return;E.photo=true;E.photoSel=sel;sel=[
 function photoOff(){if(!E.photo)return;E.photo=false;sel=E.photoSel||[];$('world').classList.remove('photo','labs');$('photobar').hidden=true;renderAct()}
 function photoCanvas(){const src=E.renderer.domElement;E.renderer.render(E.scene,E.camera);const W=1080,H=1350,PH=1010,cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d');
   const DF='"Josefin Sans","Century Gothic",sans-serif',BF='"Source Sans 3","Segoe UI",sans-serif',e=eraIdx();g.fillStyle='#10202a';g.fillRect(0,0,W,H);
-  const sw=src.width,sh=src.height,s=Math.max(W/sw,PH/sh),dw=sw*s,dh=sh*s,dx=(W-dw)/2,dy=(PH-dh)/2;g.save();g.beginPath();g.rect(0,0,W,PH);g.clip();if(gradeOn())g.filter=GRADE[e].f;g.drawImage(src,dx,dy,dw,dh);g.filter='none';
-  const vg=g.createRadialGradient(W/2,PH*0.45,PH*0.35,W/2,PH*0.45,PH*0.95);vg.addColorStop(0,'rgba(16,12,6,0)');vg.addColorStop(1,`rgba(16,12,6,${gradeOn()?GRADE[e].v*0.8:0.25})`);g.fillStyle=vg;g.fillRect(0,0,W,PH);
+  const sw=src.width,sh=src.height,s=Math.max(W/sw,PH/sh),dw=sw*s,dh=sh*s,dx=(W-dw)/2,dy=(PH-dh)/2;g.save();g.beginPath();g.rect(0,0,W,PH);g.clip();if(gradeOn())g.filter=gradeNow().f;g.drawImage(src,dx,dy,dw,dh);g.filter='none';
+  const vg=g.createRadialGradient(W/2,PH*0.45,PH*0.35,W/2,PH*0.45,PH*0.95);vg.addColorStop(0,'rgba(16,12,6,0)');vg.addColorStop(1,`rgba(16,12,6,${gradeOn()?gradeNow().v*0.8:0.25})`);g.fillStyle=vg;g.fillRect(0,0,W,PH);
   if(E.photoLab){const k=dw/(E.VW||sw);g.font=`700 ${Math.round(13*k)}px ${BF}`;g.textAlign='center';g.textBaseline='middle';
     for(const c of CITIES){if(!connected(c.id))continue;const o=E.cities[c.id],[px,py,pz]=project(c.x,(o?o.grp.userData.base:Y_LAND)+Math.min(cityLayout(c.id).top,70)+8,c.y);if(pz>1)continue;const x=dx+px*k,y=dy+py*k;if(x<40||x>W-40||y<230||y>PH-20)continue;
       const tw=g.measureText(c.n).width+18*k/1.2;g.fillStyle='rgba(255,253,247,.93)';g.beginPath();if(g.roundRect)g.roundRect(x-tw/2,y-11*k,tw,22*k,9*k);else g.rect(x-tw/2,y-11*k,tw,22*k);g.fill();g.fillStyle='#2a241c';g.fillText(c.n,x,y+1)}g.textAlign='left'}
@@ -2737,14 +2744,14 @@ function photoFlash(){const f=document.createElement('div');f.className='flash';
 /* ---------- bağlantılar ---------- */
 let introAsked=false;
 const _frame3D=frame3D;frame3D=function(dt){
-  if(!introAsked&&E.ready&&!FF.on){introAsked=true;introStart(S.t<3.3&&!S.scn?'full':'short')}
+  if(!introAsked&&E.ready&&!FF.on){introAsked=true;if(!S.pro)introStart(gT()<3.3&&!S.scn?'full':'short')}
   if(E.intro){introStep(dt)}
   try{gradeApply();vehSync();planeSync();wxSync()}catch(e){console.warn('gfx2',e)}
   _frame3D(dt);
   const camDist=E.camera.position.distanceTo(E.controls.target);try{vehStep(dt,camDist);planeStep(dt,camDist);wxStep(dt);growStep(dt)}catch(e){console.warn('gfx2',e)}};
-const _startNew=startNew;startNew=function(){_startNew();if(E.ready){E.intro=null;introStart('full')}};
+const _startNew=startNew;startNew=function(){_startNew();if(E.ready&&!S.pro){E.intro=null;introStart('full')}};
 $('stage3').addEventListener('pointerdown',()=>{if(E.intro)introEnd()},{capture:true});
-$('grade').onclick=()=>{OPT.grade=gradeOn()?'off':'era';saveOpt();gradeLabel();gradeApply();info(`<b>Renk tonu: ${gradeOn()?GRADE[eraIdx()].n:'Doğal renkler'}</b><span class="note">${gradeOn()?'Her çağın kendi görünümü var: 1927 eski fotoğraf, 1950 kartpostal, 1970’ler film, günümüz canlı renkler.':'Çağ renk tonu kapalı.'}</span>`)};gradeLabel();
+$('grade').onclick=()=>{OPT.grade=gradeOn()?'off':'era';saveOpt();gradeLabel();gradeApply();info(`<b>Renk tonu: ${gradeOn()?gradeNow().n:'Doğal renkler'}</b><span class="note">${gradeOn()?'Her çağın kendi görünümü var: 1927 eski fotoğraf, 1950 kartpostal, 1970’ler film, günümüz canlı renkler.':'Çağ renk tonu kapalı.'}</span>`)};gradeLabel();
 $('photo').onclick=()=>photoOn();
 const _v2Click=v2Click;v2Click=function(a,b){
   if(a==='photo'){photoOn();return true}
@@ -2761,6 +2768,7 @@ const CITY_DESC={
  can:'Çanakkale Boğazı’nın iki yakasında kurulu, Asya ile Avrupa arasında bir geçit şehri. 1915 Çanakkale Savaşları’nın yaşandığı Gelibolu Yarımadası ve antik Truva bu ildedir.',
  bur:'Uludağ’ın eteğinde, yeşilliği yüzünden “Yeşil Bursa” diye anılan şehir. Osmanlı’nın ilk başkentidir; ipekçilik ve tekstille ünlendi, bugün otomotiv sanayisinin merkezlerinden biri.',
  izm:'Ege’nin incisi, Türkiye’nin üçüncü büyük şehri. Körfezi çevreleyen bu liman kenti antik Smyrna’nın mirasçısıdır; Kordon boyu ve Alsancak’ıyla tanınır.',
+ aydin:'Büyük Menderes ovasında, inciri ve pamuğuyla ünlü bir Ege şehri. Anadolu’nun ilk demiryolu 1866’da İzmir’den buraya ulaştı; antik Afrodisias ve Priene bu ildedir.',
  den:'Ege’nin iç kesiminde, tekstil ve özellikle havlu üretimiyle tanınan bir sanayi şehri. Pamukkale travertenleri ve Hierapolis antik kenti şehre çok yakındır.',
  ant:'Toroslar ile Akdeniz arasında, Türkiye’nin turizm başkenti. Tarihî Kaleiçi, Hadrian Kapısı ve uzun plajlarıyla her yıl milyonlarca ziyaretçi ağırlar.',
  esk:'Porsuk Çayı’nın ikiye böldüğü, üniversiteleriyle genç bir şehir. Demiryolu şehrin kaderini belirledi: lokomotif fabrikası TÜLOMSAŞ buradadır. Odunpazarı’nın renkli evleri ve lületaşı ünlüdür.',
@@ -2858,6 +2866,140 @@ const _lmInfo=lmInfo;lmInfo=function(l){_lmInfo(l);const o=LM_OPEN[l.id],el=$('c
 const _lmCard2=lmCard;lmCard=function(id){let h=_lmCard2(id)||'';const soon=LANDMARKS.filter(l=>l.city===id&&!lmOpen(l));if(soon.length)h+=soon.map(l=>`<p class="note lmdesc">🏛 <b>${l.n}</b> ${yCase(LM_OPEN[l.id][0],'loc')} ziyarete açılacak; o zaman turist getirmeye başlar.</p>`).join('');return h};
 {const a16=ACH.find(a=>a.id==='a16');if(a16)a16.ok=()=>new Set(LANDMARKS.filter(l=>lmOpen(l)&&connected(l.city)).map(l=>l.city)).size>=4}
 const _frameExtras=frameExtras;frameExtras=function(dt,camDist){_frameExtras(dt,camDist);try{lmTick(dt)}catch(e){console.warn('lm',e)}};
+
+/* ================= Osmanlı dönemi: 1856 İzmir–Aydın, Osmanlı olayları, 1923 Cumhuriyet, dönem seçimi ================= */
+TYPES.buhar.year=1856;
+function gT(){return S?S.t-((S.t0??855)-3):0}
+const GRADE_OTT={n:'Osmanlı gravürü',f:'sepia(.6) saturate(.6) contrast(1.08) brightness(1.04)',v:.62,g:.07};
+function gradeNow(){return S&&year()<1923?GRADE_OTT:GRADE[eraIdx()]}
+const OTT_GOAL=6,OTT_END=1923;
+function isOtt(){return !!S&&year()<OTT_END}
+function eraGoalNow(){return isOtt()?OTT_GOAL:ERA_GOAL[eraIdx()]}
+function eraNextY(){return isOtt()?OTT_END:ERAS[eraIdx()+1].y}
+function rivalName(){return (S&&S.rival&&S.rival.n)||RIVAL_NAME}
+/* ---------- eski kayıtlar: 1927 tabanlı ay sayacını 1856 tabanına taşı ---------- */
+const MKEYS=new Set(['t','until','start','lastCard','lastHist','strikeUntil','armyUntil','pressUntil','merchantUntil','boostUntil','brk','m']);
+function shiftMonths(o,d,depth){if(!o||typeof o!=='object'||depth>6)return;for(const k in o){const v=o[k];if(typeof v==='number'){if(MKEYS.has(k))o[k]=v+d}else if(v&&typeof v==='object'&&k!=='cities'&&k!=='daily'&&k!=='stk'&&k!=='skins'&&k!=='flags'&&k!=='x')shiftMonths(v,d,depth+1)}}
+const _migrate2=migrate;migrate=function(){if(S&&S.y0==null){shiftMonths(S,(1927-1856)*12,0);S.y0=1856;if(S.t0==null)S.t0=855}_migrate2();if(!S.rival.n&&S.osm)S.rival.n='Şark Demiryolları';tutSwap()};
+/* ---------- rehber: döneme göre ---------- */
+const CUM_TUT=TUT.slice();
+const OTT_TUT=[
+ {t:'Anadolu’nun ilk demiryolu hazır! İzmir ile Aydın arasında buharlı tren çalışıyor. Şimdi <b>Aydın’a dokun</b> ve neler ürettiğini gör.',done:()=>sel.includes('aydin'),focus:'aydin'},
+ {t:'Aydın buğday, pamuk ve incir üretiyor; buğdayı İzmir’e zaten taşıyorsun. Denizli’nin dokuma tezgâhları da pamuk bekliyor. Şimdi <b>Denizli’ye dokun</b>; iki şehir seçilince hat bilgisi çıkar.',done:()=>sel.length===2&&sel.includes('aydin')&&sel.includes('den'),focus:'den'},
+ {t:'<b>“Hattı inşa et”</b> düğmesine bas.',done:()=>hasTrack('aydin','den'),hl:'[data-a="build"]'},
+ {t:'Hat hazır. Şimdi bu güzergaha bir <b>Buharlı tren</b> al.',done:()=>S.trains.length>=2,hl:'[data-a="buy:buhar"]'},
+ {t:'Etiketteki simgeler şehrin ihtiyaçları: <b>kırmızı çerçeve eksik, yeşil karşılanıyor.</b> Trenler yol üstündeki şehirlere ihtiyaçlarını taşır. Bütün simgeleri yeşil olan şehir büyür.',btn:'Anladım'},
+ {t:'Zamanı hızlandırmak için <b>3x</b>’e bas ve ilk seferleri izle.',done:()=>speed>=3,hl:'.sbtn[data-sp="3"]'},
+ {t:'Harika! Osmanlı’nın son yarım yüzyılını yaşayacaksın: Süveyş Kanalı, Hicaz Demiryolu, Kurtuluş Savaşı… <b>6 şehri bağlayınca</b> Görevler sekmesinden Cumhuriyet’e atlayabilirsin. İyi yolculuklar!',btn:'Başla · +100 bin ₺',hl:'.tab[data-tab="goal"]'}];
+function tutSwap(){const want=S&&S.osm?OTT_TUT:CUM_TUT;if(TUT[0]!==want[0])TUT.splice(0,TUT.length,...want)}
+{const m1=MISSIONS.find(m=>m.id==='m1');if(m1){Object.defineProperty(m1,'t',{get:()=>S&&S.osm&&!hasTrack('ist','esk')?'Ankara’ya uzan':'Başkenti bağla'});Object.defineProperty(m1,'d',{get:()=>S&&S.osm?'İstanbul’u Ankara’ya demiryoluyla bağla':'Eskişehir hattını Ankara’ya uzat'})}}
+/* ---------- yeni oyun: dönem seçimi ---------- */
+let NEWKIND='cum';
+const _freshState=freshState;freshState=function(){const s=_freshState();s.buffs=[];s.annals=[];s.histDone=[];if(NEWKIND!=='osm')return s;
+  Object.assign(s,{osm:1,t:8.75,t0:8.75,money:900,tracks:[],trains:[],tut:-1,rival:{tracks:[],trains:[],bought:false,n:'Şark Demiryolları'},pro:{ms:0}});
+  for(const c of CITIES){const st=s.cities[c.id];st.lv=c.id==='ist'?4:c.id==='izm'?3:c.id==='ank'?1:Math.max(1,c.lv-1)}return s};
+function newGameAsk(first){eraShow(`<span class="note">${first?'Hoş geldin':'Yeni oyun'}</span><h3>Nereden başlamak istersin?</h3>
+  <button class="btn primary ngb" data-a="ng:osm">🕌 1856 · Osmanlı<br><span class="note">Anadolu’nun ilk demiryolu İzmir–Aydın’ı inşa et; Cumhuriyete ve günümüze ulaş.</span></button>
+  <button class="btn ngb" data-a="ng:cum">🇹🇷 1927 · Cumhuriyet<br><span class="note">Genç Cumhuriyetle, İstanbul–Eskişehir hattıyla başla.</span></button>
+  ${first?'':'<button class="lnk" data-a="ng:x">Vazgeç</button>'}`)}
+const _startNew2=startNew;startNew=function(kind){if(!kind&&!(S&&S.scn)){newGameAsk(false);return}NEWKIND=kind||'cum';try{_startNew2()}finally{NEWKIND='cum'}tutSwap();if(S.osm)proBegin()};
+/* ---------- prolog: İzmir–Aydın inşaatı (1856–1866) ---------- */
+const PRO_END=(1866-1856)*12+6.5,PRO_RATE=(PRO_END-8.75)/80;
+const PRO_MS=[{t:12,txt:'1857: İlk kazma vuruldu. İngiliz mühendisler ve yerli işçiler çalışmaya başladı.'},{t:(1858-1856)*12+4,card:'p_gar'},{t:(1860-1856)*12+6,txt:'1860: Hattın ilk kesimi yolcu taşımaya başladı.'},{t:(1862-1856)*12+3,card:'p_isci'},{t:(1864-1856)*12+2,txt:'1864: Raylar Aydın ovasına yaklaşıyor.'}];
+CARDS.push(
+ {id:'p_gar',ok:()=>false,t:'Alsancak Garı',d:()=>'Hattın İzmir’deki başlangıç istasyonu Punta’da, bugünkü Alsancak’ta yapılıyor. Anadolu’nun ilk tren garı olacak.',
+  o:[{t:()=>'Taş bina, geniş peron · 120 bin ₺',f:()=>{pay(120);cs('izm').gar=Math.max(cs('izm').gar||0,1);return 'Alsancak Garı taştan yapıldı: İzmir’de yolcu geliri %12 fazla.'}},{t:()=>'Sade ahşap bina',f:()=>'Gar mütevazı ama iş görüyor.'}]},
+ {id:'p_isci',ok:()=>false,t:'Zorlu arazi',d:()=>'Vadiler ve dereler üzerine köprüler gerekiyor; çalışmalar yavaşladı. Şirket ortakları ek sermaye istiyor.',
+  o:[{t:()=>'Ek sermaye koy, ikinci lokomotifi sipariş et · 150 bin ₺',f:()=>{pay(150);S.pro.loco2=1;return 'Hat açıldığında iki lokomotifin olacak.'}},{t:()=>'Bütçeyi koru',f:()=>'Ortaklar sabırla bekliyor.'}]});
+function proBegin(){if(!S.pro)return;S.pro.ms=S.pro.ms||0;speed=0;setSpeedUI();if(E.intro)introEnd();E.camAnim=null;
+  eraShow(`<span class="note">23 Eylül 1856</span><h3>🕌 Anadolu’nun ilk demiryolu</h3><p>Bir İngiliz şirketi, İzmir ile Aydın arasındaki demiryolunun imtiyazını aldı. Sen bu şirketin yöneticisisin. Yaklaşık 130 km’lik hat İzmir’in limanını Menderes’in bereketli ovasına bağlayacak.</p><ul class="eralist"><li>🛤 İnşaat on yıl sürecek; kararların hattın kaderini belirleyecek.</li><li>🚂 Hat açılınca buharlı trenler incir, pamuk ve yolcu taşıyacak.</li><li>🇹🇷 Önünde Osmanlı’nın son yarım yüzyılı, Cumhuriyet ve günümüz var.</li></ul><div class="btns"><button class="btn primary" data-a="pro:go">İnşaata başla</button></div>`)}
+function proShow(){const el=$('procard');if(!el||!S.pro)return;$('world').classList.add('pro');const p=clamp01((S.t-12)/(PRO_END-12));
+  el.hidden=false;el.innerHTML=`<span class="note">Anadolu’nun ilk demiryolu</span><h3>İzmir–Aydın Demiryolu</h3><div class="kv"><span>${MONTHS[month()%12]} ${year()}</span><span><b>%${Math.round(p*100)}</b></span></div>${meterBar(p,'#e2b85c')}<p class="note">${S.pro.txt||'İmtiyaz alındı, hazırlıklar sürüyor.'}</p><div class="row2"><button class="mini ${S.pro.fast?'sel':''}" data-a="pro:fast">⏩ ${S.pro.fast?'Hızlı':'Hızlandır'}</button><button class="mini" data-a="pro:skip">Açılışa geç</button></div>`}
+function proRail(p){const A=C.izm,B=C.aydin,len=Math.hypot(B.x-A.x,B.y-A.y),ux=(B.x-A.x)/len,uz=(B.y-A.y)/len,nx=-uz,nz=ux,L=len*p;if(E.proRail){E.scene.remove(E.proRail);E.proRail.geometry.dispose();E.proRail=null}if(L<2)return null;
+  const M=new Merger(),P3=[],n=Math.max(2,Math.ceil(L/3));for(let k=0;k<=n;k++){const s=L*k/n,x=A.x+ux*s,z=A.y+uz*s;P3.push([x,railY(x,z),z])}
+  ribbon(M,P3,nx,nz,5.2,0,cc('#948875'));for(const o of [-1.35,1.35])ribbon(M,P3,nx,nz,0.4,0.45,cc('#b9bec4'),o);const ry=-Math.atan2(uz,ux);for(let s=2;s<L-1;s+=3.2){const x=A.x+ux*s,z=A.y+uz*s;M.add(E.gBox,mtx(x,railY(x,z)+0.02,z,0.8,0.3,4.4,ry),cc('#4e3c2a'))}
+  const m=M.build(E.mRail);m.receiveShadow=true;E.scene.add(m);E.proRail=m;const hx=A.x+ux*L,hz=A.y+uz*L;return [hx,railY(hx,hz),hz]}
+let proT=0,proLastP=-1,proPuff=0;
+function proStep(dt){if(!S.pro||!S.pro.go)return;speed=0;proShow0();if(S.card||($('eracard')&&!$('eracard').hidden))return;
+  S.t=Math.min(PRO_END,S.t+dt*PRO_RATE*(S.pro.fast?2.5:1));
+  const m=PRO_MS[S.pro.ms];if(m&&S.t>=m.t){S.pro.ms++;if(m.card){S.card={id:m.card,ctx:{}};showCard()}else{S.pro.txt=m.txt;sfx('chime')}persist()}
+  if(E.ready){const p=clamp01((S.t-12)/(PRO_END-12));if(Math.abs(p-proLastP)>0.012){proLastP=p;const h=proRail(p);if(h){if(!E.proCrane){E.proCrane=craneObj();E.scene.add(E.proCrane)}E.proCrane.position.set(h[0]+3,h[1]-0.3,h[2]+5);E.proHead=h}}
+    if(E.proCrane)E.proCrane.userData.jib.rotation.y+=dt*0.5;proPuff+=dt;if(E.proHead&&proPuff>0.35){proPuff=0;emitPuff(E.proHead[0],E.proHead[1]+1.5,E.proHead[2],(Math.random()-0.5)*3,(Math.random()-0.5)*3,true)}}
+  proT+=dt;if(proT>0.5){proT=0;proShow()}if(proT===0&&Math.random()<0.1)persist();
+  if(S.t>=PRO_END)proDone()}
+function proShow0(){const el=$('procard');if(el&&el.hidden)proShow()}
+function proSkip(){if(!S.pro)return;while(S.pro.ms<PRO_MS.length){const m=PRO_MS[S.pro.ms++];if(m.card){const c=CARDS.find(x=>x.id===m.card);c.o[c.o.length-1].f({})}}S.card=null;if($('card3'))$('card3').hidden=true;S.t=PRO_END;proDone()}
+function proDone(){const pro=S.pro;if(!pro)return;S.pro=null;S.t=Math.max(S.t,PRO_END);S.t0=S.t;
+  S.tracks.push({a:'izm',b:'aydin'});const tr={a:'izm',b:'aydin',type:'buhar',trips:0,earned:0,pos:0,dir:1};S.trains.push(tr);if(pro.loco2)S.trains.push({a:'izm',b:'aydin',type:'buhar',trips:0,earned:0,pos:0,dir:-1});S.trains.forEach(prepTrain);
+  if(E.proRail){E.scene.remove(E.proRail);E.proRail=null}if(E.proCrane){E.scene.remove(E.proCrane);E.proCrane=null}E.proHead=null;proLastP=-1;
+  const el=$('procard');if(el)el.hidden=true;$('world').classList.remove('pro');S.tut=META.ottTut?-1:0;META.ottTut=1;saveMeta();tutSwap();tutShown=-2;
+  celebrate('izm');popup('aydin','Hat açıldı',true);persist();renderAct();renderSide();
+  eraShow(`<span class="note">1866</span><h3>🚂 Anadolu’nun ilk demiryolu açıldı!</h3><p>İzmir ile Aydın arasındaki hat tamamlandı; aynı yıl İzmir–Kasaba (Turgutlu) hattı da açıldı. Artık buharlı trenler incir, pamuk ve yolcu taşıyor.</p><ul class="eralist"><li>🕌 Osmanlı dönemi · 1866–1922</li><li>🛤 Ağını büyüt: şehirlerin ihtiyaçlarını taşı, onları büyüt.</li><li>📜 Yolda seni Süveyş Kanalı, Hicaz Demiryolu ve Kurtuluş Savaşı bekliyor.</li><li>⏩ ${OTT_GOAL} şehri bağlayınca Cumhuriyet’e (1923) atlayabilirsin.</li></ul><div class="btns"><button class="btn primary" data-a="erago">Yola çık</button></div>`)}
+const _tick3=tick;tick=function(d){if(S&&S.pro)return;_tick3(d)};
+document.addEventListener('click',e=>{if(S&&S.pro&&e.target.closest('.sbtn')){e.stopPropagation();e.preventDefault();info('<b>İnşaat sürüyor.</b><span class="note">Hat açılınca zamanı kendin yöneteceksin. Beklemek istemezsen “Hızlandır” ya da “Açılışa geç”.</span>')}},true);
+/* ---------- Osmanlı dönemi olayları ---------- */
+const OTT_HIST=[
+ {id:'h_suveys',y:1869,m:10,t:'Süveyş Kanalı açıldı',ok:()=>S.osm,pre:()=>({c:scaleC(160,0.5)}),
+  d:()=>'17 Kasım 1869’da Süveyş Kanalı açıldı; Avrupa ile Hindistan arasındaki gemi yolu kısaldı. Doğu Akdeniz limanları canlanıyor.',
+  o:[{c:x=>x.c,t:x=>`İzmir’e iskele ve liman kur · ${fmt(x.c)} bin ₺`,f:x=>{pay(x.c);if(!hasPort('izm'))S.ports.push('izm');addBuff('cargo',1.1,36,'h_suveys');return 'İzmir limanı büyüdü: kargo gemisi alabilirsin, 3 yıl yük geliri +%10.'}},{t:()=>'Şimdilik bekle',f:()=>'Gemiler İzmir’e uğramaya devam ediyor.'}]},
+ {id:'h_iflas',y:1875,m:9,t:'Osmanlı maliyesi iflas etti',ok:()=>S.osm,
+  d:()=>'Ekim 1875’te devlet, borçlarının faizlerini ödeyemeyeceğini açıkladı. Yatırımcılar tedirgin, kredi pahalanıyor.',
+  o:[{t:()=>'Kemer sık',f:()=>{addBuff('upkeep',0.88,12,'h_iflas');addBuff('pax',0.9,12,'h_iflas');return '12 ay boyunca giderler %12 az ama yolcu geliri de %10 düşük.'}},{t:()=>'Krizi fırsata çevir: ucuza hat yap',f:()=>{addBuff('build',0.85,12,'h_iflas');addBuff('pax',0.9,12,'h_iflas');return '12 ay boyunca hat yapımı %15 ucuz; yolcu geliri %10 düşük.'}}]},
+ {id:'h_93',y:1877,m:3,t:'93 Harbi',ok:()=>S.osm&&S.trains.length>0,pre:()=>({g:scaleC(180,0.6)}),
+  d:()=>'Nisan 1877’de Osmanlı–Rus Savaşı başladı. Ordu, cepheye asker ve erzak taşınmasını istiyor.',
+  o:[{t:x=>`Askerî sevkiyatı üstlen · +${fmt(x.g)} bin ₺`,f:x=>{S.money+=x.g;S.inc+=x.g;addBuff('speed',0.85,6,'h_93');return 'Sevkiyat başladı: 6 ay trenler %15 yavaş.'}},{t:()=>'Ticari seferleri sürdür',f:()=>'Ordu başka yollar buldu.'}]},
+ {id:'h_duyun',y:1881,m:11,t:'Düyun-u Umumiye',ok:()=>S.osm,pre:()=>({g:scaleC(150,0.5)}),
+  d:()=>'Aralık 1881’de devlet borçlarını yönetmek için Düyun-u Umumiye kuruldu; tuz ve tütün gibi gelirler alacaklılara ayrıldı.',
+  o:[{t:x=>`Tuz taşıma sözleşmesi al · +${fmt(x.g)} bin ₺`,f:x=>{S.money+=x.g;S.inc+=x.g;return 'Sözleşme imzalandı, kasa rahatladı.'}},{t:()=>'Uzak dur',f:()=>'Şirket kendi yolunda.'}]},
+ {id:'h_anadolu',y:1888,m:9,t:'Anadolu Demiryolu imtiyazı',ok:()=>S.osm&&!S.tender&&!hasTrack('esk','ank'),
+  d:()=>'Ekim 1888’de Alman sermayeli Anadolu Demiryolu Şirketi, İzmit’ten Ankara’ya uzanacak hattın imtiyazını aldı. Seninle ortaklık kurmak istiyorlar.',
+  o:[{t:()=>'Ortaklık kur',f:()=>{S.tender={a:'esk',b:'ank',until:month()+24};return '24 ay boyunca Eskişehir–Ankara hattı yarı fiyatına.'}},{t:()=>'Geç',f:()=>'Hattı Almanlar kendileri yapacak.'}]},
+ {id:'h_ankara93',y:1893,m:0,t:'Demiryolu Ankara’da',ok:()=>S.osm&&connected('ank'),pre:()=>({c:scaleC(60,0.25)}),
+  d:()=>'1893’te demiryolu Ankara’ya ulaştı; şehir İstanbul’a trenle bağlandı. Ankara’da büyük bir merak var.',
+  o:[{c:x=>x.c,t:x=>`Kutlama seferleri · ${fmt(x.c)} bin ₺`,f:x=>{pay(x.c);S.events.push({t:'panayir',city:'ank',until:month()+3});return '3 ay boyunca Ankara’ya giden yolcu geliri iki katı.'}},{t:()=>'Olağan seferler',f:()=>'Trenler her zamanki tarifesiyle çalıştı.'}]},
+ {id:'h_hicaz',y:1908,m:8,t:'Hicaz Demiryolu',ok:()=>S.osm,pre:()=>({c:scaleC(120,0.4)}),
+  d:()=>'1 Eylül 1908’de Şam ile Medine arasındaki Hicaz Demiryolu açıldı. Hattın büyük kısmı halkın bağışları ve devlet imkânlarıyla yapıldı.',
+  o:[{c:x=>x.c,t:x=>`Bağış kampanyasına katıl · ${fmt(x.c)} bin ₺`,f:x=>{pay(x.c);addBuff('pax',1.1,24,'h_hicaz');return 'Halkın gözünde itibarın arttı: 2 yıl yolcu geliri +%10.'}},{t:()=>'Katılma',f:()=>'Kampanya senin katkın olmadan sürdü.'}]},
+ {id:'h_harb1',y:1914,m:10,t:'Birinci Dünya Savaşı',ok:()=>S.osm,pre:()=>({g:scaleC(200,0.6)}),
+  d:()=>'Kasım 1914’te Osmanlı Devleti savaşa girdi. Trenler cepheye asker ve cephane taşıyacak; kömür ve yedek parça bulmak zorlaşıyor.',
+  o:[{t:x=>`Seferberliğe katıl · +${fmt(x.g)} bin ₺`,f:x=>{S.money+=x.g;S.inc+=x.g;addBuff('speed',0.8,18,'h_harb1');return '18 ay boyunca trenler %20 yavaş; devlet ödemeyi yaptı.'}},{t:()=>'Sivil seferleri korumaya çalış',f:()=>{addBuff('upkeep',1.2,18,'h_harb1');return 'Kömür kıtlığı yüzünden 18 ay giderler %20 fazla.'}}]},
+ {id:'h_meclis',y:1920,m:3,t:'Ankara’da Meclis açıldı',ok:()=>S.osm,pre:()=>({c:scaleC(120,0.4)}),
+  d:()=>'23 Nisan 1920’de Büyük Millet Meclisi Ankara’da açıldı. Anadolu’daki demiryolları Kurtuluş Savaşı’nda cepheye ikmalin can damarı.',
+  o:[{t:()=>'Cepheye ikmal taşı',f:()=>{addBuff('speed',0.85,12,'h_meclis');addBuff('pax',1.12,36,'h_meclis');return 'Trenlerin cepheye koştu: 1 yıl yavaş ama halkın güveni arttı, 3 yıl yolcu geliri +%12.'}},{c:x=>x.c,t:x=>`Önce yıpranan hatları onar · ${fmt(x.c)} bin ₺`,f:x=>{pay(x.c);addBuff('upkeep',0.9,24,'h_meclis');return 'Hatlar onarıldı: 2 yıl giderler %10 az.'}}]},
+ {id:'h_milli',y:1924,m:3,t:'Demiryolları millîleşiyor',ok:()=>S.osm&&!S.rival.bought&&S.rival.tracks.length>0,pre:()=>({c:Math.round(buyoutPrice()*0.5/10)*10}),
+  d:()=>`Cumhuriyet, yabancı şirketlerin elindeki demiryollarını millîleştirmeye karar verdi. ${rivalName()} hatlarını devlet desteğiyle yarı fiyatına alabilirsin.`,
+  o:[{c:x=>x.c,t:x=>`Hatları satın al · ${fmt(x.c)} bin ₺`,f:x=>{pay(x.c);takeover();return `${rivalName()} hatları artık senin.`}},{t:()=>'Şimdilik bekle',f:()=>'Rakip şirket bir süre daha çalışacak.'}]},
+ {id:'h_tcdd',y:1927,m:4,t:'Devlet Demiryolları kuruldu',ok:()=>S.osm,pre:()=>({g:scaleC(250,0.6)}),
+  d:()=>'1927’de Devlet Demiryolları ve Limanları İşletmesi kuruldu. Demiryolu, genç Cumhuriyetin kalkınmasının merkezinde.',
+  o:[{t:x=>`Devletle ortak çalış · +${fmt(x.g)} bin ₺ destek`,f:x=>{S.money+=x.g;S.inc+=x.g;return 'Devlet desteği kasaya girdi.'}},{t:()=>'Bağımsız kal: ucuz hat',f:()=>{addBuff('build',0.9,24,'h_tcdd');return '2 yıl boyunca hat yapımı %10 ucuz.'}}]}];
+for(const h of OTT_HIST)for(const o of h.o){const f=o.f;o.f=x=>{const msg=f(x);(S.annals=S.annals||[]).push({id:h.id,o:o.t(x),r:msg,y:year(),x});return msg}}
+HIST.unshift(...OTT_HIST);CARDS.push(...OTT_HIST.map(h=>({...h,ok:()=>false})));
+/* ---------- rakip, Cumhuriyet ---------- */
+function cumCard(sum){S.flags.cum23=1;cs('ank').lv=Math.max(cs('ank').lv,2);const g=scaleC(300,0.8);S.money+=g;S.inc+=g;
+  eraShow(`${sum||''}<span class="note">29 Ekim 1923</span><h3>🇹🇷 Cumhuriyet ilan edildi!</h3><p>Osmanlı dönemi sona erdi; Ankara başkent oldu. Genç Cumhuriyet demiryollarını millî ellerde toplamak istiyor.</p><ul class="eralist"><li>🏛 Ankara başkent: şehre göç başladı, Ankara büyüdü.</li><li>💰 Cumhuriyetin kuruluş desteği: +${fmt(g)} bin ₺</li><li>📜 Yakında: demiryollarının millîleştirilmesi ve Devlet Demiryolları’nın kuruluşu</li><li>⏩ ${ERA_GOAL[0]} şehri bağlayınca Kalkınma çağına (1950) atlayabilirsin.</li></ul><div class="btns"><button class="btn primary" data-a="erago">Cumhuriyet çağına başla</button></div>`);sfx('fanfare')}
+const _monthlyExtras3=monthlyExtras;monthlyExtras=function(m){_monthlyExtras3(m);if(!S.osm||S.scn)return;S.flags=S.flags||{};
+  if(year()>=1873&&!S.flags.rv73&&!S.rival.bought){S.flags.rv73=1;if(!S.rival.tracks.length){S.rival.tracks.push({a:'ist',b:'edi'});S.rival.trains.push({a:'ist',b:'edi',pos:0,dir:1})}
+    if(!FF.on)info(`<b>Rakip geldi: ${rivalName()}</b><span class="note">1873’te Baron Hirsch’in şirketi İstanbul–Edirne hattını açtı. Rakibin olduğu şehirlerde gelirin düşük olur.</span>`)}
+  if(year()>=OTT_END&&!S.flags.cum23){if(FF.on){S.flags.cum23=1;FF.ottPending=1}else cumCard()}};
+/* ---------- çağ paneli ve atlama ---------- */
+const _eraJump=eraJump;eraJump=function(){FF.ottPending=isOtt()?1:0;_eraJump()};
+const _renderEra=renderEra;renderEra=function(){if(!isOtt()||S.scn)return _renderEra();const el=$('erap');if(!el)return;const g=OTT_GOAL,n=nCon(),ok=n>=g;
+  el.innerHTML=`<div class="erarow"><span class="erast now">🕌<small>Osmanlı</small></span><i></i>${ERAS.map(x=>`<span class="erast">${x.ic}<small>${x.n}</small></span>`).join('<i></i>')}</div>
+  <div class="kv"><span>Şu anki dönem</span><span><b>🕌 Osmanlı</b> · 1856–1922</span></div><div class="kv"><span>Sonraki</span><span>🇹🇷 Cumhuriyet · 1923</span></div>
+  <div class="kv"><span>Atlama hedefi</span><span>${Math.min(n,g)} / ${g} şehir ağda</span></div>${meterBar(Math.min(1,n/g),'#e2b85c')}
+  <div class="btns"><button class="btn ${ok&&S.money>=0?'primary':''}" data-a="erajump" ${ok&&S.money>=0?'':'disabled'}>⏩ 1923’e atla</button></div>
+  <p class="note">${ok?`Atlarsan ${OTT_END-year()} yıl hızla geçer; trenlerin kazanmaya, şehirlerin büyümeye devam eder. Olaylar kendiliğinden geçer.`:`${g} şehri ağa bağlayınca Cumhuriyet’e atlayabilirsin. İstersen zamanın akmasını da bekleyebilirsin.`}</p>`};
+const _eraHud=eraHud;eraHud=function(){if(!isOtt())return _eraHud();const l=$('datelab');if(l&&l.textContent!=='Tarih · Osmanlı')l.textContent='Tarih · Osmanlı'};
+/* ---------- tıklamalar ve açılış ---------- */
+const _v2Click3=v2Click;v2Click=function(a,b){
+  if(a.startsWith('ng:')){const k=a.slice(3);eraEl().hidden=true;if(k==='x'){eraClose();return true}if(k==='cum'&&FIRST_RUN){FIRST_RUN=false;eraClose();return true}FIRST_RUN=false;startNew(k);return true}
+  if(a==='pro:go'){eraEl().hidden=true;S.pro.go=1;if(E.ready){const A=C.izm,B=C.aydin;E.camAnim={t:V3((A.x+B.x)/2,0,(A.y+B.y)/2),p:V3((A.x+B.x)/2+30,170,(A.y+B.y)/2+200)}}proShow();persist();return true}
+  if(a==='pro:fast'){if(S.pro){S.pro.fast=!S.pro.fast;proShow()}return true}
+  if(a==='pro:skip'){proSkip();return true}
+  return _v2Click3(a,b)};
+let FIRST_RUN=false;try{FIRST_RUN=!localStorage.getItem(SAVE)&&!localStorage.getItem('demir-aglar-v5')&&!localStorage.getItem(SAVE_SCN)}catch(e){}
+let proLast=performance.now();const _hud2=hud;hud=function(){const n=performance.now(),dt=Math.min(0.1,(n-proLast)/1000);proLast=n;try{proStep(dt)}catch(e){console.warn('pro',e)}_hud2()};
+setTimeout(()=>{try{if(S&&S.pro){if(S.pro.go){proShow()}else proBegin()}else if(FIRST_RUN&&!S.scn)newGameAsk(true)}catch(e){console.warn('osm',e)}},700);
 
 window.claude?.hot?.snapshot?.(()=>({S:JSON.parse(serial())}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});

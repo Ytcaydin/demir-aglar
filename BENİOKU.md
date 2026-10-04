@@ -1,6 +1,14 @@
 # Demir Ağlar
 
-Türk şehirleriyle, şehirlerin ihtiyaçlarını taşıyarak büyüttüğün bir demiryolu tycoon oyunu. 1927'de İstanbul–Eskişehir hattıyla başlarsın.
+Türk şehirleriyle, şehirlerin ihtiyaçlarını taşıyarak büyüttüğün bir demiryolu tycoon oyunu. Yeni oyunda iki başlangıç var: **1856 Osmanlı** (Anadolu'nun ilk demiryolu İzmir–Aydın'ı inşa ederek) ya da **1927 Cumhuriyet** (İstanbul–Eskişehir hattıyla).
+
+## Osmanlı dönemi (1856–1922)
+
+- 23 Eylül 1856'da İzmir–Aydın imtiyazıyla başlarsın. Hat 1857'de başlayıp 1866'da tamamlanan inşaatı kısa bir prologla izlersin; yolda Alsancak Garı ve zorlu arazi için kararlar verirsin. İstersen "Hızlandır" ya da "Açılışa geç".
+- Hat açılınca oyun başlar. Yolda Süveyş Kanalı (1869), Şark Demiryolları'nın İstanbul–Edirne hattıyla rakip olarak gelişi (1873), Osmanlı'nın iflası (1875), 93 Harbi (1877), Düyun-u Umumiye (1881), Anadolu Demiryolu imtiyazı (1888), Ankara'ya demiryolu (1893), Hicaz Demiryolu (1908), Birinci Dünya Savaşı (1914) ve Ankara'da Meclis'in açılışı (1920) karar kartı olarak gelir.
+- 6 şehri bağlayınca 1923'e atlayabilirsin. 29 Ekim 1923'te Cumhuriyet ilan edilir; ardından demiryollarının millîleştirilmesi (rakibin hatlarını yarı fiyatına alma) ve Devlet Demiryolları'nın kuruluşu (1927) gelir. Oyun oradan günümüze devam eder.
+- Haritaya Aydın şehri eklendi. Osmanlı döneminde ekran daha koyu bir gravür tonundadır.
+- Eski kayıtlar olduğu gibi açılır; 1927 oyunu olarak devam eder.
 
 ## Çağlar
 
