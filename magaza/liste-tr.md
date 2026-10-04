@@ -75,9 +75,9 @@ Tarihî olaylar (savaşlar: 93 Harbi, Birinci Dünya Savaşı) yalnızca karttak
 Oyun çocuklara özel yapılmadı. Hedef yaş grubu olarak 13+ (ya da 18+) seç ve "çocuklara yönelik" kutusunu işaretleme; işaretlersen Play'in Aile politikası (reklam SDK sınırlamaları dahil) devreye girer.
 
 ## Görsel varlıklar
-- Uygulama simgesi 512×512: `icons/` içindeki en büyük PNG'den (icon-512.png)
-- Öne çıkan görsel 1024×500: `magaza/` klasöründe (varsa)
-- Telefon ekran görüntüleri (2–8 adet, 9:16): `magaza/ekran-*.png` (varsa)
+- Uygulama simgesi 512×512: `icons/` içindeki en büyük PNG'den (icons/icon-512.png)
+- Öne çıkan görsel 1024×500: henüz yok; Play zorunlu tutar, ekran görüntülerinden biriyle hazırlanabilir
+- Telefon ekran görüntüleri (2–8 adet, 9:16): `magaza/ekran-*.png` (4 adet hazır, 1080×1920)
 
 ## Ek 1: Reklam eklenirse
 - Ödüllü reklam (AdMob), yalnızca oyuncu "REKLAM" düğmesine dokunursa gösterilir.
