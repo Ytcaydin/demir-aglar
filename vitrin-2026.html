@@ -286,7 +286,7 @@ const WX=lon=>(lon-LON0)*KX,WY=lat=>(LAT0-lat)*KY;
 const WORLD={x0:-90,y0:-100,x1:1680,y1:450};
 CITIES.forEach(c=>{c.x=WX(c.lon);c.y=WY(c.lat)});
 
-const SEC_PER_MONTH=8,START_YEAR=1927,DECAY=0.12,RIVAL_NAME='Toros Demiryolları';
+const SEC_PER_MONTH=14,START_YEAR=1927,DECAY=0.12,RIVAL_NAME='Toros Demiryolları';
 const TYPES={
   buhar:{n:'Buharlı',year:1927,speed:168,kmh:45,cap:1,cost:80,up:4,next:'dizel'},
   dizel:{n:'Dizel',year:1932,speed:243,kmh:65,cap:1.35,cost:170,up:6,next:'hizli'},

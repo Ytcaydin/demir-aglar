@@ -347,7 +347,7 @@ const WX=lon=>(lon-LON0)*KX,WY=lat=>(LAT0-lat)*KY;
 const WORLD={x0:-90,y0:-100,x1:1680,y1:450};
 CITIES.forEach(c=>{c.x=WX(c.lon);c.y=WY(c.lat)});
 
-const SEC_PER_MONTH=8,START_YEAR=1856,DECAY=0.12,RIVAL_NAME='Toros Demiryolları';
+const SEC_PER_MONTH=14,START_YEAR=1856,DECAY=0.12,RIVAL_NAME='Toros Demiryolları';
 const TYPES={
   buhar:{n:'Buharlı',year:1927,speed:168,kmh:45,cap:1,cost:80,up:4,next:'dizel'},
   dizel:{n:'Dizel',year:1932,speed:243,kmh:65,cap:1.35,cost:170,up:6,next:'hizli'},
@@ -1406,7 +1406,7 @@ function eraJump(){if(!eraCanJump())return;const e=eraIdx(),target=isOtt()?(OTT_
   for(const k of stub){FF.saved[k]=window[k];window[k]=()=>{}}
   const ov=eraEl();ov.hidden=false;ov.innerHTML=`<span class="note">Zaman akıyor…</span><h3>⏩ ${isOtt()?'Cumhuriyet’e':ERAS[e+1].n+' çağına'}</h3><div class="ffy" id="ffy"></div><div class="meter"><i id="ffbar" style="width:0%;background:#e2b85c"></i></div><p class="note">Trenlerin çalışmaya, şehirler büyümeye devam ediyor. Kararlar ve olaylar kendiliğinden geçiyor.</p>`;
   const step=()=>{const t1=performance.now();speed=1;
-    try{while(S.t<FF.target&&!S.over&&!FF.stop&&!S.scn&&performance.now()-t1<28){for(let i=0;i<16;i++){speed=1;tick(0.5);if(S.money<0){FF.stop=1;break}if(S.t>=FF.target||S.over)break}S.card=null}}catch(err){FF.stop=1;FF.err=err}
+    try{while(S.t<FF.target&&!S.over&&!FF.stop&&!S.scn&&performance.now()-t1<28){for(let i=0;i<16;i++){speed=1;tick(0.5*SEC_PER_MONTH/8);if(S.money<0){FF.stop=1;break}if(S.t>=FF.target||S.over)break}S.card=null}}catch(err){FF.stop=1;FF.err=err}
     const f=Math.min(1,(S.t-FF.t0)/(FF.target-FF.t0));const b=$('ffbar'),y=$('ffy');if(b)b.style.width=(f*100).toFixed(1)+'%';if(y)y.textContent=`${year()} · Kasa ${fmt(S.money)} bin ₺`;
     if(S.t<FF.target&&!S.over&&!FF.stop&&!S.scn)setTimeout(step,16);else eraJumpDone()};
   setTimeout(step,60)}
@@ -2670,7 +2670,7 @@ function vehSync(){const e=eraIdx(),want=e>=1?Math.round([0,26,44,60][e]*(GFXQ==
   E.roadM=roadMesh(e);E.scene.add(E.roadM);const R=roadEdges();if(!R.length)return;const tot=R.reduce((s,r)=>s+r.len,0),pickE=()=>{let x=Math.random()*tot;for(const r of R){x-=r.len;if(x<=0)return r}return R[0]};
   const nb=Math.round(want*0.35),nt=want-nb,mk=(geo,n,cols)=>{const m=new THREE.InstancedMesh(geo,E.mBody,n);m.castShadow=GFXQ>=2;m.receiveShadow=false;for(let i=0;i<n;i++)m.setColorAt(i,cc(cols[i%cols.length]));m.instanceColor.needsUpdate=true;m.frustumCulled=false;E.scene.add(m);return m};
   E.truckM=mk(vehGeo('truck'),nt,VEH_TR);E.busM=mk(vehGeo('bus'),nb,VEH_BUS);
-  for(let i=0;i<want;i++){const r=pickE();E.vehs.push({r,s:Math.random()*r.len,dir:Math.random()<0.5?1:-1,sp:(i<nt?8:11)*(0.8+Math.random()*0.4),m:i<nt?E.truckM:E.busM,k:i<nt?i:i-nt})}}
+  for(let i=0;i<want;i++){const r=pickE();E.vehs.push({r,s:Math.random()*r.len,dir:Math.random()<0.5?1:-1,sp:(i<nt?5.5:7.5)*(0.8+Math.random()*0.4),m:i<nt?E.truckM:E.busM,k:i<nt?i:i-nt})}}
 const _dmy=new THREE.Object3D();
 function vehStep(dt,camDist){if(!E.vehs||!E.vehs.length)return;const vis=camDist<900;E.truckM.visible=E.busM.visible=vis;if(E.roadM)E.roadM.visible=camDist<1500;if(!vis)return;const go=speed&&!S.over?Math.min(3,speed):0;
   for(const v of E.vehs){const r=v.r;v.s+=v.dir*v.sp*dt*go;if(v.s>r.len){v.s=r.len;v.dir=-1}else if(v.s<0){v.s=0;v.dir=1}
