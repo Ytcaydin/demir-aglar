@@ -137,7 +137,7 @@ h1{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:.14e
 .dbtn{min-width:46px;height:46px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--paper);font:700 22px var(--body);cursor:pointer}.dbtn.sm{font-size:12px;min-width:52px}
 .thr{flex:1;height:46px;border-radius:10px;background:#0c1820;position:relative;overflow:hidden}.thr i{position:absolute;left:0;top:0;bottom:0;transition:width .15s}
 .thr span{position:relative;display:grid;place-items:center;height:100%;font:700 13px var(--body);color:var(--paper);text-shadow:0 1px 2px #000}
-.lab3.lm{background:rgba(42,29,5,.85);color:#f3d58f;border-color:#6b5a2a;pointer-events:none;opacity:.8}.lab3.lm.on{opacity:1;border-color:var(--ochre)}
+.lab3.lm{flex-direction:row;gap:5px;background:linear-gradient(#f3d58f,#d9a73e);color:#2a1d05;border:1.5px solid #8a6a1c;pointer-events:auto;opacity:.92;font-size:12px;padding:3px 9px 3px 5px;box-shadow:0 2px 8px rgba(0,0,0,.35),0 0 0 2px rgba(255,236,180,.35)}.lab3.lm .lmi{display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#2a1d05;color:#f3d58f;font-size:11px}.lab3.lm.on{opacity:1;border-color:#5a3f0c;box-shadow:0 2px 10px rgba(0,0,0,.4),0 0 0 3px rgba(226,184,92,.55)}
 .setpanel{position:absolute;top:10px;right:60px;background:rgba(16,32,42,.96);border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;z-index:6;min-width:200px}
 .setpanel .wbtn{width:100%;justify-content:start;display:flex;align-items:center;font-size:13px;letter-spacing:.02em}
 .goalchip{position:absolute;left:10px;bottom:10px;max-width:calc(100% - 80px);display:flex;align-items:center;gap:8px;background:rgba(16,32,42,.9);border:1px solid rgba(226,184,92,.6);border-radius:12px;padding:6px 10px;z-index:2;cursor:pointer;color:var(--paper)}
@@ -1165,7 +1165,7 @@ function adjustLandmarks(){
       let sea=null;for(let q=0;q<16;q++){const b=q/16*6.2832;if(hAt(x+Math.cos(b)*6,y+Math.sin(b)*6)<0.6){sea=b;break}}if(sea===null)continue;
       if(CITIES.some(o=>Math.hypot(o.x-x,o.y-y)<26))continue;if(LANDMARKS.some(o=>o!==l&&o.x!=null&&Math.hypot(o.x-x,o.y-y)<20))continue;const sc=r+Math.abs(h-1.8)*4;if(sc<bs){bs=sc;best=[x,y,sea]}}
     if(best){l.x=best[0];l.y=best[1];l.face=best[2]}else{l.x=t.x+14;l.y=t.y}}}
-const lmOf=id=>LANDMARKS.filter(l=>l.city===id);
+const lmOf=id=>LANDMARKS.filter(l=>l.city===id&&lmOpen(l));
 const summer=()=>{const mo=month()%12;return mo>=5&&mo<=8};
 function tourMul(city,tr){const n=lmOf(city).length;if(!n)return 1;const ex=tr&&tr.ex?2:1;return 1+0.2*n*(summer()?1.5:1)*ex*(hasStaff('rehber')?1.3:1)}
 /* ---------- expresses ---------- */
@@ -2057,9 +2057,9 @@ function syncPlayerShips(){const k=S.skin+'|'+S.ships.length;if(k===E.pShipKey)r
   E.pShips=S.ships.map(()=>{const g=shipMesh('cargo',(SKINS[S.skin]||SKINS.bordo).loco);g.scale.setScalar(0.85);E.scene.add(g);return g});E.pShipKey=k}
 
 /* ---- landmarks, express labels ---- */
-function buildLandmarks(){const B=new Merger(),R=rng(77);E.balloons=[];E.lmLabels=[];
-  const P=(pr,x,y,z,sx,sy,sz,col,ry,rz)=>B.add(pr,mtx(x,y,z,sx,sy,sz,ry||0,rz||0),cc(col));
-  for(const l of LANDMARKS){const x=l.x,z=l.y,b=Math.max(hAt(x,z),1.2);
+function buildLandmarks(){const B=new Merger(),R=rng(77);E.balloons=[];E.lmLabels=[];let lc=null;const LK=1.4;
+  const P=(pr,x,y,z,sx,sy,sz,col,ry,rz)=>{if(lc){x=lc.x+(x-lc.x)*LK;y=lc.b+(y-lc.b)*LK;z=lc.z+(z-lc.z)*LK;sx*=LK;sy*=LK;sz*=LK}B.add(pr,mtx(x,y,z,sx,sy,sz,ry||0,rz||0),cc(col))};
+  for(const l of LANDMARKS.filter(lmOpen)){const x=l.x,z=l.y,b=Math.max(hAt(x,z),1.2);lc={x,z,b};
     if(l.id==='kapadokya'){for(let k=0;k<9;k++){const a=R()*6.28,d=3+R()*13,px=x+Math.cos(a)*d,pz=z+Math.sin(a)*d,h=9+R()*9,r=1.8+R()*1.4,pb=Math.max(hAt(px,pz),1.2);
         P(E.gCone,px,pb-1,pz,r,h,r,'#d8b98e');P(E.gCone,px,pb+h-2.4,pz,r*0.55,2.6,r*0.55,'#7a5a3c');P(E.gBox,px+r*0.3,pb+h*0.35,pz+r*0.55,0.8,1.1,0.2,'#3a2b20')}
       ['#c8412f','#e2b85c','#2f6f9f','#4f8a5b'].forEach((col,i)=>{const M=new Merger(),c=cc(col),s=cc('#f1efe8');M.add(E.gDome,mtx(0,4.2,0,3.2,3.6,3.2,0),i%2?s:c);M.add(E.gCone,mtx(0,4.25,0,3.2,4.2,3.2,0,Math.PI),c);M.add(E.gBox,mtx(0,-0.6,0,1.3,1,1.3,0),cc('#6b4a30'));
@@ -2075,14 +2075,14 @@ function buildLandmarks(){const B=new Merger(),R=rng(77);E.balloons=[];E.lmLabel
       const fx=x+10*c+3*s,fz=z-10*s+3*c;P(E.gBox,fx,b-0.4,fz,2.2,0.8,2.2,'#a39a8c',ry);P(E.gCyl,fx,b,fz,0.25,19,0.25,'#d7d4cc');P(E.gBox,fx+2.9*s,b+15.2,fz+2.9*c,0.14,3.6,5.4,'#e30a17',ry);P(E.gBox,fx+2.9*s+0.02,b+16.6,fz+2.9*c-0.6,0.18,1,1,'#ffffff',ry)}
     else if(l.id==='truva'){const w='#8a5a33';P(E.gBox,x,b,z,11,1,6,'#6b4a30');for(const [ox,oz] of [[-3.5,-1.3],[-3.5,1.3],[3.5,-1.3],[3.5,1.3]])P(E.gBox,x+ox,b+1,z+oz,1.1,6,1.1,w);P(E.gBox,x,b+7,z,10,4.2,3.6,w);P(E.gBox,x+5.2,b+9.5,z,2.2,6,2.2,w,0,-0.5);P(E.gBox,x+7.3,b+14,z,4.2,2.2,2.4,w);P(E.gBox,x+6.6,b+15.8,z,1.4,1.6,0.6,'#6b4a30')}
     const d=document.createElement('div');d.className='lab3 lm';d.innerHTML=`<b>🏛 ${l.n}</b>`;$('labels3').appendChild(d);E.lmLabels.push({el:d,l,w:0})}
-  const m=B.build(E.mBody);m.castShadow=true;m.receiveShadow=true;E.scene.add(m)}
+  const m=B.build(E.mBody);m.castShadow=true;m.receiveShadow=true;E.scene.add(m);E.lmMesh=m}
 function frameExtras(dt,camDist){
   for(const m of E.balloons||[]){m.position.y=m.userData.y0+Math.sin(time*0.4+m.userData.ph)*3;m.position.x+=Math.sin(time*0.1+m.userData.ph)*dt*0.6}
 }
 /* landmark and express labels: placed after city labels, never on top of them */
 function extraLabels(camDist,placed,q){const hit=(x0,y,w,h)=>placed.some(p=>x0<p[0]+p[2]+4&&x0+w+4>p[0]&&Math.abs(y-p[1])<h+4);
   for(const L of E.lmLabels||[]){const l=L.l,[px,py,pz]=project(l.x,Math.max(hAt(l.x,l.y),1.2)+24,l.y);if(!L.w)L.w=L.el.offsetWidth||70;
-    let show=pz<1&&camDist<[380,800,1300][q]&&px>0&&px<E.VW&&py>-10&&py<E.VH+10;const x0=Math.max(4,Math.min(E.VW-L.w-4,px-L.w/2));if(show&&hit(x0,py,L.w,22))show=false;
+    let show=pz<1&&camDist<[700,1300,1900][q]&&px>0&&px<E.VW&&py>-10&&py<E.VH+10;const x0=Math.max(4,Math.min(E.VW-L.w-4,px-L.w/2));if(show&&hit(x0,py,L.w,22))show=false;
     if(show){placed.push([x0,py,L.w]);L.el.style.transform=`translate(${Math.round(x0)}px,${Math.round(py)}px)`;L.el.style.visibility='visible';L.el.classList.toggle('on',connected(l.city))}else L.el.style.visibility='hidden'}
   E.exLab=E.exLab||{};const lay=$('labels3'),fi=E.follow&&E.follow.k==='t'?E.follow.i:-1,cx=E.VW/2,cy=E.VH/2;
   const cand=[];S.trains.forEach((tr,i)=>{let L=E.exLab[i];if(!tr.ex){if(L)L.style.visibility='hidden';return}if(!L){L=document.createElement('div');L.className='exlab';lay.appendChild(L);E.exLab[i]=L}
@@ -2829,6 +2829,35 @@ const _v2Click2=v2Click;v2Click=function(a,b){
   if(a==='cix'){cinfoHide();return true}
   if(a==='cidet'){cinfoHide();if(FS.on)fsOpen('sec');else{setTab('sec');$('act').scrollIntoView({behavior:'smooth',block:'start'})}return true}
   return _v2Click2(a,b)};
+
+/* ================= turistik yerler 2: açılış yılları, belirgin görünüm, dokununca tanıtım ================= */
+const LM_OPEN={efes:[1869,'1869’da J. T. Wood, Artemis Tapınağı’nın yerini buldu; kazılar o yıl başladı.'],
+ truva:[1871,'1871’de Heinrich Schliemann Hisarlık tepesinde kazılara başladı.'],
+ nemrut:[1953,'Heykelleri 1881’de Karl Sester buldu; 1953’te Theresa Goell’in kazılarıyla dünya tanıdı.'],
+ pamukkale:[1957,'1957’de Hierapolis’te İtalyan kazıları başladı.'],
+ abide:[1960,'Çanakkale Şehitler Abidesi 1960’ta açıldı.'],
+ kapadokya:[1985,'1985’te Göreme ve Kapadokya UNESCO Dünya Mirası listesine girdi.'],
+ sumela:[1986,'1986’da resmen ziyarete açıldı.']};
+const BALLOON_YEAR=1991;
+function lmOpen(l){const o=LM_OPEN[l.id];return !o||!S||year()>=o[0]}
+function lmOpenKey(){return LANDMARKS.filter(lmOpen).map(l=>l.id).join(',')}
+function lmRebuild(){if(E.lmMesh){E.scene.remove(E.lmMesh);E.lmMesh.geometry.dispose();E.lmMesh=null}for(const m of E.balloons||[])E.scene.remove(m);for(const L of E.lmLabels||[])L.el.remove();for(const r of E.lmRings||[])E.scene.remove(r);
+  buildLandmarks();E.lmRings=[];const g=new THREE.RingGeometry(0.86,1,64).rotateX(-Math.PI/2);
+  for(const L of E.lmLabels){const l=L.l,b=Math.max(hAt(l.x,l.y),1.2),m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:0xe2b85c,transparent:true,opacity:0.5,depthWrite:false}));m.scale.set(30,1,30);m.position.set(l.x,b+0.6,l.y);m.renderOrder=3;m.userData.l=l;E.scene.add(m);E.lmRings.push(m);
+    L.el.innerHTML=`<span class="lmi">🏛</span><b>${l.n}</b>`}}
+let lmKey=null;
+function lmTick(dt){const k=lmOpenKey();if(k!==lmKey){const first=lmKey===null,prev=new Set((lmKey||'').split(','));lmKey=k;if(E.ready)lmRebuild();
+    if(!first&&!FF.on)for(const l of LANDMARKS)if(lmOpen(l)&&!prev.has(l.id)){const o=LM_OPEN[l.id];good(`<b>🏛 Yeni turistik yer: ${l.n}</b><span class="note">${o?o[1]+' ':''}${connected(l.city)?`${nSuf(C[l.city].n,'dat')} gelen yolcu artacak.`:`${accSuf(C[l.city].n)} ağa bağlarsan turist yolcu kazanırsın.`}</span>`,6500);sfx('fanfare');popup(l.city,'🏛 '+l.n,true)}}
+  const pulse=0.5+0.5*Math.sin(time*2.2);for(const r of E.lmRings||[]){const on=connected(r.userData.l.city);r.material.opacity=on?0.35+0.35*pulse:0.18;const s=on?28+3*pulse:28;r.scale.set(s,1,s)}
+  const bOn=year()>=BALLOON_YEAR;for(const m of E.balloons||[])m.visible=bOn}
+/* modele dokununca da tanıtım açılsın */
+const _pickAt=pickAt;pickAt=function(sx,sy){let bl=null,bd=48;for(const L of E.lmLabels||[]){const l=L.l,[px,py,pz]=project(l.x,Math.max(hAt(l.x,l.y),1.2)+10,l.y);if(pz>1)continue;const d=Math.hypot(px-sx,py-sy);if(d<bd){bd=d;bl=l}}
+  if(bl){let cd=1e9;for(const c of CITIES){const L=cityLayout(c.id),[px,py,pz]=project(c.x,cityBase(c)+Math.min(L.top,70)*0.35,c.y);if(pz>1)continue;cd=Math.min(cd,Math.hypot(px-sx,py-sy))}if(bd<cd){lmInfo(bl);return}}
+  return _pickAt(sx,sy)};
+const _lmInfo=lmInfo;lmInfo=function(l){_lmInfo(l);const o=LM_OPEN[l.id],el=$('cinfo');if(o&&el)el.querySelector('p').insertAdjacentHTML('afterend',`<small class="note">📅 ${o[1]}</small>`)};
+const _lmCard2=lmCard;lmCard=function(id){let h=_lmCard2(id)||'';const soon=LANDMARKS.filter(l=>l.city===id&&!lmOpen(l));if(soon.length)h+=soon.map(l=>`<p class="note lmdesc">🏛 <b>${l.n}</b> ${yCase(LM_OPEN[l.id][0],'loc')} ziyarete açılacak; o zaman turist getirmeye başlar.</p>`).join('');return h};
+{const a16=ACH.find(a=>a.id==='a16');if(a16)a16.ok=()=>new Set(LANDMARKS.filter(l=>lmOpen(l)&&connected(l.city)).map(l=>l.city)).size>=4}
+const _frameExtras=frameExtras;frameExtras=function(dt,camDist){_frameExtras(dt,camDist);try{lmTick(dt)}catch(e){console.warn('lm',e)}};
 
 window.claude?.hot?.snapshot?.(()=>({S:JSON.parse(serial())}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});

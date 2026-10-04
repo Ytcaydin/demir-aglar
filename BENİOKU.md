@@ -49,7 +49,8 @@ Ayarlar (⚙) menüsünden bildirimleri açabilirsin. Oyun telefona uygulama ola
 
 - Haritanın sağ üstündeki köşeli düğme oyunu **tam ekran** yapar. Tarih, kasa ve hız üstte kalır; Seçim, Görevler, Şirket, Filo, Albüm ve Mağaza alttaki çubuktan açılır. Telefonun geri tuşu önce açık paneli, sonra tam ekranı kapatır.
 - Bir şehre dokununca haritada 2-3 cümlelik **şehir tanıtımı** ve yöresel ürünü çıkar. Aynı tanıtım şehir kartında da durur.
-- Kapadokya, Pamukkale, Efes, Sümela, Nemrut, Truva ve Şehitler Abidesi etiketlerine dokununca **turistik yerin kısa tanıtımı** açılır.
+- Kapadokya, Pamukkale, Efes, Sümela, Nemrut, Truva ve Şehitler Abidesi etiketlerine ya da modellerine dokununca **turistik yerin kısa tanıtımı** açılır.
+- Turistik yerler ziyarete açıldıkları ya da dünyaca tanındıkları yıldan itibaren haritada belirir: Efes 1869, Truva 1871, Nemrut 1953, Pamukkale 1957, Şehitler Abidesi 1960, Kapadokya 1985, Sümela 1986. Kapadokya balonları 1991'den sonra uçar. Açılmamış bir yer, şehir kartında "yakında" diye görünür.
 
 ## Dosyalar
 
