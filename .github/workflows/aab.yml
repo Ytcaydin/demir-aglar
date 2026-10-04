@@ -1,0 +1,58 @@
+name: Play Store AAB
+
+# Elle çalıştırılır: Actions → "Play Store AAB" → Run workflow.
+# Önce depo ayarlarında 4 gizli anahtar (secret) tanımlanmalı (BENİOKU.md → "Play Store için").
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  aab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Gizli anahtarlar tanımlı mı?
+        env:
+          KS: ${{ secrets.PLAY_KEYSTORE_BASE64 }}
+          KP: ${{ secrets.PLAY_KEYSTORE_PASSWORD }}
+          KA: ${{ secrets.PLAY_KEY_ALIAS }}
+          KK: ${{ secrets.PLAY_KEY_PASSWORD }}
+        run: |
+          for v in KS KP KA KK; do
+            if [ -z "${!v}" ]; then echo "::error::Eksik secret: $v. BENİOKU.md'deki 'Play Store için' bölümüne bak."; exit 1; fi
+          done
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14.3"
+
+      - name: Oyun dosyalarını hazırla
+        run: python3 android/prepare_assets.py
+
+      - name: İmzalı AAB derle
+        env:
+          PLAY_KEYSTORE_PASSWORD: ${{ secrets.PLAY_KEYSTORE_PASSWORD }}
+          PLAY_KEY_ALIAS: ${{ secrets.PLAY_KEY_ALIAS }}
+          PLAY_KEY_PASSWORD: ${{ secrets.PLAY_KEY_PASSWORD }}
+          PLAY_KEYSTORE_B64: ${{ secrets.PLAY_KEYSTORE_BASE64 }}
+        run: |
+          echo "$PLAY_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/play.keystore"
+          export PLAY_KEYSTORE="$RUNNER_TEMP/play.keystore"
+          gradle -p android bundleRelease --no-daemon --stacktrace
+          rm -f "$RUNNER_TEMP/play.keystore"
+          cp android/app/build/outputs/bundle/release/app-release.aab DemirAglar.aab
+
+      - name: AAB'yi yükle (yalnızca depo sahibi indirebilir)
+        uses: actions/upload-artifact@v4
+        with:
+          name: DemirAglar-aab
+          path: DemirAglar.aab
+          retention-days: 30

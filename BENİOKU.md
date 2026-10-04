@@ -112,4 +112,18 @@ Notlar:
 
 ## Play Store için
 
-Play Store'a çıkmak için bu PWA, Bubblewrap veya PWABuilder ile Android uygulamasına (TWA) paketlenebilir. Gerçek reklam (AdMob) ve uygulama içi satın alma o aşamada bağlanır; şu an oyundaki "REKLAM" düğmeleri demo.
+Play Store'a yüklemek için imzalı bir AAB dosyası gerekir. Hazırlık tamam; senin yapacakların:
+
+1. **Geliştirici hesabı:** play.google.com/console adresinden hesap aç (tek seferlik 25 USD). Kişisel hesapta yayından önce 12 test kullanıcısıyla 14 gün kapalı test şartı var.
+2. **Yükleme anahtarı üret** (bilgisayarında bir kez, Java gerekir):
+   `keytool -genkeypair -v -keystore demir-aglar-play.keystore -alias demiraglar -keyalg RSA -keysize 2048 -validity 10000`
+   Sorulan şifreyi ve dosyayı güvenli bir yere yedekle. Dosyayı kaybedersen Play'e destek isteği açman gerekir; depoya asla koyma.
+3. **Anahtarı GitHub'a ver:** dosyayı base64 yap (`base64 -w0 demir-aglar-play.keystore`, Mac'te `base64 -i dosya`). Depo → Settings → Secrets and variables → Actions → New repository secret ile şu dört secret'ı ekle: `PLAY_KEYSTORE_BASE64` (base64 çıktısı), `PLAY_KEYSTORE_PASSWORD`, `PLAY_KEY_ALIAS` (`demiraglar`), `PLAY_KEY_PASSWORD`.
+4. **AAB üret:** Actions → "Play Store AAB" → Run workflow. Bitince sayfanın altındaki `DemirAglar-aab` dosyasını indir (zip içinde DemirAglar.aab).
+5. Play Console'da uygulamayı oluştur, "Play Uygulama İmzalama"yı kabul et, AAB'yi yükle. Mağaza metinleri `magaza/liste-tr.md` içinde hazır.
+6. **Gizlilik politikası adresi:** Depo → Settings → Pages → Branch: main, klasör: / seç. Birkaç dakika sonra `https://ytcaydin.github.io/demir-aglar/gizlilik.html` açılır; bu adresi Play Console'a yaz.
+
+Notlar:
+- Uygulama Android 16'yı (API 36) hedefler; Play'in 31 Ağustos 2026 sonrası şartını karşılar.
+- APK (telefona elle kurulum) ile AAB (Play Store) farklı anahtarlarla imzalanır; APK, depodaki herkese açık test anahtarını kullanır. Play'e yalnızca AAB gönder.
+- Reklam (AdMob) ve uygulama içi satın alma henüz bağlı değil; oyundaki "REKLAM" düğmeleri demo.

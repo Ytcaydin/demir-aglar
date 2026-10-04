@@ -3,15 +3,17 @@ plugins {
 }
 
 def runNo = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+// Play Store imzası: yalnızca CI'da gizli anahtar (secret) verilmişse kullanılır, anahtar depoya girmez.
+def playKeystore = System.getenv("PLAY_KEYSTORE")
 
 android {
     namespace "com.ytcaydin.demiraglar"
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.ytcaydin.demiraglar"
         minSdk 24
-        targetSdk 35
+        targetSdk 36
         versionCode runNo
         versionName "1.0.${runNo}"
     }
@@ -24,12 +26,20 @@ android {
             keyAlias "demiraglar"
             keyPassword "android"
         }
+        if (playKeystore) {
+            play {
+                storeFile file(playKeystore)
+                storePassword System.getenv("PLAY_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("PLAY_KEY_ALIAS")
+                keyPassword System.getenv("PLAY_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.sideload
+            signingConfig playKeystore ? signingConfigs.play : signingConfigs.sideload
         }
     }
 
