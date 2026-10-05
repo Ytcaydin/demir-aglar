@@ -11,6 +11,17 @@ Türk şehirleriyle, şehirlerin ihtiyaçlarını taşıyarak büyüttüğün bi
 - Haritaya Aydın şehri eklendi. Osmanlı döneminde ekran daha koyu bir gravür tonundadır.
 - Eski kayıtlar olduğu gibi açılır; 1927 oyunu olarak devam eder.
 
+## Osmanlı senaryoları
+
+Senaryo sekmesinde üç yeni görev var:
+- **Ege Ovası (1866):** İzmir–Aydın hattını Denizli'ye ve Antalya'ya uzat, kasayı 1.500 bin ₺'ye çıkar (84 ay).
+- **Bağdat Demiryolu (1903):** Konya'dan Toroslar'ı aşıp Adana'ya, oradan Gaziantep'e ulaş, kasayı 1.200 bin ₺'ye çıkar (60 ay).
+- **Kurtuluş Savaşı İkmali (1921):** Az parayla Ankara'yı Kayseri ve Sivas'a bağla, kasa eksiye düşmesin (30 ay).
+
+## Ses
+
+Müzik ve tren sesleri çağa göre değişir: Osmanlı'da ud gibi tınlayan hicaz, 1927'de hicaz, Kalkınma'da klarnet gibi rast, Elektrik çağında yumuşak synth, Hızlı Tren çağında çan arpeji. Buharlıda düdük, dizelde korna, elektrikli trenlerde iki tonlu elektronik ses çalar.
+
 ## Çağlar
 
 Oyun 4 çağdan geçer: Kuruluş (1927), Kalkınma (1950), Elektrik (1975), Hızlı Tren (2003). Her çağ yeni trenler (Mavi Tren, Elektrikli, YHT), yeni rakipler (karayolu, havayolu) ve daha büyük şehirler getirir. Yeterince şehri bağlayınca Görevler sekmesinden sonraki çağa atlayabilirsin.
@@ -126,4 +137,4 @@ Play Store'a yüklemek için imzalı bir AAB dosyası gerekir. Hazırlık tamam;
 Notlar:
 - Uygulama Android 16'yı (API 36) hedefler; Play'in 31 Ağustos 2026 sonrası şartını karşılar.
 - APK (telefona elle kurulum) ile AAB (Play Store) farklı anahtarlarla imzalanır; APK, depodaki herkese açık test anahtarını kullanır. Play'e yalnızca AAB gönder.
-- Reklam (AdMob) ve uygulama içi satın alma henüz bağlı değil; oyundaki "REKLAM" düğmeleri demo.
+- Ödüllü reklam (AdMob) Android uygulamasında bağlı. Kimlik verilmezse Google test reklamı çıkar; kendi kimliklerin için `magaza/liste-tr.md` → "AdMob kurulumu". Web sürümünde reklam düğmeleri hâlâ 3 saniyelik demo.

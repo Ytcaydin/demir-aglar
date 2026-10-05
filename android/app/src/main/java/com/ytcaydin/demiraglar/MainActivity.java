@@ -23,13 +23,27 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
 import androidx.webkit.WebViewAssetLoader;
 
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+import com.google.android.ump.ConsentInformation;
+import com.google.android.ump.ConsentRequestParameters;
+import com.google.android.ump.UserMessagingPlatform;
+
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Demir Ağlar: oyunun HTML sürümünü uygulamanın içinden, internetsiz açan kabuk.
@@ -43,6 +57,13 @@ public class MainActivity extends Activity {
     private WebView web;
     private WebViewAssetLoader loader;
     private boolean immersive = false;
+
+    // Ödüllü reklam: yalnızca oyuncu "REKLAM" düğmesine bastığında gösterilir.
+    private final AtomicBoolean adsStarted = new AtomicBoolean(false);
+    private volatile boolean adsReady = false;
+    private RewardedAd rewarded;
+    private boolean rewardedLoading = false;
+    private ConsentInformation consent;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -110,6 +131,83 @@ public class MainActivity extends Activity {
 
         if (state != null) web.restoreState(state);
         else web.loadUrl(START);
+
+        setupAds();
+    }
+
+    /** Önce (gerekiyorsa) Avrupa onay iletisini sor, sonra reklam SDK'sını başlat. */
+    private void setupAds() {
+        try {
+            consent = UserMessagingPlatform.getConsentInformation(this);
+            consent.requestConsentInfoUpdate(this, new ConsentRequestParameters.Builder().build(),
+                    () -> UserMessagingPlatform.loadAndShowConsentFormIfRequired(this, err -> startAds()),
+                    err -> startAds());
+            if (consent.canRequestAds()) startAds();
+        } catch (Throwable t) {
+            startAds();
+        }
+    }
+
+    private void startAds() {
+        if (consent != null && !consent.canRequestAds() && consent.getConsentStatus() != ConsentInformation.ConsentStatus.NOT_REQUIRED
+                && consent.getConsentStatus() != ConsentInformation.ConsentStatus.UNKNOWN) return;
+        if (!adsStarted.compareAndSet(false, true)) return;
+        new Thread(() -> {
+            try {
+                MobileAds.initialize(this, status -> runOnUiThread(() -> { adsReady = true; loadRewarded(); }));
+            } catch (Throwable t) {
+                adsReady = false;
+            }
+        }).start();
+    }
+
+    private void loadRewarded() {
+        if (!adsReady || rewarded != null || rewardedLoading) return;
+        rewardedLoading = true;
+        RewardedAd.load(this, getString(R.string.admob_rewarded), new AdRequest.Builder().build(), new RewardedAdLoadCallback() {
+            @Override
+            public void onAdLoaded(@NonNull RewardedAd ad) {
+                rewardedLoading = false;
+                rewarded = ad;
+            }
+
+            @Override
+            public void onAdFailedToLoad(@NonNull LoadAdError e) {
+                rewardedLoading = false;
+                rewarded = null;
+            }
+        });
+    }
+
+    private void adResult(String id, boolean ok) {
+        if (web == null) return;
+        web.evaluateJavascript("window.__adDone&&__adDone(" + JSONObject.quote(id) + "," + ok + ")", null);
+    }
+
+    private void showRewarded(String id) {
+        RewardedAd ad = rewarded;
+        if (ad == null) {
+            adResult(id, false);
+            loadRewarded();
+            return;
+        }
+        rewarded = null;
+        final boolean[] earned = {false};
+        ad.setFullScreenContentCallback(new FullScreenContentCallback() {
+            @Override
+            public void onAdDismissedFullScreenContent() {
+                adResult(id, earned[0]);
+                loadRewarded();
+                if (immersive) applyImmersive(true);
+            }
+
+            @Override
+            public void onAdFailedToShowFullScreenContent(@NonNull AdError e) {
+                adResult(id, false);
+                loadRewarded();
+            }
+        });
+        ad.show(this, item -> earned[0] = true);
     }
 
     @Override
@@ -186,6 +284,26 @@ public class MainActivity extends Activity {
 
     /** Sayfanın çağırdığı yerel işlevler: paylaşım sayfası, titreşim ve tam ekran. */
     private class Bridge {
+        @JavascriptInterface
+        public boolean hasAds() {
+            return adsReady;
+        }
+
+        @JavascriptInterface
+        public void showRewarded(String id) {
+            runOnUiThread(() -> MainActivity.this.showRewarded(id));
+        }
+
+        @JavascriptInterface
+        public boolean privacyOptions() {
+            return consent != null && consent.getPrivacyOptionsRequirementStatus() == ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED;
+        }
+
+        @JavascriptInterface
+        public void showPrivacyOptions() {
+            runOnUiThread(() -> UserMessagingPlatform.showPrivacyOptionsForm(MainActivity.this, err -> { }));
+        }
+
         @JavascriptInterface
         public void setImmersive(boolean on) {
             runOnUiThread(() -> applyImmersive(on));

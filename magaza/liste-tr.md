@@ -6,10 +6,7 @@ Karakter sınırları parantez içinde.
 ## Uygulama adı (en çok 30)
 Demir Ağlar: Demiryolu Patronu
 
-Alternatif adlar (hangisi seçilirse `android/app/src/main/res/values/strings.xml` içindeki app_name de güncellenmeli):
-- Demir Ağlar (kısa, mevcut ad; "demir ağlar" aramasında zaten öne çıkar)
-- Anadolu Ekspresi: Demiryolu Patronu
-- Raylar Anadolu'ya: Tren İmparatorluğu
+Telefondaki simgenin altında kısa ad "Demir Ağlar" görünür (`android/app/src/main/res/values/strings.xml`).
 
 ## Kısa açıklama (en çok 80)
 1856'dan bugüne Anadolu'ya demiryolu döşe, şehirleri büyüt, tren imparatorluğu kur.
@@ -65,20 +62,26 @@ Etiketler: Strateji, Simülasyon, Tren, İş idaresi, Tek oyunculu, Çevrimdış
 Şiddet yok, kan yok, korku yok, cinsel içerik yok, kumar yok, uyuşturucu yok, küfür yok, kullanıcılar arası iletişim yok, konum paylaşımı yok, uygulama içi satın alma yok. Beklenen sonuç: tüm yaşlar (PEGI 3 / Everyone).
 Tarihî olaylar (savaşlar: 93 Harbi, Birinci Dünya Savaşı) yalnızca karttaki kısa bir metindir; şiddet görseli yok.
 
-## Veri güvenliği formu (bu sürüm)
-- Veri toplama: Hayır. Veri paylaşma: Hayır.
-- Güvenli bağlantıyla aktarım: uygulama veri aktarmadığı için "Uygulamam veri toplamıyor veya paylaşmıyor" seçeneğini işaretle.
-- Hesap oluşturma: yok. Silme isteği: gerekmez (veri yalnızca cihazda).
-- Reklam eklenirse (Ek 1'e bak) bu form değişir: "Cihaz veya diğer kimlikler" toplanır ve paylaşılır, "Reklam" amaçlı.
+## Veri güvenliği formu
+Uygulamada AdMob ödüllü reklamı var. Play Console → Uygulama içeriği → Veri güvenliği:
+- Veri topluyor mu / paylaşıyor mu: Evet (reklam SDK'sı yüzünden).
+- Veri türleri: "Cihaz veya diğer kimlikler" (reklam kimliği), "Uygulama etkinliği → Uygulama etkileşimleri", "Uygulama bilgileri ve performansı → Kilitlenme günlükleri, Teşhis". Konum: "Yaklaşık konum" (IP'den, Google tarafından).
+- Amaç: Reklam veya pazarlama, Analiz (reklam ölçümü), Dolandırıcılık önleme. Paylaşım: Evet, Google ile.
+- Aktarım şifreli: Evet. Kullanıcı veri silmeyi isteyebilir mi: Oyun verisi yalnızca cihazda; reklam kimliği cihaz ayarlarından sıfırlanır.
+- Uygulama içeriği → Reklamlar: "Evet, uygulamamda reklam var".
+- Uygulama içeriği → Reklam kimliği: "Evet, reklam için kullanıyorum" (SDK AD_ID iznini kendisi ekler).
+
+## AdMob kurulumu
+1. admob.google.com'da hesap aç, "Uygulama ekle" → Android → (Play'de yayınlanınca bağla).
+2. Bir "Ödüllü" reklam birimi oluştur.
+3. GitHub → Settings → Secrets → Actions: `ADMOB_APP_ID` (ca-app-pub-…~…) ve `ADMOB_REWARDED_ID` (ca-app-pub-…/…) ekle.
+4. Avrupa için AdMob → Gizlilik ve mesajlaşma → GDPR iletisi oluştur.
+5. Bu kimlikler yalnızca Play Store AAB'sine girer. GitHub'daki APK her zaman test reklamı gösterir: kendi reklamına tıklamak AdMob hesabının kapanmasına yol açabilir.
 
 ## Hedef kitle
 Oyun çocuklara özel yapılmadı. Hedef yaş grubu olarak 13+ (ya da 18+) seç ve "çocuklara yönelik" kutusunu işaretleme; işaretlersen Play'in Aile politikası (reklam SDK sınırlamaları dahil) devreye girer.
 
 ## Görsel varlıklar
 - Uygulama simgesi 512×512: `icons/` içindeki en büyük PNG'den (icons/icon-512.png)
-- Öne çıkan görsel 1024×500: henüz yok; Play zorunlu tutar, ekran görüntülerinden biriyle hazırlanabilir
+- Öne çıkan görsel 1024×500: `magaza/one-cikan-1024x500.png`
 - Telefon ekran görüntüleri (2–8 adet, 9:16): `magaza/ekran-*.png` (4 adet hazır, 1080×1920)
-
-## Ek 1: Reklam eklenirse
-- Ödüllü reklam (AdMob), yalnızca oyuncu "REKLAM" düğmesine dokunursa gösterilir.
-- Gizlilik politikasına AdMob/Google reklam kimliği paragrafı eklenir; Veri güvenliği formu güncellenir; Avrupa/İngiltere için onay iletisi (UMP) gerekir.

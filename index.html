@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>Demir Ağlar 3D</title>
+<title>Demir Ağlar: Demiryolu Patronu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
@@ -3041,6 +3041,57 @@ const OTT_KM_SUP=0.7,OTT_TRAIN_SUP=0.25;
 function ottSupport(){if(!S||!S.osm||S.scn)return 0;const f=Math.max(0,Math.min(1,1-(S.t/12+START_YEAR-OTT_END)/12));if(f<=0)return 0;return f*upkeepMul()*(trackKm()*0.015*OTT_KM_SUP+S.trains.reduce((s,t)=>s+TYPES[t.type].up*OTT_TRAIN_SUP,0))}
 {const _up=upkeep;upkeep=function(){return Math.max(0,_up()-ottSupport())}}
 {const _pd=proDone;proDone=function(){const had=!!(S&&S.pro);_pd();if(had&&!FF.on)info('<b>📜 İmtiyaz sözleşmesi</b><span class="note">Devlet, hat kilometresi başına garanti verdi: Osmanlı döneminde hat bakımı ve tren giderlerinin büyük kısmını o üstleniyor. Cumhuriyet’ten sonra bu destek 12 yıl içinde yavaşça azalıp biter.</span>')}}
+/* ================= Osmanlı senaryoları ================= */
+function ottScn(s,y,mo,money,tracks){Object.assign(s,{osm:1,t:(y-START_YEAR)*12+mo,money,tracks:tracks.map(([a,b])=>({a,b})),trains:[],rival:{tracks:[],trains:[],bought:false,n:'Şark Demiryolları'}});s.t0=s.t;
+  for(const c of CITIES){const st=s.cities[c.id];st.lv=c.id==='ist'?4:c.id==='izm'?3:c.id==='ank'?1:Math.max(1,c.lv-1)}
+  for(const [a,b] of tracks)s.trains.push({a,b,type:'buhar',trips:0,earned:0,pos:0,dir:1})}
+SCN.push(
+ {id:'ege66',t:'🕌 Ege Ovası',d:'1866. İzmir–Aydın hattı yeni açıldı. Rayları Denizli’ye ve Antalya’ya uzat, kasayı 1.500 bin ₺’ye çıkar.',mo:84,osm:1,
+  setup:s=>ottScn(s,1866,7,900,[['izm','aydin']]),ok:()=>pathExists('izm','den')&&pathExists('izm','ant')&&S.money>=1500},
+ {id:'bagdat',t:'🕌 Bağdat Demiryolu',d:'1903. Konya’dan Toroslar’ı aşıp Adana’ya, oradan Gaziantep’e ulaş; kasayı 1.200 bin ₺’ye çıkar.',mo:60,osm:1,
+  setup:s=>{ottScn(s,1903,3,600,[['ist','esk'],['esk','ank'],['esk','kon'],['izm','aydin']]);s.rival={tracks:[{a:'ist',b:'edi'}],trains:[{a:'ist',b:'edi',pos:0,dir:1}],bought:false,n:'Şark Demiryolları'}},
+  ok:()=>pathExists('kon','ada')&&pathExists('ada','gaz')&&S.money>=1200},
+ {id:'kurtulus',t:'🕌 Kurtuluş Savaşı İkmali',d:'1921. Cepheye ikmal Ankara’dan akıyor. Kaynak çok az: Ankara’yı Kayseri ve Sivas’a bağla; kasa eksiye düşmesin.',mo:30,osm:1,
+  setup:s=>{ottScn(s,1921,4,520,[['esk','ank'],['esk','kon']]);s.events=[]},ok:()=>pathExists('ank','kay')&&pathExists('ank','siv')&&S.money>=0});
+{const _os=ottSupport;ottSupport=function(){if(S&&S.scn&&S.osm&&isOtt()){const s=S.scn;S.scn=null;try{return _os()}finally{S.scn=s}}return _os()}}
+
+/* ================= çağlara göre ses ================= */
+const MUS={
+ ott:{sc:[146.8,155.6,185,196,220,233.1,261.6,293.7],gap:[0.9,1.3],drone:73.4,lead:'pluck',oct:2},           // hicaz, ud gibi
+ e0:{sc:[293.7,311.1,370,392,440,466.2,523.3,587.3],gap:[0.5,0.9],drone:73.4,lead:'saw',oct:1},             // hicaz (eski)
+ e1:{sc:[293.7,329.6,370,392,440,493.9,523.3,587.3],gap:[0.45,0.8],drone:98,lead:'reed',oct:1},              // rast, klarnet gibi
+ e2:{sc:[261.6,293.7,311.1,392,440,523.3,587.3,622.3],gap:[0.6,1],drone:65.4,lead:'pad',oct:1},             // kürdi/pentatonik, synth
+ e3:{sc:[261.6,293.7,329.6,370,392,440,493.9,523.3],gap:[0.35,0.6],drone:65.4,lead:'bell',oct:2}};          // lidyen, çan arpeji
+function musKey(){return S&&year()<OTT_END?'ott':'e'+eraIdx()}
+musicTick=function(){if(!AU.ctx||OPT.snd!=='all')return;const c=AU.ctx,t=c.currentTime;if(t<AU.nextNote)return;const P=MUS[musKey()]||MUS.e0,night=daylight().night;
+  if(AU.drone&&AU.droneF!==P.drone){AU.droneF=P.drone;AU.drone.frequency.setTargetAtTime(P.drone,t,1.5)}
+  AU.nextNote=t+P.gap[0]+Math.random()*(P.gap[1]-P.gap[0])+night*0.6;if(Math.random()<0.25)return;
+  AU.deg=Math.max(0,Math.min(P.sc.length-1,AU.deg+[-2,-1,-1,0,1,1,2][Math.floor(Math.random()*7)]));const f=P.sc[AU.deg]*(Math.random()<0.2?0.5:1);
+  const lp=c.createBiquadFilter();lp.type='lowpass';lp.connect(AU.musG);
+  if(P.lead==='pluck'){lp.frequency.setValueAtTime(3200,t);lp.frequency.exponentialRampToValueAtTime(400,t+0.5);tone('triangle',f*P.oct,t,0.003,0.4,0.55,lp);tone('sawtooth',f*P.oct*2,t,0.002,0.08,0.18,lp);if(Math.random()<0.3)tone('triangle',f*P.oct,t+0.12,0.003,0.25,0.4,lp)}
+  else if(P.lead==='reed'){lp.frequency.setValueAtTime(1800,t);tone('square',f,t,0.04,0.16,0.9,lp);tone('triangle',f*2,t,0.04,0.08,0.7,lp)}
+  else if(P.lead==='pad'){lp.frequency.setValueAtTime(1400,t);lp.frequency.linearRampToValueAtTime(700,t+1.6);tone('sawtooth',f,t,0.35,0.14,1.6,lp);tone('sawtooth',f*1.005,t,0.35,0.12,1.6,lp)}
+  else if(P.lead==='bell'){lp.frequency.setValueAtTime(5000,t);tone('sine',f*P.oct,t,0.004,0.3,1.2,lp);tone('sine',f*P.oct*2.76,t,0.002,0.06,0.4,lp)}
+  else{lp.frequency.setValueAtTime(2400,t);lp.frequency.exponentialRampToValueAtTime(500,t+0.9);tone('sawtooth',f,t,0.005,0.35,1.1,lp);tone('triangle',f*2,t,0.005,0.12,0.6,lp)}};
+/* tren sesi: buharlıda düdük, dizelde korna, elektrikli/YHT'de elektronik iki ton */
+{const _sfx=sfx;sfx=function(k,vol){if(k==='whistle'&&AU.ctx&&OPT.snd!=='off'&&S&&year()>=1932){const e=eraIdx(),c=AU.ctx,t=c.currentTime,v=vol==null?1:vol;if(v<0.03)return;if(AU.last.whistle&&t-AU.last.whistle<1.6)return;AU.last.whistle=t;
+    if(e<2){const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=900;const g=c.createGain();g.gain.value=v*0.8;lp.connect(g);g.connect(AU.sfxG);tone('sawtooth',311,t,0.04,0.3,0.7,lp);tone('sawtooth',370,t,0.04,0.25,0.7,lp)}
+    else{tone('triangle',659,t,0.01,0.22*v,0.3);tone('triangle',523,t+0.32,0.01,0.22*v,0.45)}return}
+  return _sfx(k,vol)}}
+/* sürücüdeki drone osilatörünü yakala ki çağ değişince perde kaysın */
+{const _ai=auInit;auInit=function(){const had=!!AU.ctx;const C0=window.AudioContext||window.webkitAudioContext;let cap=null;
+  if(!had&&C0&&!C0.prototype.__daWrap){const co=C0.prototype.createOscillator;C0.prototype.createOscillator=function(){const o=co.call(this);if(!cap&&!AU.drone){cap=o}return o};_ai();C0.prototype.createOscillator=co}else _ai();
+  if(!had&&AU.ctx&&!AU.drone){/* auInit içinde yaratılan tek osilatör drone'dur */AU.drone=cap;AU.droneF=73.4}}}
+/* ================= ödüllü reklam (Android uygulamasında AdMob) ================= */
+const AD_WAIT={};let adSeq=0;
+window.__adDone=function(id,ok){const w=AD_WAIT[id];if(!w)return;delete AD_WAIT[id];clearTimeout(w.to);speed=w.sp;setSpeedUI();
+  if(ok)w.done();else{w.btn.disabled=false;w.btn.innerHTML=w.html;bad('<b>Şu an gösterilecek reklam yok.</b><span class="note">Biraz sonra tekrar dene.</span>')}};
+{const _fa=fakeAd;fakeAd=function(btn,done){const A=window.AndroidBridge;let real=false;try{real=!!(A&&A.hasAds&&A.hasAds())}catch(e){}
+  if(!real)return _fa(btn,done);const id='ad'+(++adSeq);AD_WAIT[id]={btn,done,html:btn.innerHTML,sp:speed,to:setTimeout(()=>window.__adDone(id,false),90000)};
+  btn.disabled=true;btn.innerHTML='<span class="adtag">REKLAM</span>Yükleniyor…';speed=0;setSpeedUI();
+  try{A.showRewarded(id)}catch(e){window.__adDone(id,false)}}}
+/* Avrupa'da reklam izni seçeneklerini değiştirme düğmesi */
+setTimeout(()=>{try{const A=window.AndroidBridge;if(A&&A.privacyOptions&&A.privacyOptions()){const b=document.createElement('button');b.className='wbtn sm';b.textContent='REKLAM İZNİ';b.onclick=()=>A.showPrivacyOptions();$('setpanel').appendChild(b)}}catch(e){}},4000);
 window.claude?.hot?.snapshot?.(()=>({S:JSON.parse(serial())}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>

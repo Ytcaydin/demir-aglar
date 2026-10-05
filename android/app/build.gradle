@@ -5,6 +5,9 @@ plugins {
 def runNo = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
 // Play Store imzası: yalnızca CI'da gizli anahtar (secret) verilmişse kullanılır, anahtar depoya girmez.
 def playKeystore = System.getenv("PLAY_KEYSTORE")
+// AdMob: kendi kimliklerin CI'da ADMOB_APP_ID / ADMOB_REWARDED_ID ile verilir; yoksa Google'ın test kimlikleri kullanılır.
+def admobApp = System.getenv("ADMOB_APP_ID") ?: "ca-app-pub-3940256099942544~3347511713"
+def admobRewarded = System.getenv("ADMOB_REWARDED_ID") ?: "ca-app-pub-3940256099942544/5224354917"
 
 android {
     namespace "com.ytcaydin.demiraglar"
@@ -16,6 +19,8 @@ android {
         targetSdk 36
         versionCode runNo
         versionName "1.0.${runNo}"
+        manifestPlaceholders = [admobAppId: admobApp]
+        resValue "string", "admob_rewarded", admobRewarded
     }
 
     signingConfigs {
@@ -52,4 +57,6 @@ android {
 dependencies {
     implementation "androidx.webkit:webkit:1.12.1"
     implementation "androidx.core:core:1.13.1"
+    implementation "com.google.android.gms:play-services-ads:25.5.0"
+    implementation "com.google.android.ump:user-messaging-platform:3.2.0"
 }
