@@ -1,4 +1,4 @@
-# Demir Ağlar
+# Demir Ağlar: Demiryolu Patronu
 
 Türk şehirleriyle, şehirlerin ihtiyaçlarını taşıyarak büyüttüğün bir demiryolu tycoon oyunu. Yeni oyunda iki başlangıç var: **1856 Osmanlı** (Anadolu'nun ilk demiryolu İzmir–Aydın'ı inşa ederek) ya da **1927 Cumhuriyet** (İstanbul–Eskişehir hattıyla).
 
