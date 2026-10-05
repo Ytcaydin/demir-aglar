@@ -3151,6 +3151,13 @@ if(window.DA_CG){const SDK=window.CrazyGames&&window.CrazyGames.SDK,ok=()=>SDK&&
       adFinished:()=>{end();done()},
       adError:(err)=>{end();btn.disabled=false;btn.innerHTML=html;const c=err&&err.code;bad(c==='adCooldown'?_t('<b>Biraz bekle.</b><span class="note">Reklamlar arasında kısa bir ara olmalı.</span>'):c==='adblock'?_t('<b>Reklam engelleyici açık.</b><span class="note">Ödül için reklam engelleyiciyi bu oyunda kapat.</span>'):_t('<b>Şu an gösterilecek reklam yok.</b><span class="note">Biraz sonra tekrar dene.</span>'))}})}
     catch(e){end();btn.disabled=false;btn.innerHTML=html}}
+  /* geçiş reklamı (midgame): yalnızca doğal molalarda — çağ kartı kapanınca, senaryo bitince/yeniden başlayınca, yeni oyunda.
+     Oyun başladıktan 3 dk önce ve iki reklam arası 4 dk içinde gösterilmez; çalışırken hız durur, ses kısılır. */
+  {const t0=Date.now();let last=0;
+   const mid=()=>{if(!ok()||window.__cgAd||S.over==='lose')return;const n=Date.now();if(n-t0<180000||n-last<240000)return;last=n;window.__cgAd=1;const sp=speed;
+     const end=()=>{window.__cgAd=0;if(!S.over&&$('eracard').hidden&&$('card3').hidden){speed=sp||1}setSpeedUI();cgMute()};
+     try{SDK.ad.requestAd('midgame',{adStarted:()=>{speed=0;setSpeedUI();if(AU.master)AU.master.gain.value=0},adFinished:end,adError:end})}catch(e){end()}};
+   document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;if(a==='erago'||a==='scnre'||a==='scnexit'||a==='new2'||a==='scnnext')setTimeout(mid,600)},true)}
 }
 window.claude?.hot?.snapshot?.(()=>({S:JSON.parse(serial())}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
