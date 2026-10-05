@@ -7,6 +7,7 @@ on:
       - "index.html"
       - "icons/**"
       - "android/**"
+      - "tools/**"
       - ".github/workflows/apk.yml"
   workflow_dispatch:
 
@@ -35,6 +36,9 @@ jobs:
       - name: Oyun dosyalarını hazırla
         run: python3 android/prepare_assets.py
 
+      - name: CrazyGames paketi
+        run: python3 tools/build_crazygames.py
+
       - name: APK derle
         run: |
           set -o pipefail
@@ -50,7 +54,11 @@ jobs:
           body: |
             Android için kurulum dosyası. Telefonda **DemirAglar.apk** dosyasına dokunup indir, sonra aç ve kur.
             İlk kurulumda "bilinmeyen kaynaklardan yükleme" izni istenebilir.
-          files: DemirAglar.apk
+
+            **DemirAglar-crazygames.zip**: CrazyGames'e yüklenecek web paketi (Developer Portal → oyunu yükle → bu zip).
+          files: |
+            DemirAglar.apk
+            dist/DemirAglar-crazygames.zip
 
       - name: Hata kaydını yükle
         if: failure()
