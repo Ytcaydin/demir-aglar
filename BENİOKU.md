@@ -18,6 +18,14 @@ Senaryo sekmesinde üç yeni görev var:
 - **Bağdat Demiryolu (1903):** Konya'dan Toroslar'ı aşıp Adana'ya, oradan Gaziantep'e ulaş, kasayı 1.200 bin ₺'ye çıkar (60 ay).
 - **Kurtuluş Savaşı İkmali (1921):** Az parayla Ankara'yı Kayseri ve Sivas'a bağla, kasa eksiye düşmesin (30 ay).
 
+## Dil
+
+Oyun Türkçe ve İngilizce. İlk açılışta cihazın diline göre seçilir (Türkçe değilse İngilizce); Ayarlar'daki "DİL" düğmesiyle değişir. Adrese `?lang=en` ya da `?lang=tr` eklemek de olur.
+
+- Metinler kodda `_t('…')` ya da ``_t`…` `` ile sarılı; İngilizceleri `index.html` başındaki `EN_DICT` sözlüğünde. Anahtar Türkçe metnin kendisi, `{0}`, `{1}` yer tutucuları şablondaki `${…}` değerleri.
+- Yeni metin eklerken: metni `_t` ile sar, `EN_DICT`'e İngilizcesini ekle. Eksikleri bulmak için: `npm i --no-save acorn acorn-walk && node tools/i18n-check.js`
+- İngilizce mağaza metni: `magaza/listing-en.md`.
+
 ## Ses
 
 Müzik ve tren sesleri çağa göre değişir: Osmanlı'da ud gibi tınlayan hicaz, 1927'de hicaz, Kalkınma'da klarnet gibi rast, Elektrik çağında yumuşak synth, Hızlı Tren çağında çan arpeji. Buharlıda düdük, dizelde korna, elektrikli trenlerde iki tonlu elektronik ses çalar.
