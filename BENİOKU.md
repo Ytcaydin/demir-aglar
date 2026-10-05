@@ -26,6 +26,12 @@ Oyun Türkçe ve İngilizce. İlk açılışta cihazın diline göre seçilir (T
 - Yeni metin eklerken: metni `_t` ile sar, `EN_DICT`'e İngilizcesini ekle. Eksikleri bulmak için: `npm i --no-save acorn acorn-walk && node tools/i18n-check.js`
 - İngilizce mağaza metni: `magaza/listing-en.md`.
 
+## CrazyGames sürümü
+
+Her derlemede GitHub Releases'a APK'nın yanında **DemirAglar-crazygames.zip** da eklenir (`tools/build_crazygames.py`). Bu paket CrazyGames SDK v3 ile çalışır: ödüllü reklamlar CrazyGames reklamı olur, dil oyuncunun diline göre seçilir, kayıt CrazyGames bulutuna yazılır, oyun hep tam ekran düzeninde açılır. Yükleme adımları, kapak görselleri ve İngilizce sayfa metinleri `magaza/crazygames/` klasöründe.
+
+Yatay ekranda (bilgisayar, yatay tablet) tam ekran menüsü sağda panel olarak açılır.
+
 ## Ses
 
 Müzik ve tren sesleri çağa göre değişir: Osmanlı'da ud gibi tınlayan hicaz, 1927'de hicaz, Kalkınma'da klarnet gibi rast, Elektrik çağında yumuşak synth, Hızlı Tren çağında çan arpeji. Buharlıda düdük, dizelde korna, elektrikli trenlerde iki tonlu elektronik ses çalar.
