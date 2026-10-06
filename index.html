@@ -2019,7 +2019,7 @@ function syncTrains(){
 function pointOn3(path,pos){if(!path||path.length<2)return null;let rem=Math.max(0,pos);
   for(let i=0;i<path.length-1;i++){const a=C[path[i]],b=C[path[i+1]],k=dist(a,b);if((rem<=k||i===path.length-2)&&viaOf(path[i],path[i+1])){const f=clamp01(rem/k),v=viaAt(path[i],path[i+1],f);return {x:v.x,z:v.z,ux:v.ux,uz:v.uz,a:path[i],b:path[i+1],f}}if(rem<=k||i===path.length-2){const f=clamp01(rem/k),dx=b.x-a.x,dz=b.y-a.y,l=Math.hypot(dx,dz)||1;return {x:a.x+dx*f,z:a.y+dz*f,ux:dx/l,uz:dz/l,a:path[i],b:path[i+1],f}}rem-=k}}
 function placeTrain(o,path,pos,dir,len,wlen,idx){const kmU=len/(wlen||1);let off=0;const side=((idx%3)-1)*0;
-  o.cars.forEach((car,ci)=>{const q=pointOn3(path,Math.max(0,Math.min(len,pos-dir*off*kmU)));if(!q)return;car.position.set(q.x,trackY(q.a,q.b,q.f,q.x,q.z)+0.3,q.z);car.rotation.set(0,-Math.atan2(q.uz*dir,q.ux*dir),0);off+=car.userData.len+1});
+  o.cars.forEach((car,ci)=>{const q=pointOn3(path,Math.max(0,Math.min(len,pos-dir*off*kmU)));if(!q)return;car.visible=!q.water;if(ci===0&&o.grp)tferry(o,q,dir);car.position.set(q.x,trackY(q.a,q.b,q.f,q.x,q.z)+0.3,q.z);car.rotation.set(0,-Math.atan2(q.uz*dir,q.ux*dir),0);off+=car.userData.len+1});
   return o.cars[0]}
 function trackY(a,b,f,x,z){const t=trackOf(a,b);if(t&&t.g&&!viaOf(a,b)){const A=C[a],B=C[b];return railY(A.x,A.y)+(railY(B.x,B.y)-railY(A.x,A.y))*f}return railY(x,z)}
 function emitPuff(x,y,z,vx,vz,big){const p=E.puffs[E.puffI++%E.puffs.length];p.s.position.set(x,y,z);p.life=1;p.s.visible=true;p.vx=vx+(Math.random()-0.5)*1.5;p.vz=vz+(Math.random()-0.5)*1.5;p.big=big?1.6:1}
@@ -3273,6 +3273,20 @@ function asiaBuild(){if(E.asia){disposeObj(E.asia);E.asia=null}
   E.scene.add(grp);E.asia=grp;E.asiaKey=asiaKey();try{forestClear()}catch(e){}}
 let asiaT=0;{const _fx2=frameExtras;frameExtras=function(dt,camDist){_fx2(dt,camDist);try{if((asiaT+=dt)>0.25){asiaT=0;if(E.ready&&S&&E.asiaKey!==asiaKey())asiaBuild()}
   if(E.asia){const op=clamp01((420-camDist)/140);for(const l of E.asia.userData.labs){l.material.opacity=op;l.visible=op>0.02}}}catch(e){console.warn('asya',e)}}}
+
+/* ---- Boğaz aktarması: Avrupa hattından Anadolu hattına geçen tren, Marmaray'dan önce tren feribotuyla, sonra Boğaz'ın altından geçer (yalnız görüntü) ---- */
+const SIRK=[287.5,108.4],HAYP=[314.6,112.9],_xf=new WeakMap();
+function xferOf(path){if(!path||path.length<3)return null;if(_xf.has(path))return _xf.get(path);const L=[];let c=0;
+  for(let k=1;k<path.length;k++){const d=dist(C[path[k-1]],C[path[k]]);if(k<path.length-1&&path[k]==='ist'&&asiaEdge(path[k-1],'ist')!==asiaEdge('ist',path[k+1])){const c2=c+d,W=Math.min(25,0.4*d,0.4*dist(C['ist'],C[path[k+1]]));L.push({k,c:c2,W,euFirst:!asiaEdge(path[k-1],'ist')})}c+=d}
+  const r=L.length?L:null;_xf.set(path,r);return r}
+{const _po3=pointOn3;pointOn3=function(path,pos){const X=xferOf(path);if(X)for(const t of X){if(pos>t.c-t.W&&pos<t.c+t.W){
+    const A=_po3(path,t.c-t.W),B=_po3(path,t.c+t.W);if(!A||!B)break;const P=t.euFirst?[[A.x,A.z],SIRK,HAYP,[B.x,B.z]]:[[A.x,A.z],HAYP,SIRK,[B.x,B.z]];
+    const seg=[];let tot=0;for(let i=1;i<P.length;i++){const l=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);seg.push(l);tot+=l}
+    let s=(pos-(t.c-t.W))/(2*t.W)*tot,i=0;while(i<seg.length-1&&s>seg[i]){s-=seg[i];i++}const f=clamp01(s/(seg[i]||1)),a=P[i],b=P[i+1],l=seg[i]||1;
+    const before=pos<t.c,ia=before?t.k-1:t.k,ib=before?t.k:t.k+1;
+    return {x:a[0]+(b[0]-a[0])*f,z:a[1]+(b[1]-a[1])*f,ux:(b[0]-a[0])/l,uz:(b[1]-a[1])/l,a:path[ia],b:path[ib],f:before?1:0,water:i===1}}}
+  return _po3(path,pos)}}
+function tferry(o,q,dir){const on=!!(q&&q.water)&&!megaDone('marmaray');if(on){if(!o.tf){o.tf=shipMesh('ferry');o.tf.scale.setScalar(0.3);o.grp.add(o.tf)}o.tf.visible=true;o.tf.position.set(q.x,0,q.z);o.tf.rotation.y=-Math.atan2(q.uz*dir,q.ux*dir)}else if(o.tf)o.tf.visible=false}
 /* ---------- dikey ekran düzeltmeleri ---------- */
 /* bilgi kartı ve rehber, sağdaki düğme sütununun (dile göre genişliği değişir) üstüne binmesin */
 {const st=document.createElement('style');st.textContent='.cinfo,.coach{right:calc(var(--wcw,52px) + 10px)}';document.head.appendChild(st);

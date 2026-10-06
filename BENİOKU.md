@@ -108,6 +108,14 @@ Not: Dosyayı doğrudan açınca uygulama olarak kurma ve çevrimdışı çalı�
 4. Telefonda Chrome ile bu adresi aç, menüden **Ana ekrana ekle** de. Oyun uygulama gibi tam ekran açılır.
    İlk açılıştan sonra 3D kütüphanesi önbelleğe alınır, internet olmadan da oynanabilir.
 
+## İstanbul ve Boğaz
+
+- İstanbul oyunda tek şehirdir (nüfus, görev, gelir aynı) ama haritada iki yakadır. Anadolu'ya giden bütün hatlar Anadolu yakasındaki **Haydarpaşa Garı**'ndan kalkar; Edirne hattı Avrupa yakasında kalır.
+- Edirne'den Anadolu'ya İstanbul üzerinden giden trenler Marmaray tamamlanana kadar **tren feribotuyla** karşıya geçer, sonra Boğaz'ın altından geçer.
+- **İstanbul–Eskişehir** hattı gerçek güzergâhı izler: Kartal–Gebze kıyısı, İzmit, Arifiye, Pamukova, Osmaneli, Bilecik, Bozüyük. Yalnız çizim kıvrımlıdır; mesafe, süre ve maliyet değişmez.
+- **Boğaziçi Köprüsü** oyun takvimine göre 20 Şubat 1970'te yapılmaya başlar, 30 Ekim 1973'te açılır.
+- Boğaz vapuru ve denizlerdeki süs gemileri çağa göre değişir (çarklı vapur → buharlı vapur → klasik şehir hatları vapuru → modern feribot) ve iskelelerde bekler.
+
 ## Kayıtlar
 
 İlerleme tarayıcının kendi hafızasında (localStorage) tutulur. Farklı adres veya tarayıcıda açarsan kayıt oradan başlar.
