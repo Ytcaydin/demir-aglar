@@ -2063,7 +2063,7 @@ function frame3D(dt){
     const x=a[0]+dx*f,z=a[1]+dz*f,h=-Math.atan2(uz,ux);o.position.set(x,0,z);o.rotation.y+=(((h-o.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI)*Math.min(1,dt*3);
     const u=o.userData;u.inner.position.y=Math.sin(time*1.2+i*1.7)*0.12;u.inner.rotation.x=Math.sin(time*0.7+i)*0.025;
     if(doPuff&&speed&&Math.random()<0.4){const hx=Math.cos(o.rotation.y),hz=-Math.sin(o.rotation.y);emitPuff(x+hx*u.funnel[0]*0.85,u.funnel[1]*0.85,z+hz*u.funnel[0]*0.85,-hx*3,-hz*3)}});
-  for(let i=0;i<ships.length;i++){const s=ships[i],m=E.ships[i],u=m.userData;s.pos+=s.dir*14*dt;if(s.pos>=s.L){s.pos=s.L;s.dir=-1}else if(s.pos<=0){s.pos=0;s.dir=1}const q=shipPos(s);m.position.set(q.x,0,q.y);m.rotation.y=-Math.atan2(q.uy,q.ux);
+  for(let i=0;i<ships.length;i++){const s=ships[i],m=E.ships[i],u=m.userData;shipAdvance(s,dt,i);const q=shipPos(s);m.position.set(q.x,0,q.y);m.rotation.y=-Math.atan2(q.uy,q.ux);
     u.inner.position.y=Math.sin(time*1.3+i*2)*0.12;u.inner.rotation.x=Math.sin(time*0.8+i)*0.025;u.inner.rotation.z=Math.sin(time*0.6+i*3)*0.012;
     if(doPuff&&Math.random()<0.35)emitPuff(q.x+q.ux*u.funnel[0],u.funnel[1],q.y+q.uy*u.funnel[0],-q.ux*3,-q.uy*3)}
   for(const p of E.puffs){if(p.life<=0)continue;p.life-=dt*0.5;p.s.position.x+=p.vx*dt;p.s.position.z+=p.vz*dt;p.s.position.y+=dt*5;const s=(2+(1-p.life)*9)*(p.big||1);p.s.scale.set(s,s,1);p.s.material.opacity=Math.max(0,p.life)*0.75;p.s.material.color.setScalar(0.92-0.55*dl.night);if(p.life<=0)p.s.visible=false}
@@ -3159,6 +3159,71 @@ setTimeout(()=>{try{const A=window.AndroidBridge;if(A&&A.privacyOptions&&A.priva
 }`;document.head.appendChild(st)}
 {const s=$('fssheet');if(s)new MutationObserver(()=>{document.body.classList.toggle('fsopen',!s.hidden);fsLayout()}).observe(s,{attributes:true,attributeFilter:['hidden']})}
 
+
+/* ================= PROTOTİP: Boğaz (Boğaziçi Köprüsü inşaatı + çağa göre Boğaz vapuru) ================= */
+const yearF=()=>START_YEAR+(S?S.t:0)/12;
+/* süs gemileri: rota sonunda limanda bekler, yaklaşırken yavaşlar */
+function shipAdvance(s,dt,i){if(s.wait>0){s.wait-=dt;return}const edge=Math.min(s.pos,s.L-s.pos),v=14*Math.max(0.25,Math.min(1,edge/40));s.pos+=s.dir*v*dt;
+  if(s.pos>=s.L){s.pos=s.L;s.dir=-1;s.wait=8+(i%3)*2}else if(s.pos<=0){s.pos=0;s.dir=1;s.wait=8+(i%3)*2}}
+/* Boğaz'ın orta çizgisi üzerinde, verilen enlemdeki nokta ve yönler */
+function strAt(lat){const L=STRAITS[0];for(let k=0;k<L.length-1;k++){const a=L[k],b=L[k+1];if(lat>=a[1]&&lat<=b[1]){const f=(lat-a[1])/(b[1]-a[1]),x=WX(a[0]+(b[0]-a[0])*f),z=WY(lat),dx=WX(b[0])-WX(a[0]),dz=WY(b[1])-WY(a[1]),l=Math.hypot(dx,dz);return {x,z,dx:dx/l,dz:dz/l,nx:-dz/l,nz:dx/l}}}return null}
+/* ---- Boğaziçi Köprüsü: temel 20 Şubat 1970, açılış 30 Ekim 1973 ---- */
+const BRG={y0:1970+1.65/12,y1:1973+9.97/12,lat:41.215,T:6.4,A:12,H:13,h0:4.2};
+function bridgeBuild(f){const B=new Merger(),{T,A,H,h0}=BRG,steel=cc('#c9ccc9'),dark=cc('#5f6566'),conc=cc('#a39d90');
+  const tw=clamp01((f-0.06)/0.38),cab=clamp01((f-0.46)/0.18),dk=clamp01((f-0.66)/0.32);
+  for(const sx of [-1,1]){const x=sx*T;B.add(E.gBox,mtx(x,-0.6,0,2.4,1.2,3.6,0),conc);B.add(E.gBox,mtx(sx*A,Y_LAND-1,0,2.6,h0-Y_LAND+1.2,3.2,0),conc);if(f>=0.5)for(const k of [0.35,0.7])B.add(E.gBox,mtx(sx*(T+(A-T)*k),Y_LAND-1,0,0.9,h0-Y_LAND+1,1.6,0),conc);
+    if(tw>0){const h=H*tw;for(const z of [-1,1])B.add(E.gBox,mtx(x,0.6,z*1.05,0.55,h,0.55,0),steel);
+      for(const yb of [0.32,0.62,0.97])if(h>H*yb)B.add(E.gBox,mtx(x,H*yb-0.35,0,0.5,0.5,2.6,0),steel)}}
+  const cy=u=>{const a=Math.abs(u);if(a<=T){const k=a/T;return h0+0.7+(H-h0-0.7)*k*k}const k=(a-T)/(A-T);return H-(H-(Y_LAND+0.6))*k};
+  if(cab>0){const n=60,Lc=Math.round(n*cab);for(const z of [-1,1])for(let i=0;i<Lc;i++){const u0=-A+2*A*i/n,u1=-A+2*A*(i+1)/n,y0=cy(u0),y1=cy(u1),len=Math.hypot(u1-u0,y1-y0);B.add(E.gBox,mtx((u0+u1)/2,(y0+y1)/2-0.06,z*1.05,len,0.12,0.12,0,Math.atan2(y1-y0,u1-u0)),dark)}}
+  if(dk>0){const seg=1.15,ns=Math.ceil(2*T/seg),need=Math.round(ns*dk);for(let i=0;i<ns;i++){const c=Math.abs(i-(ns-1)/2);if(c>need/2)continue;const u=-T+seg*(i+0.5);B.add(E.gBox,mtx(u,h0,0,seg*0.96,0.45,2.6,0),steel);B.add(E.gBox,mtx(u,h0+0.45,0,seg*0.96,0.06,2.3,0),cc('#3b3f42'));if(i%2===0)for(const z of [-1,1])B.add(E.gBox,mtx(u,h0+0.45,z*1.05,0.06,Math.max(0.1,cy(u)-h0-0.45),0.06,0),dark)}
+    if(dk>=1)for(const sx of [-1,1]){const l=A-T;B.add(E.gBox,mtx(sx*(T+l/2),h0,0,l,0.45,2.6,0),steel);B.add(E.gBox,mtx(sx*(T+l/2),h0+0.45,0,l,0.06,2.3,0),cc('#3b3f42'))}}
+  const m=B.build(E.mBody);m.castShadow=true;m.receiveShadow=true;return m}
+function bridgeTick(){if(!E.ready||!S)return;const y=yearF(),f=y<BRG.y0?-1:clamp01((y-BRG.y0)/(BRG.y1-BRG.y0)),q=f<0?-1:Math.round(f*80);
+  if(!E.brg){const p=strAt(BRG.lat);if(!p)return;const g=new THREE.Group();g.position.set(p.x,0,p.z);g.rotation.y=-Math.atan2(p.nz,p.nx);E.scene.add(g);E.brg={g,q:-2,mesh:null,cr:[],p}}
+  const b=E.brg;if(q===b.q)return;b.q=q;if(b.mesh){b.g.remove(b.mesh);b.mesh.geometry.dispose();b.mesh=null}
+  if(f>=0)b.mesh=bridgeBuild(f),b.g.add(b.mesh);
+  const wantCr=f>=0&&f<1;if(wantCr&&!b.cr.length){for(const sx of [-1,1]){const c=craneObj();c.scale.setScalar(0.34);c.position.set(sx*(BRG.T+1.8),0,1.6*sx);b.g.add(c);b.cr.push(c)}}
+  if(!wantCr&&b.cr.length){b.cr.forEach(c=>b.g.remove(c));b.cr=[]}
+  if(f>=1&&S.flags&&!S.flags.brg1){S.flags.brg1=1;try{good(_t('<b>🌉 Boğaziçi Köprüsü açıldı!</b><span class="note">30 Ekim 1973: Asya ile Avrupa ilk kez bir köprüyle bağlandı. Cumhuriyet’in 50. yılına yetişti.</span>'),9000)}catch(e){}}}
+/* ---- Boğaz vapuru: çağa göre model, iki iskele arasında gider, iskelede bekler ---- */
+function ferryKind(y){return y<1900?'carkli':y<1950?'vapur':y<1990?'klasik':'modern'}
+function oldFerryMesh(kind){const B=new Merger(),Gl=new Merger(),WH=WHITE3||(WHITE3=new THREE.Color(1,1,1)),I=()=>mtx(0,0,0,1,1,1,0);let L,Bm,D,funnel;
+  const hull=(l,b,d,dr,upC,loC,dkC,bowK)=>{const h=primHull(l,b,d,dr,bowK||0.72,0.12);B.add(h.up,I(),cc(upC));B.add(h.lo,I(),cc(loC));B.add(h.dk,I(),cc(dkC))};
+  const win=(x,y,z,sx,sy,sz)=>Gl.add(E.gBox,mtx(x,y,z,sx,sy,sz,0),WH);
+  if(kind==='carkli'){L=22;Bm=4.6;D=2.2;hull(L,Bm,D,1,'#1f2328','#5a2a22','#8b7355',0.7);
+    B.add(E.gBox,mtx(0.5,D,0,L*0.42,1.5,Bm*0.62,0),cc('#efe9dc'));for(const s of [-1,1])win(0.5,D+0.55,s*Bm*0.315,L*0.36,0.55,0.06);
+    for(const s of [-1,1]){B.add(E.gCylC,mtx(0,D-0.5,s*(Bm/2+0.55),3.6,1.1,3.6,0,0,Math.PI/2),cc('#2a2e33'));B.add(E.gBox,mtx(0,D+0.9,s*(Bm/2+0.55),3.7,0.18,1.15,0),cc('#efe9dc'))}
+    B.add(E.gCyl,mtx(-0.6,D+1.5,0,0.95,5.2,0.95,0),cc('#17191c'));B.add(E.gCyl,mtx(-0.6,D+5.4,0,1.0,0.4,1.0,0),cc('#c8a24a'));funnel=[-0.6,D+6.8];
+    B.add(E.gCyl,mtx(6.5,D,0,0.14,6.5,0.14,0),cc('#5a4632'));B.add(E.gCyl,mtx(-7,D,0,0.12,5,0.12,0),cc('#5a4632'))}
+  else if(kind==='vapur'){L=24;Bm=5;D=2.4;hull(L,Bm,D,1.1,'#1d2126','#7c2a22','#9a8466',0.74);
+    B.add(E.gBox,mtx(-0.4,D,0,L*0.66,1.9,Bm*0.84,0),cc('#efeadf'));B.add(E.gBox,mtx(-0.8,D+1.9,0,L*0.4,1.6,Bm*0.66,0),cc('#efeadf'));
+    B.add(E.gBox,mtx(-0.4,D+1.85,0,L*0.68,0.14,Bm*0.9,0),cc('#7a5d40'));
+    for(const s of [-1,1]){win(-0.4,D+0.7,s*Bm*0.425,L*0.58,0.7,0.06);win(-0.8,D+2.45,s*Bm*0.335,L*0.32,0.6,0.06)}
+    B.add(E.gBox,mtx(3.4,D+3.5,0,2,1.2,Bm*0.5,0),cc('#efeadf'));win(4.42,D+3.9,0,0.06,0.6,Bm*0.4);
+    B.add(E.gCyl,mtx(-1.6,D+3.4,0,1.15,4.4,1.15,0),cc('#17191c'));B.add(E.gCyl,mtx(-1.6,D+6.2,0,1.2,0.45,1.2,0),cc('#efeadf'));funnel=[-1.6,D+7.8];
+    B.add(E.gCyl,mtx(7.6,D,0,0.13,6,0.13,0),cc('#c9c3b6'));B.add(E.gCyl,mtx(-8,D+1.9,0,0.12,4.2,0.12,0),cc('#c9c3b6'))}
+  else{L=25;Bm=5.6;D=2.5;hull(L,Bm,D,1.1,'#f0ece2','#1f2a33','#a8957a',0.76);
+    B.add(E.gBox,mtx(0,D-0.1,0,L*0.8,0.3,Bm*0.98,0),cc('#1f2a33'));
+    B.add(E.gBox,mtx(-0.4,D,0,L*0.7,2.2,Bm*0.88,0),cc('#f0ece2'));B.add(E.gBox,mtx(-0.6,D+2.2,0,L*0.5,1.9,Bm*0.74,0),cc('#f0ece2'));
+    for(const s of [-1,1]){win(-0.4,D+0.85,s*Bm*0.445,L*0.62,0.85,0.06);win(-0.6,D+2.9,s*Bm*0.375,L*0.44,0.8,0.06)}
+    B.add(E.gBox,mtx(4.6,D+4.1,0,2.3,1.3,Bm*0.56,0),cc('#f0ece2'));win(5.77,D+4.5,0,0.06,0.65,Bm*0.46);
+    B.add(E.gCylC,mtx(-2.4,D+5.4,0,1.4,2.6,1.7,0),cc('#e6d6b0'));B.add(E.gCylC,mtx(-2.4,D+6.95,0,1.45,0.55,1.75,0),cc('#17191c'));funnel=[-2.4,D+7.3]}
+  const inner=new THREE.Group();const m=B.build(E.mBody);m.castShadow=true;inner.add(m);inner.add(Gl.build(E.mGlass));
+  const wake=new THREE.Mesh(new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2),E.wakeMat);wake.scale.set(L*2.6,1,Bm*4.2);wake.position.set(-L*1.05,0.12,0);wake.renderOrder=3;
+  const grp=new THREE.Group();grp.add(inner,wake);grp.userData={inner,funnel,L,wake};return grp}
+const FER={lat:41.125,off:3.9,sc:0.3,wait:7,sp:2.2};
+function ferryTick(dt){if(!E.ready||!S)return;const kind=ferryKind(yearF());let F=E.fer;
+  if(!F){const p=strAt(FER.lat);if(!p)return;F=E.fer={p,kind:null,g:null,ph:'wait',t:FER.wait*0.5,side:-1,ang:0}}
+  if(F.kind!==kind){if(F.g)E.scene.remove(F.g);F.g=kind==='modern'?shipMesh('ferry'):oldFerryMesh(kind);if(!F.g.userData.wake)F.g.userData.wake=F.g.children[1];F.g.scale.setScalar(FER.sc);E.scene.add(F.g);F.kind=kind}
+  const {p}=F,pos=s=>[p.x+p.nx*FER.off*s,p.z+p.nz*FER.off*s];let u=0;
+  if(F.ph==='wait'){F.t-=dt;if(F.t<=0){F.ph='go';F.t=0}}
+  else{F.t+=dt;const dur=2*FER.off/FER.sp*1.6;u=Math.min(1,F.t/dur);if(u>=1){F.ph='wait';F.t=FER.wait;F.side=-F.side;u=0}}
+  const e=u*u*(3-2*u),a=pos(F.side),b=pos(-F.side),x=a[0]+(b[0]-a[0])*e,z=a[1]+(b[1]-a[1])*e;
+  const want=-Math.atan2((b[1]-a[1]),(b[0]-a[0])),dif=Math.atan2(Math.sin(want-F.ang),Math.cos(want-F.ang));F.ang+=dif*Math.min(1,dt*(F.ph==='wait'?0.9:3));
+  const g=F.g,ud=g.userData;g.position.set(x,0,z);g.rotation.y=F.ang;const mv=F.ph==='go'?Math.sin(Math.PI*u):0;if(ud.wake){ud.wake.visible=mv>0.08;ud.wake.scale.x=(ud.L||24)*2.6*Math.max(0.2,mv)}
+  ud.inner.position.y=Math.sin(time*1.3)*0.1;if(Math.random()<(F.ph==='go'?0.25:0.05)*(dt*60))emitPuff(x+Math.cos(F.ang)*ud.funnel[0]*FER.sc,ud.funnel[1]*FER.sc,z-Math.sin(F.ang)*ud.funnel[0]*FER.sc,0,0)}
+{const _fx=frameExtras;frameExtras=function(dt,camDist){_fx(dt,camDist);try{bridgeTick();ferryTick(dt)}catch(e){console.warn('bogaz',e)}}}
 /* ---------- dikey ekran düzeltmeleri ---------- */
 /* bilgi kartı ve rehber, sağdaki düğme sütununun (dile göre genişliği değişir) üstüne binmesin */
 {const st=document.createElement('style');st.textContent='.cinfo,.coach{right:calc(var(--wcw,52px) + 10px)}';document.head.appendChild(st);
