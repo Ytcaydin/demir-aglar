@@ -1808,7 +1808,7 @@ function buildCity(id){
   const psp=hasPort(id)?portSpot(c):null,myD=(x,z)=>Math.hypot(x-c.x,z-c.y);
   const dry=(x,z,r)=>{r=r||4;if(APT&&inAirport(APT,x,z,r))return false;if(psp&&Math.hypot(x-psp.x,z-psp.z)<17)return false;if(CITIES.some(o=>o!==c&&Math.hypot(x-o.x,z-o.y)/cityW(o.id)<myD(x,z)/cityW(id)*1.02+3))return false;if(!c.span){const d=myD(x,z),n=Math.ceil(d/4);for(let k=1;k<n;k++){const f=k/n;if(hAt(c.x+(x-c.x)*f,c.y+(z-c.y)*f)<0.9)return false}}return hAt(x,z)>1.05&&hAt(x+r,z)>0.9&&hAt(x-r,z)>0.9&&hAt(x,z+r)>0.9&&hAt(x,z-r)>0.9&&!LANDMARKS.some(l=>Math.hypot(l.x-x,l.y-z)<20)};
   const lb=(x,z,r)=>Math.max(Y_LAND*0.9,Math.min(hAt(x,z),hAt(x+r,z),hAt(x-r,z),hAt(x,z+r),hAt(x,z-r)));
-  const railDir=cityRails(id).map(o=>{const d=Math.hypot(C[o].x-c.x,C[o].y-c.y)||1;return [(C[o].x-c.x)/d,(C[o].y-c.y)/d]}),onRail=(x,z,r)=>railDir.some(([ux,uz])=>{const dx=x-c.x,dz=z-c.y,al=dx*ux+dz*uz;return al>-r&&Math.abs(dx*uz-dz*ux)<r+3.5});
+  const railDir=cityRails(id).map(o=>{if(viaOf(id,o)){const v=viaAt(id,o,Math.min(0.08,14/(edgeW(id,o)||1))),d=Math.hypot(v.x-c.x,v.z-c.y)||1;return [(v.x-c.x)/d,(v.z-c.y)/d]}const d=Math.hypot(C[o].x-c.x,C[o].y-c.y)||1;return [(C[o].x-c.x)/d,(C[o].y-c.y)/d]}),onRail=(x,z,r)=>railDir.some(([ux,uz])=>{const dx=x-c.x,dz=z-c.y,al=dx*ux+dz*uz;return al>-r&&Math.abs(dx*uz-dz*ux)<r+3.5});
   const placed=[],free=(x,z,r)=>!placed.some(([px,pz,pr])=>Math.hypot(px-x,pz-z)<(pr+r)*0.8);
   const place=(u,v,r,sr)=>{sr=sr||r*1.25;const solid=(x,z,rr)=>{for(let k=0;k<8;k++){const a=k*Math.PI/4;if(hAt(x+Math.cos(a)*rr,z+Math.sin(a)*rr)<0.95)return false}return true};
     const tp=p=>{if(dry(p[0],p[1],r)&&free(p[0],p[1],r)&&!onRail(p[0],p[1],r)&&solid(p[0],p[1],sr)){placed.push([p[0],p[1],r]);return p}return null};
@@ -1907,10 +1907,38 @@ function wakeTexture(){const c=document.createElement('canvas');c.width=256;c.he
 
 /* ---- railways ---- */
 function railKey(){return [S.ships.map(t=>t.a+t.b).join(','),S.tracks.map(t=>t.a+t.b+(t.g?'g':'')+(t.h?'h':'')).join(','),eraIdx()>=2?'E':'',S.rival.bought?'':S.rival.tracks.map(t=>t.a+t.b).join(','),S.blocks.map(b=>b.a+b.b).join(',')].join('|')}
+/* ---------- gerçek güzergâhlı hatlar: çizim ve trenin izlediği yol kıvrımlı, oyun mesafesi/süresi aynı ---------- */
+/* İstanbul–Eskişehir: Anadolu Demiryolu güzergâhı (Boğaz geçişi, Kartal–Gebze kıyısı, İzmit, Arifiye, Pamukova, Osmaneli, Bilecik, Bozüyük) */
+const VIA={'esk|ist':{from:'ist',pts:[[284,104],[316,107],[330,113],[346,118],[369,121.5],[397,125],[389,134.5],[376,142.5],[373,152.5],[378,164.5]]}};
+const _viaC=new Map();
+function viaOf(a,b){const v=VIA[edgeKey(a,b)];if(!v)return null;let g=_viaC.get(v);if(!g){
+  const P=[[C[v.from].x,C[v.from].y],...v.pts,(()=>{const o=edgeKey(a,b).split('|').find(x=>x!==v.from);return [C[o].x,C[o].y]})()];
+  const D=[];for(let i=0;i<P.length-1;i++){const p0=P[Math.max(0,i-1)],p1=P[i],p2=P[i+1],p3=P[Math.min(P.length-1,i+2)],n=Math.max(2,Math.ceil(Math.hypot(p2[0]-p1[0],p2[1]-p1[1])/2.2));
+    for(let k=0;k<n;k++){const t=k/n,t2=t*t,t3=t2*t;D.push([0.5*((2*p1[0])+(-p0[0]+p2[0])*t+(2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*t2+(-p0[0]+3*p1[0]-3*p2[0]+p3[0])*t3),0.5*((2*p1[1])+(-p0[1]+p2[1])*t+(2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t2+(-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t3)])}}
+  D.push(P[P.length-1]);const cum=[0];for(let i=1;i<D.length;i++)cum.push(cum[i-1]+Math.hypot(D[i][0]-D[i-1][0],D[i][1]-D[i-1][1]));
+  g={from:v.from,D,cum,L:cum[cum.length-1]};_viaC.set(v,g)}return g}
+/* a→b yönünde, 0..1 arası ilerlemedeki nokta ve yön */
+function viaAt(a,b,f){const g=viaOf(a,b);if(!g)return null;const fw=a===g.from,s=(fw?f:1-f)*g.L,{D,cum}=g;let i=1;while(i<D.length-1&&cum[i]<s)i++;
+  const p=D[i-1],q=D[i],l=(cum[i]-cum[i-1])||1,t=clamp01((s-cum[i-1])/l),dx=(q[0]-p[0])/l*(fw?1:-1),dz=(q[1]-p[1])/l*(fw?1:-1);return {x:p[0]+(q[0]-p[0])*t,z:p[1]+(q[1]-p[1])*t,ux:dx,uz:dz}}
+function edgeW(a,b){const g=viaOf(a,b);return g?g.L:Math.hypot(C[b].x-C[a].x,C[b].y-C[a].y)}
+function ribbonV(M,P3,N,w,lift,color,off){off=off||0;const h=w/2;for(let k=0;k<P3.length-1;k++){const [x1,y1,z1]=P3[k],[x2,y2,z2]=P3[k+1],[n1x,n1z]=N[k],[n2x,n2z]=N[k+1];
+  const ax=x1+n1x*(off-h),az=z1+n1z*(off-h),bx=x1+n1x*(off+h),bz=z1+n1z*(off+h),cx=x2+n2x*(off-h),cz=z2+n2z*(off-h),dx=x2+n2x*(off+h),dz=z2+n2z*(off+h);
+  M.p.push(ax,y1+lift,az,bx,y1+lift,bz,cx,y2+lift,cz,bx,y1+lift,bz,dx,y2+lift,dz,cx,y2+lift,cz);for(let i=0;i<6;i++){M.n.push(0,1,0);M.c.push(color.r,color.g,color.b)}}}
+function railVia(e,Bm,Sn,cat){const g=viaOf(e.a,e.b),{D}=g,P3=D.map(([x,z])=>[x,railY(x,z),z]),N=D.map((p,i)=>{const a=D[Math.max(0,i-1)],b=D[Math.min(D.length-1,i+1)],dx=b[0]-a[0],dz=b[1]-a[1],l=Math.hypot(dx,dz)||1;return [-dz/l,dx/l]});
+  const at=s=>{let i=1;while(i<D.length-1&&g.cum[i]<s)i++;const p=D[i-1],q=D[i],l=(g.cum[i]-g.cum[i-1])||1,t=clamp01((s-g.cum[i-1])/l),x=p[0]+(q[0]-p[0])*t,z=p[1]+(q[1]-p[1])*t,ux=(q[0]-p[0])/l,uz=(q[1]-p[1])/l;return {x,y:railY(x,z),z,ux,uz,nx:-uz,nz:ux,ry:-Math.atan2(uz,ux)}};
+  ribbonV(Bm,P3,N,e.h?6.4:5.2,0,cc(e.r?'#72829a':e.h?'#9b9893':'#948875'));
+  for(let s=2;s<g.L-2;s+=e.h?2.6:3.2){const q=at(s);Bm.add(E.gBox,mtx(q.x,q.y+0.02,q.z,e.h?0.7:0.8,0.3,4.4,q.ry),cc(e.r?'#34496a':e.h?'#bdb8ae':cat?'#6b6259':'#4e3c2a'))}
+  if(cat&&!e.r){const pole=cc('#7b8288'),wire=cc('#2f3336');for(let s=5,k=0;s<g.L-3;s+=9.6,k++){const q=at(s),sd=k%2?3.4:-3.4;if(hAt(q.x+q.nx*sd,q.z+q.nz*sd)>q.y+0.6)continue;Bm.add(E.gBox,mtx(q.x+q.nx*sd,q.y,q.z+q.nz*sd,0.35,7.2,0.35,q.ry),pole);Bm.add(E.gBox,mtx(q.x+q.nx*sd*0.5,q.y+6.5,q.z+q.nz*sd*0.5,0.22,0.22,3.8,q.ry),pole)}
+    ribbonV(Bm,P3.map(p=>[p[0],p[1]+6.3,p[2]]),N,0.14,0,wire)}
+  for(const o of [-1.35,1.35])ribbonV(Bm,P3,N,0.4,0.45,cc('#b9bec4'),o);
+  const steel=cc(e.r?'#5a6a80':'#6d7479'),stone=cc('#9c9384');
+  for(let s=3,k=0;s<g.L-3;s+=3.2,k++){const q=at(s);if(hAt(q.x,q.z)>=0.9)continue;for(const o of [-2.7,2.7]){const px=q.x+q.nx*o,pz=q.z+q.nz*o;Bm.add(E.gBox,mtx(px,q.y+3.1,pz,3.3,0.35,0.35,q.ry),steel);if(k%2===0)Bm.add(E.gBox,mtx(px,q.y,pz,0.3,3.3,0.3,q.ry),steel);else Bm.add(E.gCylC,mtx(px,q.y+1.65,pz,0.12,4.4,0.12,q.ry,k%4<2?0.78:-0.78),steel)}
+    if(k%5===0)Bm.add(E.gCyl,mtx(q.x,-SEA_D-1,q.z,1.2,q.y+SEA_D+1,1.2,0),stone)}
+  if(isBlocked(e.a,e.b))ribbonV(Sn,P3,N,6.4,0.7,new THREE.Color(1,1,1))}
 function buildRails(){
   disposeObj(E.railGrp);const grp=new THREE.Group(),Bm=new Merger(),Sn=new Merger();
   const cat=eraIdx()>=2;const edges=[...S.tracks.map(t=>({a:t.a,b:t.b,r:false,g:!!t.g,h:!!t.h})),...(S.rival.bought?[]:S.rival.tracks.map(t=>({a:t.a,b:t.b,r:true})))];
-  for(const e of edges){const A=C[e.a],Bc=C[e.b];const dx=Bc.x-A.x,dz=Bc.y-A.y,len=Math.hypot(dx,dz),ux=dx/len,uz=dz/len,nx=-uz,nz=ux,ry=-Math.atan2(dz,dx);
+  for(const e of edges){if(viaOf(e.a,e.b)){railVia(e,Bm,Sn,cat);continue}const A=C[e.a],Bc=C[e.b];const dx=Bc.x-A.x,dz=Bc.y-A.y,len=Math.hypot(dx,dz),ux=dx/len,uz=dz/len,nx=-uz,nz=ux,ry=-Math.atan2(dz,dx);
     const yA=railY(A.x,A.y),yB=railY(Bc.x,Bc.y),Y=(x,z,f)=>e.g?yA+(yB-yA)*f:railY(x,z),at=s=>{const x=A.x+ux*s,z=A.y+uz*s;return [x,Y(x,z,s/len),z]};
     const n=Math.max(2,Math.ceil(len/3)),P3=[];for(let k=0;k<=n;k++)P3.push(at(len*k/n));
     ribbon(Bm,P3,nx,nz,e.h?6.4:5.2,0,cc(e.r?'#72829a':e.h?'#9b9893':'#948875'));
@@ -1933,7 +1961,7 @@ function buildRails(){
 function prevKey(){return sel.join(',')+'|'+S.tracks.length+'|'+S.ports.length}
 function buildPreview(){
   disposeObj(E.prevGrp);E.prevGrp=null;if(sel.length!==2)return;const M=new Merger();
-  const seg=(A,B,w,color,dash)=>{const dx=B.x-A.x,dz=B.y-A.y,len=Math.hypot(dx,dz),nx=-dz/len,nz=dx/len,n=Math.max(2,Math.ceil(len/3));
+  const seg=(A,B,w,color,dash)=>{const g=A.id&&B.id&&viaOf(A.id,B.id);if(g){const D=g.D;for(let k=0;k<D.length-1;k++){if(dash&&k%3===2)continue;const [x1,z1]=D[k],[x2,z2]=D[k+1],l=Math.hypot(x2-x1,z2-z1)||1;ribbon(M,[[x1,railY(x1,z1),z1],[x2,railY(x2,z2),z2]],-(z2-z1)/l,(x2-x1)/l,w,1.2,color)}return}const dx=B.x-A.x,dz=B.y-A.y,len=Math.hypot(dx,dz),nx=-dz/len,nz=dx/len,n=Math.max(2,Math.ceil(len/3));
     for(let k=0;k<n;k++){if(dash&&k%3===2)continue;const x1=A.x+dx*k/n,z1=A.y+dz*k/n,x2=A.x+dx*(k+1)/n,z2=A.y+dz*(k+1)/n;ribbon(M,[[x1,railY(x1,z1),z1],[x2,railY(x2,z2),z2]],nx,nz,w,1.2,color)}};
   const r=route(sel[0],sel[1]);if(r)for(let i=0;i<r.length-1;i++)seg(C[r[i]],C[r[i+1]],9,cc('#e2b85c'),false);
   if(!hasTrack(sel[0],sel[1]))seg(C[sel[0]],C[sel[1]],3,cc('#c8412f'),true);
@@ -1984,11 +2012,11 @@ function syncTrains(){
   const rk=S.rival.bought?'':S.rival.trains.length+'|'+(eraIdx()>=1?1:0);if(rk!==E.rivalKey){E.rivalObjs.forEach(o=>disposeObj(o.grp));E.rivalObjs=S.rival.bought?[]:S.rival.trains.map(()=>makeTrainObj([eraIdx()>=1?'diesel':'steam','wagon','wagon'],'rival'));E.rivalKey=rk}
 }
 function pointOn3(path,pos){if(!path||path.length<2)return null;let rem=Math.max(0,pos);
-  for(let i=0;i<path.length-1;i++){const a=C[path[i]],b=C[path[i+1]],k=dist(a,b);if(rem<=k||i===path.length-2){const f=clamp01(rem/k),dx=b.x-a.x,dz=b.y-a.y,l=Math.hypot(dx,dz)||1;return {x:a.x+dx*f,z:a.y+dz*f,ux:dx/l,uz:dz/l,a:path[i],b:path[i+1],f}}rem-=k}}
+  for(let i=0;i<path.length-1;i++){const a=C[path[i]],b=C[path[i+1]],k=dist(a,b);if((rem<=k||i===path.length-2)&&viaOf(path[i],path[i+1])){const f=clamp01(rem/k),v=viaAt(path[i],path[i+1],f);return {x:v.x,z:v.z,ux:v.ux,uz:v.uz,a:path[i],b:path[i+1],f}}if(rem<=k||i===path.length-2){const f=clamp01(rem/k),dx=b.x-a.x,dz=b.y-a.y,l=Math.hypot(dx,dz)||1;return {x:a.x+dx*f,z:a.y+dz*f,ux:dx/l,uz:dz/l,a:path[i],b:path[i+1],f}}rem-=k}}
 function placeTrain(o,path,pos,dir,len,wlen,idx){const kmU=len/(wlen||1);let off=0;const side=((idx%3)-1)*0;
   o.cars.forEach((car,ci)=>{const q=pointOn3(path,Math.max(0,Math.min(len,pos-dir*off*kmU)));if(!q)return;car.position.set(q.x,trackY(q.a,q.b,q.f,q.x,q.z)+0.3,q.z);car.rotation.set(0,-Math.atan2(q.uz*dir,q.ux*dir),0);off+=car.userData.len+1});
   return o.cars[0]}
-function trackY(a,b,f,x,z){const t=trackOf(a,b);if(t&&t.g){const A=C[a],B=C[b];return railY(A.x,A.y)+(railY(B.x,B.y)-railY(A.x,A.y))*f}return railY(x,z)}
+function trackY(a,b,f,x,z){const t=trackOf(a,b);if(t&&t.g&&!viaOf(a,b)){const A=C[a],B=C[b];return railY(A.x,A.y)+(railY(B.x,B.y)-railY(A.x,A.y))*f}return railY(x,z)}
 function emitPuff(x,y,z,vx,vz,big){const p=E.puffs[E.puffI++%E.puffs.length];p.s.position.set(x,y,z);p.life=1;p.s.visible=true;p.vx=vx+(Math.random()-0.5)*1.5;p.vz=vz+(Math.random()-0.5)*1.5;p.big=big?1.6:1}
 
 /* ---- per-frame ---- */
@@ -2022,7 +2050,7 @@ function frame3D(dt){
   puffT+=dt;const doPuff=puffT>0.09;if(doPuff)puffT=0;
   S.trains.forEach((tr,i)=>{const o=E.trainObjs[i];if(!o)return;o.grp.visible=!!tr.path;if(!tr.path)return;const loco=placeTrain(o,tr.path,tr.pos,tr.dir,tr.len,tr.wlen,i);
     if(o.steam&&doPuff&&!tr.wait&&speed&&!S.over){const fx=Math.cos(loco.rotation.y),fz=-Math.sin(loco.rotation.y);emitPuff(loco.position.x+fx*3.3,loco.position.y+5.4,loco.position.z+fz*3.3,-fx*3,-fz*3)}});
-  if(!S.rival.bought)S.rival.trains.forEach((tr,i)=>{const o=E.rivalObjs[i];if(!o)return;const L=dist(C[tr.a],C[tr.b]),wl=Math.hypot(C[tr.b].x-C[tr.a].x,C[tr.b].y-C[tr.a].y);const loco=placeTrain(o,[tr.a,tr.b],tr.pos,tr.dir,L,wl,i);
+  if(!S.rival.bought)S.rival.trains.forEach((tr,i)=>{const o=E.rivalObjs[i];if(!o)return;const L=dist(C[tr.a],C[tr.b]),wl=edgeW(tr.a,tr.b);const loco=placeTrain(o,[tr.a,tr.b],tr.pos,tr.dir,L,wl,i);
     if(o.steam&&doPuff&&speed){const fx=Math.cos(loco.rotation.y),fz=-Math.sin(loco.rotation.y);emitPuff(loco.position.x+fx*3.3,loco.position.y+5.4,loco.position.z+fz*3.3,-fx*3,-fz*3)}});
   for(const c of CITIES){const o=E.cities[c.id];if(!o)continue;const st=cs(c.id);
     if(o.grp.userData.chim&&factoryOn(c.id)&&Math.random()<dt*5){const [x,y,z]=o.grp.userData.chim;emitPuff(x,y,z,2,0.5,true)}
@@ -2227,7 +2255,7 @@ function buildForests(){const R=rng(4242),want=GFXQ>=2?7000:3800,pts={pine:[],oa
 function forestSeason(){const w=winterMix>0.5;if(E.forestW===w)return;E.forestW=w;const col=new THREE.Color(),base={pine:['#2f5234','#35593a','#284a30'],oak:['#4b6e3a','#557a40','#3f6334'],olive:['#77815a','#6b7650','#838c64']},snowC=cc('#dfe7ea'),bare=cc('#6f6152');
   for(const f of E.forests||[]){f.P.forEach(([x,y,sc,ry,v],i)=>{const lon=x/KX+LON0,lat=LAT0-y/KY,snowReg=!(lat<37.6&&lon<36.6)&&!(lon<28.3&&lat<39.8);col.copy(cc(base[f.kind][Math.floor(v*3)%3]));
       if(w&&snowReg){if(f.kind==='pine')col.lerp(snowC,0.45);else if(f.kind==='oak')col.copy(bare).lerp(snowC,0.35)}f.mesh.setColorAt(i,col)});if(f.mesh.instanceColor)f.mesh.instanceColor.needsUpdate=true}}
-function forestClear(){if(!E.forests)return;const segs=[...S.tracks,...(S.rival.bought?[]:S.rival.tracks)].map(t=>[C[t.a],C[t.b]]);for(const sp of S.ships)void sp;
+function forestClear(){if(!E.forests)return;const segs=[...S.tracks,...(S.rival.bought?[]:S.rival.tracks)].flatMap(t=>{const g=viaOf(t.a,t.b);if(!g)return [[C[t.a],C[t.b]]];const o=[];for(let i=0;i<g.D.length-1;i++)o.push([{x:g.D[i][0],y:g.D[i][1]},{x:g.D[i+1][0],y:g.D[i+1][1]}]);return o});for(const sp of S.ships)void sp;
   const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),s=new THREE.Vector3(),p=new THREE.Vector3(),yAx=new THREE.Vector3(0,1,0);
   const port=S.ports.map(id=>C[id]);
   for(const f of E.forests){let ch=false;f.P.forEach(([x,y,sc,ry,v],i)=>{let hide=false;for(const [A,B] of segs){const dx=B.x-A.x,dy=B.y-A.y,t=clamp01(((x-A.x)*dx+(y-A.y)*dy)/(dx*dx+dy*dy||1));if(Math.hypot(x-A.x-dx*t,y-A.y-dy*t)<4.5){hide=true;break}}
@@ -2364,7 +2392,7 @@ function megaModel(K,b,x,z,base,ry){const B=K.B,P=(pr,lx,ly,lz,sx,sy,sz,col,M)=>
 
 
 /* ---------- glue ---------- */
-function prepTrain(tr){tr.path=route(tr.a,tr.b);tr.cum=[0];tr.wlen=0;if(tr.path)for(let i=0;i<tr.path.length-1;i++){const a=C[tr.path[i]],b=C[tr.path[i+1]];tr.cum.push(tr.cum[i]+dist(a,b));tr.wlen+=Math.hypot(b.x-a.x,b.y-a.y)}tr.len=tr.path?tr.cum[tr.cum.length-1]:0;if(tr.pos>tr.len)tr.pos=tr.len;if(!tr.dir)tr.dir=1;if(!tr.type)tr.type='buhar'}
+function prepTrain(tr){tr.path=route(tr.a,tr.b);tr.cum=[0];tr.wlen=0;if(tr.path)for(let i=0;i<tr.path.length-1;i++){const a=C[tr.path[i]],b=C[tr.path[i+1]];tr.cum.push(tr.cum[i]+dist(a,b));tr.wlen+=edgeW(tr.path[i],tr.path[i+1])}tr.len=tr.path?tr.cum[tr.cum.length-1]:0;if(tr.pos>tr.len)tr.pos=tr.len;if(!tr.dir)tr.dir=1;if(!tr.type)tr.type='buhar'}
 $('zin').onclick=()=>zoomBy(0.7);$('zout').onclick=()=>zoomBy(1.4);$('zfit').onclick=()=>fitAll();
 function dnLabel(){const on=OPT.night!=='off';$('dn').textContent=_t('Gece/gündüz: ')+(on?_t('Açık'):_t('Kapalı'));$('dn').classList.toggle('on',on);$('dn').setAttribute('aria-pressed',on)}
 $('dn').onclick=()=>{OPT.night=OPT.night==='off'?'auto':'off';try{localStorage.setItem('demir-aglar-opt',JSON.stringify(OPT))}catch(e){}dnLabel()};dnLabel();
