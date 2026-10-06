@@ -1,4 +1,4 @@
-const CACHE='demir-aglar-v4';
+const CACHE='demir-aglar-v5';
 const CORE=['./','./index.html','./vitrin-2026.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png',
  'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
  'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js'];
@@ -17,7 +17,7 @@ async function remind(){const c=await caches.open('da-state');const r=await c.ma
   const en=s.lang==='en';
   const body=en?(g>0?`Your trains kept running while you were away: +${g.toLocaleString('en-US')}k ₺ is waiting in your cash.`:'Your trains are waiting. Keep growing your network!')+(s.day!==today?' Your daily reward is ready too.':'')
     :(g>0?`Sen yokken trenler çalıştı: kasada +${g.toLocaleString('tr-TR')} bin ₺ seni bekliyor.`:'Trenlerin seni bekliyor. Ağını büyütmeye devam et!')+(s.day!==today?' Günlük ödülün de hazır.':'');
-  await self.registration.showNotification('Demir Ağlar',{body,icon:'icons/icon-192.png',badge:'icons/icon-192.png',tag:'da-remind',lang:en?'en':'tr'});
+  await self.registration.showNotification(en?'Rails of Anatolia':'Demir Ağlar',{body,icon:'icons/icon-192.png',badge:'icons/icon-192.png',tag:'da-remind',lang:en?'en':'tr'});
   s.nAt=now;await c.put(STATE_URL,new Response(JSON.stringify(s),{headers:{'Content-Type':'application/json'}}))}
 self.addEventListener('periodicsync',e=>{if(e.tag==='da-remind')e.waitUntil(remind().catch(()=>{}))});
 self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(L=>{for(const w of L)if('focus' in w)return w.focus();return self.clients.openWindow('./')}))});

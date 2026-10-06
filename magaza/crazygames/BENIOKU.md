@@ -11,7 +11,7 @@ Paketin içinde: CrazyGames SDK v3, ödüllü reklamlar, oyuncunun diline göre 
 
 ## Oyun sayfası metinleri (İngilizce)
 
-**Title:** Demir Ağlar: Railway Tycoon
+**Title:** Rails of Anatolia
 
 **Short description:** Build Turkey's railway network from the first Ottoman line in 1856 to today's high-speed trains.
 

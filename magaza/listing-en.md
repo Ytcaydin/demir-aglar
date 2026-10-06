@@ -3,7 +3,7 @@
 Play Console → Grow → Store presence → Main store listing → Manage translations → Add English (United States).
 
 ## App name (max 30)
-Demir Ağlar: Railway Tycoon
+Rails of Anatolia
 
 ## Short description (max 80)
 Lay rails across Anatolia from 1856 to today and build a railway empire.
@@ -11,7 +11,7 @@ Lay rails across Anatolia from 1856 to today and build a railway empire.
 ## Full description (max 4000)
 Start in 1856 with the İzmir–Aydın line, the first railway in Anatolia, and build Turkey's rail network all the way to 2026.
 
-Demir Ağlar ("Iron Networks") is an offline 3D railway strategy game. Lay track, buy trains and carry the goods each city needs to grow it from a village into a metropolis.
+Rails of Anatolia (Turkish title: "Demir Ağlar") is an offline 3D railway strategy game. Lay track, buy trains and carry the goods each city needs to grow it from a village into a metropolis.
 
 LIVE THROUGH HISTORY
 • Start in the Ottoman era: the İzmir–Aydın concession of 1856, the opening in 1866, the Suez Canal, the Ottoman Public Debt Administration, the Anatolian and Baghdad Railways
