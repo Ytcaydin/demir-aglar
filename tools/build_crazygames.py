@@ -22,8 +22,9 @@ ZIP = ROOT / "dist" / "DemirAglar-crazygames.zip"
 
 LOADER = """<script>
 (async()=>{const C=window.CrazyGames&&window.CrazyGames.SDK;let store=null;
-  try{if(C){try{C.game.loadingStart()}catch(e){}
+  try{if(C){
     await Promise.race([C.init(),new Promise(r=>setTimeout(r,4000))]);
+    try{C.game.loadingStart()}catch(e){}
     if(C.environment&&C.environment!=='disabled'){store=C.data;
       const si=C.user&&C.user.systemInfo,loc=(si&&(si.locale||si.language||si.countryCode))||'';let o={};
       try{o=JSON.parse(store.getItem('demir-aglar-opt')||'{}')||{}}catch(e){}
