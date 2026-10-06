@@ -2545,7 +2545,7 @@ function rec(){return META.rec||(META.rec={})}
 function recWeek(){const R=rec(),w=weekId();if(!R.week||R.week.id!==w){if(R.week)R.prev=R.week;R.week={id:w,net:0,mo:0,v:0,n:0}}return R.week}
 function recMonth(){if(!S||S.scn)return;const W=recWeek(),R=rec(),v=Math.round(myValue()),n=nCon();if(S.last){W.net+=S.last.inc-S.last.exp;W.mo++}
   if(v>W.v){W.v=v;W.y=year()}if(n>W.n)W.n=n;if(!R.best||v>R.best.v)R.best={v,y:year(),n,d:today()};if(!FF.on)saveMeta()}
-function shareURL(){return /^https?:/.test(location.protocol)&&location.host!=='appassets.androidplatform.net'?location.origin+location.pathname.replace(/[^/]*$/,''):''}
+function shareURL(){if(window.DA_CG)return '';return /^https?:/.test(location.protocol)&&location.host!=='appassets.androidplatform.net'?location.origin+location.pathname.replace(/[^/]*$/,''):''}
 function shareText(){const u=shareURL();return _t`Demir Ağlar’da ${year()} yılına geldim: ${nCon()} şehri bağladım, ${fmt(trackKm())} km hat döşedim. Şirket değeri ${fmt(myValue())} bin ₺!${u?' '+u:''}`}
 function shareCanvas(){const W=1080,H=1350,cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d');
   const DF=_t('"Josefin Sans","Century Gothic",sans-serif'),BF=_t('"Source Sans 3","Segoe UI",sans-serif');
@@ -3310,7 +3310,7 @@ if(window.DA_CG){const SDK=window.CrazyGames&&window.CrazyGames.SDK,ok=()=>SDK&&
   const cgMute=()=>{try{const m=SDK.game.settings&&SDK.game.settings.muteAudio;if(AU.master)AU.master.gain.value=m?0:0.7;window.__cgMuted=!!m}catch(e){}};
   if(ok()){try{SDK.game.addSettingsChangeListener(cgMute)}catch(e){}setInterval(cgMute,2000);cgMute()}
   /* oynanış başladı/durdu bildirimi */
-  let playing=null;setInterval(()=>{if(!ok())return;const p=!!(speed&&S&&!S.over&&$('eracard')&&$('eracard').hidden&&$('card3').hidden&&!document.hidden&&!window.__cgAd);if(p!==playing){playing=p;try{p?SDK.game.gameplayStart():SDK.game.gameplayStop()}catch(e){}}},1000);
+  let playing=null;setInterval(()=>{if(!ok())return;const p=!!(speed&&S&&!S.over&&(!$('eracard')||$('eracard').hidden)&&(!$('card3')||$('card3').hidden)&&!document.hidden&&!window.__cgAd);if(p!==playing){playing=p;try{p?SDK.game.gameplayStart():SDK.game.gameplayStop()}catch(e){}}},1000);
   {const ls=setInterval(()=>{if(!E.ready)return;clearInterval(ls);try{if(ok())SDK.game.loadingStop()}catch(e){}},200)}
   /* ödüllü reklam */
   const _fa=fakeAd;fakeAd=function(btn,done){if(!ok())return _fa(btn,done);const html=btn.innerHTML,sp=speed;btn.disabled=true;window.__cgAd=1;
