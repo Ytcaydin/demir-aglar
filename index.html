@@ -195,7 +195,7 @@ body.fs3 .world{position:fixed;inset:0;z-index:60;border:0;border-radius:0;backg
 body.fs3 #stage3{min-height:0}
 body.fs3 #fshud{display:flex;flex-direction:column;gap:6px;position:absolute;left:8px;right:62px;top:8px;z-index:7;pointer-events:none}
 body.fs3 #fshud>*{pointer-events:auto}
-body.fs3 #fshud .bar{gap:5px}body.fs3 #fshud .chip{flex:1 1 90px!important;padding:4px 9px;background:rgba(16,32,42,.86)}body.fs3 #fshud .chip b{font-size:15px}body.fs3 #fshud .prog{display:none}body.fs3 #fshud .sbtn{padding:6px 9px;background:rgba(30,53,68,.9)}
+body.fs3 #fshud .bar{gap:5px}body.fs3 #fshud .chip{flex:1 1 90px!important;padding:4px 9px;background:rgba(16,32,42,.86)}body.fs3 #fshud .chip b{font-size:15px}body.fs3 #fshud .prog{display:none}body.fs3 #fshud .sbtn{padding:6px 9px;background:rgba(30,53,68,.9)}body.fs3 #fshud .sbtn.on{background:var(--ochre)}
 body.fs3 #fshud .banner{padding:8px 11px;font-size:14px}
 body.fs3 .fsnav{display:flex;position:absolute;left:0;right:0;bottom:0;z-index:8;background:rgba(16,32,42,.95);border-top:1px solid var(--line);padding:3px 2px calc(3px + env(safe-area-inset-bottom));justify-content:space-around}
 .fsnav button{flex:1;min-width:0;background:none;border:0;color:var(--muted);font:600 10.5px var(--body);display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 0;position:relative;cursor:pointer}
@@ -3130,6 +3130,17 @@ setTimeout(()=>{try{const A=window.AndroidBridge;if(A&&A.privacyOptions&&A.priva
  body.fs3 .coach{font-size:13px;padding:7px 10px;max-width:600px}body.fs3 .cinfo{font-size:13px}
 }`;document.head.appendChild(st)}
 {const s=$('fssheet');if(s)new MutationObserver(()=>{document.body.classList.toggle('fsopen',!s.hidden);fsLayout()}).observe(s,{attributes:true,attributeFilter:['hidden']})}
+
+/* ---------- dikey ekran düzeltmeleri ---------- */
+/* bilgi kartı ve rehber, sağdaki düğme sütununun (dile göre genişliği değişir) üstüne binmesin */
+{const st=document.createElement('style');st.textContent='.cinfo,.coach{right:calc(var(--wcw,52px) + 10px)}';document.head.appendChild(st);
+ const wcFit=()=>{const w=document.querySelector('.wctl');if(w&&w.offsetWidth)document.documentElement.style.setProperty('--wcw',w.offsetWidth+'px')};
+ addEventListener('resize',wcFit);setTimeout(wcFit,0);setTimeout(wcFit,1500)}
+/* açılış uçuşu dar ekranda biraz daha geriden bitsin; bitince rehber kamerayı hedef şehre çevirsin */
+{const _is=introStart;introStart=function(kind){_is(kind);const I=E.intro;if(!I||!E.camera)return;const a=E.camera.aspect||1;if(a<1){const K=I.K[I.K.length-1],off=K.p.clone().sub(K.t);off.multiplyScalar(Math.min(1.9,1/a));K.p=K.t.clone().add(off)}};
+ const _ie=introEnd;introEnd=function(){const had=!!E.intro;_ie();if(had)tutShown=-2}}
+/* rehber kutusuna dokununca kamera rehberin gösterdiği şehre döner */
+$('coach').addEventListener('click',e=>{if(e.target.closest('button'))return;const i=S.tut??-1,st=i>=0&&TUT[i];if(st&&st.focus)focusCity(st.focus)});
 
 /* ================= CrazyGames sürümü (window.DA_CG derleme sırasında eklenir) ================= */
 if(window.DA_CG){const SDK=window.CrazyGames&&window.CrazyGames.SDK,ok=()=>SDK&&(SDK.environment==='crazygames'||SDK.environment==='local');
