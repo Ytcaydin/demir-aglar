@@ -26,7 +26,7 @@ h1{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:.14e
 .sub{font-size:12px;color:var(--muted);letter-spacing:.08em;margin-top:6px}
 .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
 .chip{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 10px;display:flex;flex-direction:column;justify-content:center;min-width:0}
-.chip .lab{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.chip .lab{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}@media (max-width:480px){.chip .lab{letter-spacing:.06em}}
 .chip b{font-family:var(--display);font-size:18px;letter-spacing:.04em;font-variant-numeric:tabular-nums;white-space:nowrap}
 .money.neg{color:var(--bad)}
 .prog{height:3px;background:#0c1820;border-radius:2px;margin-top:4px;overflow:hidden}.prog i{display:block;height:100%;background:var(--ochre);width:0}
@@ -512,9 +512,10 @@ const RIVERS=[
 ];
 function computeGrid(){
   GW=Math.ceil((WORLD.x1-WORLD.x0)/G)+2;GH=Math.ceil((WORLD.y1-WORLD.y0)/G)+2;const N=GW*GH;
-  const land=new Float32Array(N);
+  /* kara maskesi şehirlere bağlı değil: ikinci çağrıda (şehirler kıyıdan kaydırıldıktan sonra) yeniden hesaplanmaz */
+  let land=computeGrid._land;if(!land||land.length!==N){land=new Float32Array(N);
   for(let j=0;j<GH;j++)for(let i=0;i<GW;i++){const x=WORLD.x0+i*G,y=WORLD.y0+j*G,lon=x/KX+LON0,lat=LAT0-y/KY;
-    const wl=(fbm(x*0.03,y*0.03,3)-0.5)*0.14,wa=(fbm(x*0.03+50,y*0.03+20,3)-0.5)*0.1;land[j*GW+i]=isLand(lon+wl,lat+wa)?1:0}
+    const wl=(fbm(x*0.03,y*0.03,3)-0.5)*0.14,wa=(fbm(x*0.03+50,y*0.03+20,3)-0.5)*0.1;land[j*GW+i]=isLand(lon+wl,lat+wa)?1:0}computeGrid._land=land}
   const blur=(src,r)=>{const tmp=new Float32Array(N),out=new Float32Array(N),w=2*r+1;
     for(let j=0;j<GH;j++){const o=j*GW;let acc=0;for(let i=-r;i<=r;i++)acc+=src[o+Math.max(0,Math.min(GW-1,i))];for(let i=0;i<GW;i++){tmp[o+i]=acc/w;acc+=src[o+Math.min(GW-1,i+r+1)]-src[o+Math.max(0,i-r)]}}
     for(let i=0;i<GW;i++){let acc=0;for(let j=-r;j<=r;j++)acc+=tmp[Math.max(0,Math.min(GH-1,j))*GW+i];for(let j=0;j<GH;j++){out[j*GW+i]=acc/w;acc+=tmp[Math.min(GH-1,j+r+1)*GW+i]-tmp[Math.max(0,j-r)*GW+i]}}return out};
@@ -1913,7 +1914,9 @@ function railKey(){return [S.ships.map(t=>t.a+t.b).join(','),S.tracks.map(t=>t.a
 const HAY=[318,113.6],EURO_ONLY=new Set(['edi']);
 const asiaEdge=(a,b)=>(a==='ist'&&!EURO_ONLY.has(b))||(b==='ist'&&!EURO_ONLY.has(a));
 const endP=(id,o)=>id==='ist'&&!EURO_ONLY.has(o)?HAY:[C[id].x,C[id].y];
-const VIA={'esk|ist':{from:'ist',pts:[[330,113.2],[346,118],[369,121.5],[397,125],[389,134.5],[376,142.5],[373,152.5],[378,164.5]]}};
+const VIA={'esk|ist':{from:'ist',pts:[[330,113.2],[346,118],[369,121.5],[397,125],[389,134.5],[376,142.5],[373,152.5],[378,164.5]]},
+ /* İstanbul–Bursa: körfezi köprüyle geçmek yerine Gebze–İzmit kıyısından körfezin doğu ucunu dolaşır, güney kıyıdan Bursa'ya iner */
+ 'bur|ist':{from:'ist',pts:[[330,113.2],[346,118],[353,124],[346,134.5],[330,141],[313,146]]}};
 const _viaDyn={};
 const _viaC=new Map();
 function viaOf(a,b){const ek=edgeKey(a,b);let v=VIA[ek];if(!v&&asiaEdge(a,b))v=_viaDyn[ek]||(_viaDyn[ek]={from:'ist',pts:[]});if(!v)return null;const ck=edgeKey(a,b).split('|').map(id=>C[id].x.toFixed(2)+','+C[id].y.toFixed(2)).join(';');let g=_viaC.get(v);if(!g||g.ck!==ck){
@@ -2694,9 +2697,11 @@ const GRADE=[{n:_t('1927 fotoğrafı'),f:_t('sepia(.42) saturate(.72) contrast(1
  {n:_t('1970’ler filmi'),f:_t('sepia(.08) saturate(1.14) contrast(1.06) hue-rotate(-5deg)'),v:.22,g:.02},
  {n:_t('Günümüz'),f:_t('saturate(1.1) contrast(1.04)'),v:.14,g:0}];
 function gradeOn(){return OPT.grade!=='off'}
+/* film greni dokusu: 3D başlamadan, CPU tuvalinde bir kez üretilir. (Eskiden ilk karede üretiliyordu; toDataURL
+   GPU kuyruğunun bitmesini beklediği için açılışı saniyelerce kilitliyordu.) */
+const GRAIN_URL=(()=>{try{const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d',{willReadFrequently:true}),im=g.createImageData(128,128);for(let i=0;i<im.data.length;i+=4){const v=Math.random()*255|0;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255}g.putImageData(im,0,0);return 'url('+c.toDataURL()+')'}catch(e){return 'none'}})();
 function gradeOverlay(){let ov=$('gradeov');if(!ov){ov=document.createElement('div');ov.id='gradeov';ov.className='gradeov';
-  const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d'),im=g.createImageData(128,128);for(let i=0;i<im.data.length;i+=4){const v=Math.random()*255|0;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255}g.putImageData(im,0,0);
-  ov.style.setProperty('--noise',_t`url(${c.toDataURL()})`);$('stage3').appendChild(ov)}return ov}
+  ov.style.setProperty('--noise',GRAIN_URL);$('stage3').appendChild(ov)}return ov}
 function gradeApply(){const cv=E.renderer&&E.renderer.domElement;if(!cv)return;const e=eraIdx(),ot=year()<1923,on=gradeOn(),k=(on?(ot?'o':e):-1)+'|'+GFXQ;if(cv.dataset.g===k)return;cv.dataset.g=k;
   const G=gradeNow();cv.style.filter=on?G.f:'none';const ov=gradeOverlay();ov.style.setProperty('--vig',on?G.v:.12);ov.style.setProperty('--grain',on&&GFXQ>0?G.g:0);ov.classList.toggle('still',GFXQ===0)}
 function gradeLabel(){const b=$('grade');if(!b)return;b.textContent=_t('Renk tonu: ')+(gradeOn()?_t('Çağa göre'):_t('Doğal'));b.classList.toggle('on',gradeOn());b.setAttribute('aria-pressed',String(gradeOn()))}
