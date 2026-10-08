@@ -28,7 +28,7 @@ LOADER = """<script>
     if(C.environment&&C.environment!=='disabled'){store=C.data;
       const si=C.user&&C.user.systemInfo,loc=(si&&(si.locale||si.language||si.countryCode))||'';let o={};
       try{o=JSON.parse(store.getItem('demir-aglar-opt')||'{}')||{}}catch(e){}
-      if(!o.lang&&loc)window.DA_LANG=/^tr/i.test(loc)?'tr':'en'}}}catch(e){}
+      if(!o.lang&&loc&&!/[?&]lang=/.test(location.search))window.DA_LANG=/^tr/i.test(loc)?'tr':'en'}}}catch(e){}
   window.DA_STORE=store||window.localStorage;
   for(const s of [...document.querySelectorAll('script[type="text/da-boot"]')]){const n=document.createElement('script');n.textContent=s.textContent;document.body.appendChild(n)}
 })();
