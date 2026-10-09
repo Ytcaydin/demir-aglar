@@ -3322,7 +3322,9 @@ if(window.DA_CG){const SDK=window.CrazyGames&&window.CrazyGames.SDK,ok=()=>SDK&&
   const cgMute=()=>{try{const m=SDK.game.settings&&SDK.game.settings.muteAudio;if(AU.master)AU.master.gain.value=m?0:0.7;window.__cgMuted=!!m}catch(e){}};
   if(ok()){try{SDK.game.addSettingsChangeListener(cgMute)}catch(e){}setInterval(cgMute,2000);cgMute()}
   /* oynanış başladı/durdu bildirimi */
-  let playing=null;setInterval(()=>{if(!ok())return;const p=!!(speed&&S&&!S.over&&(!$('eracard')||$('eracard').hidden)&&(!$('card3')||$('card3').hidden)&&!document.hidden&&!window.__cgAd);if(p!==playing){playing=p;try{p?SDK.game.gameplayStart():SDK.game.gameplayStop()}catch(e){}}},1000);
+  let playing=null;setInterval(()=>{if(!ok())return;/* hız 0 (duraklat) da oynanıştır: tycoon'da hat kurma/planlama duraklatılmış yapılır; eskiden
+     yalnızca zaman akınca sayılıyordu ve ilk hattını kuran yeni oyuncu 'oynamadı' görünüyordu */
+  const p=!!(S&&!S.over&&(!$('eracard')||$('eracard').hidden)&&(!$('card3')||$('card3').hidden)&&!document.hidden&&!window.__cgAd);if(p!==playing){playing=p;try{p?SDK.game.gameplayStart():SDK.game.gameplayStop()}catch(e){}}},1000);
   {const ls=setInterval(()=>{if(!E.ready)return;clearInterval(ls);try{if(ok())SDK.game.loadingStop()}catch(e){}},200)}
   /* ödüllü reklam */
   const _fa=fakeAd;fakeAd=function(btn,done){if(!ok())return _fa(btn,done);const html=btn.innerHTML,sp=speed;btn.disabled=true;window.__cgAd=1;
