@@ -43,13 +43,31 @@ def main() -> int:
     if OUT.exists():
         shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
+    # Tüm dosyalar tek düzeyde (alt klasörsüz): CrazyGames yükleme ekranında dosyalar tek tek
+    # seçildiğinde alt klasörler (fonts/, icons/) yüklenmiyor ve "Missing resource" uyarısı
+    # çıkıyordu. fonts/f0.woff2 -> fonts-f0.woff2 gibi düzleştirip referansları güncelliyoruz.
+    renames = {}
     for p in SRC.iterdir():
         if p.name == "index.html":
             continue
         if p.is_dir():
-            shutil.copytree(p, OUT / p.name)
+            for q in sorted(p.rglob("*")):
+                if q.is_file():
+                    rel = q.relative_to(SRC).as_posix()
+                    flat = rel.replace("/", "-")
+                    shutil.copy2(q, OUT / flat)
+                    renames[rel] = flat
         else:
             shutil.copy2(p, OUT / p.name)
+
+    def flatten_refs(text: str) -> str:
+        for rel in sorted(renames, key=len, reverse=True):
+            text = text.replace(rel, renames[rel])
+        return text
+
+    for p in OUT.iterdir():
+        if p.suffix in (".css", ".json", ".js", ".webmanifest") and p.name not in ("three.min.js", "OrbitControls.js"):
+            p.write_text(flatten_refs(p.read_text(encoding="utf-8")), encoding="utf-8")
 
     html = (SRC / "index.html").read_text(encoding="utf-8")
     # Android'e özgü titreşim köprüsü gerekmez
@@ -73,7 +91,11 @@ def main() -> int:
         print(f"HATA: beklenen betikler bulunamadı ({n})", file=sys.stderr)
         return 1
     tail = tail.replace("</body>", LOADER + "</body>", 1)
-    (OUT / "index.html").write_text(head + tail, encoding="utf-8")
+    (OUT / "index.html").write_text(flatten_refs(head + tail), encoding="utf-8")
+    left = [d for d in OUT.iterdir() if d.is_dir()]
+    if left:
+        print(f"HATA: alt klasör kaldı: {left}", file=sys.stderr)
+        return 1
 
     if ZIP.exists():
         ZIP.unlink()
