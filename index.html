@@ -2280,7 +2280,13 @@ function envReflections(){try{const pm=new THREE.PMREMGenerator(E.renderer);cons
 
 /* ---- per-frame: shadows follow zoom, headlights, env fade, fps ---- */
 function gfxFrame(dt,camDist,dl){GFX_U.uTime.value=time;gfxFps(dt);forestSeason();
-  const ext=Math.max(70,Math.min(340,camDist*0.62));if(!E.shExt||Math.abs(ext-E.shExt)>E.shExt*0.12){E.shExt=ext;const sc=E.sun.shadow.camera;sc.left=-ext;sc.right=ext;sc.top=ext;sc.bottom=-ext;sc.updateProjectionMatrix()}
+  /* açılış uçuşu: gölge kutusu uçuş boyunca sabit (son karedeki mesafe) — her adımda yeniden
+     boyutlanınca tüm haritadaki gölgeler 2-3 sn titriyordu */
+  const I=E.intro,cd=I?I.K[I.K.length-1].p.distanceTo(I.K[I.K.length-1].t):camDist;
+  /* uzaktayken yakın kırpma düzlemini büyüt: derinlik hassasiyeti artar, kıyı/yol/su üst üste
+     binen yüzeylerde titreme (z-fighting) olmaz. Yakında 4 olarak kalır. */
+  {const cam=E.camera,nr=Math.max(4,Math.min(40,Math.min(camDist,cam.position.y)*0.02));if(Math.abs(nr-cam.near)>cam.near*0.1){cam.near=nr;cam.updateProjectionMatrix()}}
+  const ext=Math.max(70,Math.min(340,cd*0.62));if(!E.shExt||Math.abs(ext-E.shExt)>E.shExt*0.12){E.shExt=ext;const sc=E.sun.shadow.camera;sc.left=-ext;sc.right=ext;sc.top=ext;sc.bottom=-ext;sc.updateProjectionMatrix()}
   if(E.env){const k=1-dl.night*0.85;E.mGlass.envMapIntensity=k;E.mGlassOff.envMapIntensity=k;if(E.mCurtain)E.mCurtain.envMapIntensity=k;E.mBody.envMapIntensity=0.25*k}
   const lampOp=dl.night*0.95+dl.dusk*0.3;for(const o of [...E.trainObjs,...E.rivalObjs])if(o.lamp){o.lamp.material.opacity=lampOp;o.lamp.visible=lampOp>0.03}}
 function addLamp(o){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:E.glowTex,color:0xfff2c8,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));s.userData.ownMat=true;s.scale.set(7,7,1);s.position.set(5.2,2.4,0);o.cars[0].add(s);o.lamp=s;return o}
