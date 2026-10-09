@@ -3300,6 +3300,8 @@ function xferOf(path){if(!path||path.length<3)return null;if(_xf.has(path))retur
   return _po3(path,pos)}}
 function tferry(o,q,dir){const on=!!(q&&q.water)&&!megaDone('marmaray');if(on){if(!o.tf){o.tf=shipMesh('ferry');o.tf.scale.setScalar(0.3);o.grp.add(o.tf)}o.tf.visible=true;o.tf.position.set(q.x,0,q.z);o.tf.rotation.y=-Math.atan2(q.uz*dir,q.ux*dir)}else if(o.tf)o.tf.visible=false}
 function realAds(){try{return !!(window.DA_CG||(window.AndroidBridge&&AndroidBridge.hasAds&&AndroidBridge.hasAds()))}catch(e){return false}}
+/* tam ekranda açık yan panel (Şirket vb.) çağ/yeni oyun kartının üstünü kapatıyordu: kart açılınca paneli kapat */
+{const _es=eraShow;eraShow=function(h){try{if(FS.tab)fsClose()}catch(e){}return _es(h)}}
 /* ---------- dikey ekran düzeltmeleri ---------- */
 /* bilgi kartı ve rehber, sağdaki düğme sütununun (dile göre genişliği değişir) üstüne binmesin */
 {const st=document.createElement('style');st.textContent='.cinfo,.coach{right:calc(var(--wcw,52px) + 10px)}';document.head.appendChild(st);
