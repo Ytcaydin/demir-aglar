@@ -3336,7 +3336,10 @@ if(window.DA_CG){const SDK=window.CrazyGames&&window.CrazyGames.SDK,ok=()=>SDK&&
   /* ilk dakikalar: portal oyuncusu hemen oynamalı. 1927 başlangıcı öne alınır (eğitim anında başlar),
      Osmanlı girişindeki inşaat bölümü varsayılan olarak hızlı oynar */
   {const _nga=newGameAsk;newGameAsk=function(first){_nga(first);const c=document.querySelector('#eracard [data-a="ng:cum"]'),o=document.querySelector('#eracard [data-a="ng:osm"]');
-     if(c&&o){c.classList.add('primary');o.classList.remove('primary');o.parentNode.insertBefore(c,o)}};
+     if(c&&o){c.classList.add('primary');o.classList.remove('primary');o.parentNode.insertBefore(c,o)}
+     /* ilk açılışta seçim ekranı yok: oyuncu doğrudan 1927 ile başlar (CrazyGames'te seçim ekranında
+        çıkan oyuncu çoktu). 1856 ve diğerleri Senaryo menüsünde; "Yeni oyun" yine soruyu gösterir. */
+     if(first&&c)c.click()};
    document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-a="pro:go"]');if(b)setTimeout(()=>{if(S&&S.pro&&S.pro.fast===undefined){S.pro.fast=true;try{proShow()}catch(x){}}},0)},true)}
   /* geçiş reklamı (midgame): yalnızca doğal molalarda — çağ kartı kapanınca, senaryo bitince/yeniden başlayınca, yeni oyunda.
      Oyun başladıktan 3 dk önce ve iki reklam arası 4 dk içinde gösterilmez; çalışırken hız durur, ses kısılır. */
