@@ -139,6 +139,7 @@ h1{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:.14e
 .thr span{position:relative;display:grid;place-items:center;height:100%;font:700 13px var(--body);color:var(--paper);text-shadow:0 1px 2px #000}
 .lab3.lm{flex-direction:row;gap:5px;background:linear-gradient(#f3d58f,#d9a73e);color:#2a1d05;border:1.5px solid #8a6a1c;pointer-events:auto;opacity:.92;font-size:12px;padding:3px 9px 3px 5px;box-shadow:0 2px 8px rgba(0,0,0,.35),0 0 0 2px rgba(255,236,180,.35)}.lab3.lm .lmi{display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#2a1d05;color:#f3d58f;font-size:11px}.lab3.lm.on{opacity:1;border-color:#5a3f0c;box-shadow:0 2px 10px rgba(0,0,0,.4),0 0 0 3px rgba(226,184,92,.55)}
 .setpanel{position:absolute;top:10px;right:60px;background:rgba(16,32,42,.96);border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;z-index:6;min-width:200px}
+body.fs3 .card3,body.fs3 .eracard,body.fs3 .procard{z-index:9}
 body.fs3 .setpanel{z-index:9;max-height:calc(100% - 20px);overflow:auto}
 .setpanel .wbtn{width:100%;justify-content:start;display:flex;align-items:center;font-size:13px;letter-spacing:.02em}
 .goalchip{position:absolute;left:10px;bottom:10px;max-width:calc(100% - 80px);display:flex;align-items:center;gap:8px;background:rgba(16,32,42,.9);border:1px solid rgba(226,184,92,.6);border-radius:12px;padding:6px 10px;z-index:2;cursor:pointer;color:var(--paper)}
@@ -3303,6 +3304,8 @@ function tferry(o,q,dir){const on=!!(q&&q.water)&&!megaDone('marmaray');if(on){i
 function realAds(){try{return !!(window.DA_CG||(window.AndroidBridge&&AndroidBridge.hasAds&&AndroidBridge.hasAds()))}catch(e){return false}}
 /* tam ekranda açık yan panel (Şirket vb.) çağ/yeni oyun kartının üstünü kapatıyordu: kart açılınca paneli kapat */
 {const _es=eraShow;eraShow=function(h){try{if(FS.tab)fsClose()}catch(e){}return _es(h)}}
+/* aynısı karar kartı (card3) ve diğer ortadaki kartlar için: görünür olduklarında açık yan paneli kapat */
+{const ids=new Set(['card3','eracard','procard']);new MutationObserver(ms=>{for(const m of ms){const t=m.target;if(t&&ids.has(t.id)&&!t.hidden){try{if(FS.tab)fsClose()}catch(e){}break}}}).observe(document.body,{subtree:true,attributes:true,attributeFilter:['hidden']})}
 /* iflas öncesi uyarı: kasa eksiye düşünce (ve -200 altında son kez) oyunu durdurup ne yapılacağını söyle.
    Eskiden yalnızca rakam kırmızıya dönüyor, -300'de oyun aniden bitiyordu. */
 {const negCard=last=>{const canLoan=(S.debt||0)<900;
