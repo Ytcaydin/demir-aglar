@@ -3310,9 +3310,10 @@ function xferOf(path){if(!path||path.length<3)return null;if(_xf.has(path))retur
 function tferry(o,q,dir){const on=!!(q&&q.water)&&!megaDone('marmaray');if(on){if(!o.tf){o.tf=shipMesh('ferry');o.tf.scale.setScalar(0.3);o.grp.add(o.tf)}o.tf.visible=true;o.tf.position.set(q.x,0,q.z);o.tf.rotation.y=-Math.atan2(q.uz*dir,q.ux*dir)}else if(o.tf)o.tf.visible=false}
 function realAds(){try{return !!(window.DA_CG||(window.AndroidBridge&&AndroidBridge.hasAds&&AndroidBridge.hasAds()))}catch(e){return false}}
 /* tam ekranda açık yan panel (Şirket vb.) çağ/yeni oyun kartının üstünü kapatıyordu: kart açılınca paneli kapat */
-{const _es=eraShow;eraShow=function(h){try{if(FS.tab)fsClose()}catch(e){}return _es(h)}}
+const closeOverlays=()=>{try{if(FS.tab)fsClose()}catch(e){}try{const sp=$('setpanel');if(sp&&!sp.hidden){sp.hidden=true;$('setbtn')&&$('setbtn').classList.remove('on')}}catch(e){}};
+{const _es=eraShow;eraShow=function(h){closeOverlays();return _es(h)}}
 /* aynısı karar kartı (card3) ve diğer ortadaki kartlar için: görünür olduklarında açık yan paneli kapat */
-{const ids=new Set(['card3','eracard','procard']);new MutationObserver(ms=>{for(const m of ms){const t=m.target;if(t&&ids.has(t.id)&&!t.hidden&&m.oldValue!==null){try{if(FS.tab)fsClose()}catch(e){}break}}}).observe(document.body,{subtree:true,attributes:true,attributeOldValue:true,attributeFilter:['hidden']})}
+{const ids=new Set(['card3','eracard','procard']);new MutationObserver(ms=>{for(const m of ms){const t=m.target;if(t&&ids.has(t.id)&&!t.hidden&&m.oldValue!==null){closeOverlays();break}}}).observe(document.body,{subtree:true,attributes:true,attributeOldValue:true,attributeFilter:['hidden']})}
 /* iflas öncesi uyarı: kasa eksiye düşünce (ve -200 altında son kez) oyunu durdurup ne yapılacağını söyle.
    Eskiden yalnızca rakam kırmızıya dönüyor, -300'de oyun aniden bitiyordu. */
 {const negCard=last=>{const canLoan=(S.debt||0)<900;
