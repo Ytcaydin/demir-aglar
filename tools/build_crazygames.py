@@ -72,8 +72,10 @@ def main() -> int:
     html = (SRC / "index.html").read_text(encoding="utf-8")
     # Android'e özgü titreşim köprüsü gerekmez
     html = re.sub(r"<script>if\(window\.AndroidBridge\)\{navigator\.vibrate=.*?</script>\n?", "", html)
-    sdk = '<script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>\n<script>window.DA_CG=true</script>\n'
-    html = html.replace("</head>", sdk + "</head>", 1)
+    # DA_CG bayrağı başta (satır içi, engellemez). SDK betiği ise <body> sonunda, yükleyiciden hemen önce:
+    # baştayken SDK inene kadar tarayıcı hiçbir şey çizmiyor, telefonda 4-5 sn beyaz ekran kalıyordu.
+    html = html.replace("</head>", "<script>window.DA_CG=true</script>\n</head>", 1)
+    sdk_tag = '<script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>\n'
 
     # three.js ve OrbitControls'ten sonraki satır içi betikler SDK hazır olunca çalışsın
     start = html.index('<script src="OrbitControls.js"></script>') + len('<script src="OrbitControls.js"></script>')
@@ -90,7 +92,7 @@ def main() -> int:
     if n < 2:
         print(f"HATA: beklenen betikler bulunamadı ({n})", file=sys.stderr)
         return 1
-    tail = tail.replace("</body>", LOADER + "</body>", 1)
+    tail = tail.replace("</body>", sdk_tag + LOADER + "</body>", 1)
     (OUT / "index.html").write_text(flatten_refs(head + tail), encoding="utf-8")
     left = [d for d in OUT.iterdir() if d.is_dir()]
     if left:
