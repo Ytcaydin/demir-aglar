@@ -3332,7 +3332,7 @@ const closeOverlays=()=>{try{if(FS.tab)fsClose()}catch(e){}try{const sp=$('setpa
    eraClose()},true)}
 /* rakip şirket tanıtımı: öğretici bitince, rakibin hattı varsa bir kez (eleştiri: rakip hiç tanıtılmıyordu) */
 {const _me2=monthEnd;monthEnd=function(m){_me2(m);try{if(S.over||S.scn||(typeof FF!=='undefined'&&FF.on)||(S.tut??-1)>=0||!S.rival||S.rival.bought||!S.rival.tracks.length)return;
-   S.flags=S.flags||{};if(S.flags.rvIntro)return;if(S.card||($('eracard')&&!$('eracard').hidden))return;S.flags.rvIntro=1;
+   S.flags=S.flags||{};if(S.flags.rvIntro)return;if(month()-(S.rvT0??(S.rvT0=month()))<8)return;if(S.card||($('eracard')&&!$('eracard').hidden))return;S.flags.rvIntro=1;
    const ls=S.rival.tracks.slice(0,3).map(t=>`${C[t.a].n}–${C[t.b].n}`).join(', ');
    eraShow(_t`<span class="note">${_t('Rakip şirket')}</span><h3>${rivalName()}</h3>
    <p>${_t`Haritadaki <b style="color:#7fb2e5">mavi hatlar</b> rakibin: ${ls}. Rakip her yıl yeni şehirlere uzanır.`}</p>
@@ -3370,7 +3370,11 @@ if(window.DA_CG){const SDK=window.CrazyGames&&window.CrazyGames.SDK,ok=()=>SDK&&
   /* oynanış başladı/durdu bildirimi */
   let playing=null;setInterval(()=>{if(!ok())return;/* hız 0 (duraklat) da oynanıştır: tycoon'da hat kurma/planlama duraklatılmış yapılır; eskiden
      yalnızca zaman akınca sayılıyordu ve ilk hattını kuran yeni oyuncu 'oynamadı' görünüyordu */
-  const p=!!(S&&!S.over&&(!$('eracard')||$('eracard').hidden)&&(!$('card3')||$('card3').hidden)&&!document.hidden&&!window.__cgAd);if(p!==playing){playing=p;try{p?SDK.game.gameplayStart():SDK.game.gameplayStop()}catch(e){}}},1000);
+  /* CrazyGames dönüşümü = "en az 1 dk oynayan oyuncu". Karar/tarih/rakip kartlarını okumak oyunun parçası;
+     eskiden her kartta gameplayStop gidiyor, ilk dakikadaki kartlar sayacı durduruyordu. Artık yalnızca
+     başlangıç seçimi menüsü, oyun sonu, reklam ve sekme gizliyken durur. */
+  const menu=$('eracard')&&!$('eracard').hidden&&$('eracard').querySelector('[data-a^="ng:"]');
+  const p=!!(S&&!S.over&&!menu&&!document.hidden&&!window.__cgAd);if(p!==playing){playing=p;try{p?SDK.game.gameplayStart():SDK.game.gameplayStop()}catch(e){}}},1000);
   {const ls=setInterval(()=>{if(!E.ready)return;clearInterval(ls);try{if(ok())SDK.game.loadingStop()}catch(e){}},200)}
   /* ödüllü reklam */
   const _fa=fakeAd;fakeAd=function(btn,done){if(!ok())return _fa(btn,done);const html=btn.innerHTML,sp=speed;btn.disabled=true;window.__cgAd=1;
