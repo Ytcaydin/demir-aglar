@@ -32,7 +32,7 @@ window.DA_BOOT=async()=>{if(window.__daBoot)return;window.__daBoot=1;const C=win
     if(ready&&C.environment&&C.environment!=='disabled'){store=C.data;
       const si=C.user&&C.user.systemInfo,loc=(si&&(si.locale||si.language||si.countryCode))||'';let o={};
       try{o=JSON.parse(store.getItem('demir-aglar-opt')||'{}')||{}}catch(e){}
-      if(!o.lang&&loc&&!/[?&]lang=/.test(location.search))window.DA_LANG=/^tr/i.test(loc)?'tr':'en'}}}catch(e){}
+      if(!o.lang&&loc&&!/[?&]lang=/.test(location.search))window.DA_LANG=/^tr/i.test(loc)?'tr':'en'}}}catch(e){store=null;window.DA_CG_OFFLINE=1}
   if(!C)window.DA_CG_OFFLINE=1;
   window.DA_STORE=store||window.localStorage;
   for(const s of [...document.querySelectorAll('script[type="text/da-boot"]')]){const n=document.createElement('script');n.textContent=s.textContent;document.body.appendChild(n)}
