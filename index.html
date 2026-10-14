@@ -119,10 +119,16 @@ h1{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:.14e
 #load3,#err3{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(25,22,18,.82);color:#fff;border-radius:10px;padding:10px 14px;font-size:13px;max-width:82%;text-align:center}
 #err3{background:rgba(140,35,25,.92);cursor:pointer;pointer-events:auto}
 #load3[hidden],#err3[hidden]{display:none}
+.world:has(#load3:not([hidden])) .coach,body:has(#load3:not([hidden])) #banner{visibility:hidden}
+#load3::after{content:'';display:block;height:3px;margin-top:8px;border-radius:2px;background:linear-gradient(90deg,transparent,#e2b85c,transparent);background-size:200% 100%;animation:ldbar 1.1s linear infinite}
+@keyframes ldbar{from{background-position:100% 0}to{background-position:-100% 0}}
 .coach{position:absolute;left:10px;right:62px;bottom:10px;background:rgba(16,32,42,.95);border:1px solid var(--ochre);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;z-index:3;box-shadow:0 6px 20px rgba(0,0,0,.35)}
 .coach p{margin:0;line-height:1.45;font-size:14px}.coach .ct{display:flex;justify-content:space-between;align-items:center}
 .lnk{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:600 13px var(--body);padding:4px}
 .pulse{animation:pulse 1.2s ease-in-out infinite;position:relative;z-index:1}
+.lab3.tutgo{animation:pulse 1.1s ease-in-out infinite;border:2px solid #e2b85c;z-index:6;font-weight:700}
+.lab3.tutgo::after{content:'👆';position:absolute;top:100%;left:50%;margin-left:-12px;font-size:24px;line-height:24px;animation:tutbob .9s ease-in-out infinite;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}
+@keyframes tutbob{0%,100%{transform:translateY(2px)}50%{transform:translateY(9px)}}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(226,184,92,.95)}50%{box-shadow:0 0 0 7px rgba(226,184,92,0)}}
 .scnflag{position:absolute;left:10px;top:46px;background:rgba(27,44,64,.9);border:1px solid #35507a;color:#cfe0f5;font:700 12px var(--body);padding:5px 9px;border-radius:8px}
 .followcap{position:absolute;left:10px;right:62px;top:10px;background:rgba(16,32,42,.85);border:1px solid var(--line);color:var(--paper);font:600 12px var(--body);padding:6px 9px;border-radius:8px;text-align:center}
@@ -1287,7 +1293,7 @@ function showCard(){const el=$('card3');if(!el)return;if(!S.card){el.hidden=true
 function monthlyExtras(m){unlockCheck();
   if(S.promise){const p=S.promise;if(connected(p.city)){S.money+=250;S.inc+=250;good(_t`<b>${C[p.city].n} belediyesi hibeyi ödedi: +250 bin ₺</b>`);popup(p.city,'+250',true);S.promise=null}else if(m>=p.until){bad(_t`<b>${nSuf(C[p.city].n,'dat')} verilen söz tutulmadı.</b><span class="note">Hibe iptal edildi.</span>`);S.promise=null}}
   if(S.tender&&m>=S.tender.until)S.tender=null;
-  const b=bayramAt(m);if(b&&!bayramAt(m-1))good(_t`<b>${b} geldi!</b><span class="note">Bu ay bütün yolcu gelirleri %50 fazla. Bayram trenleri tıklım tıklım.</span>`,5000);
+  const b=bayramAt(m);if(b&&!bayramAt(m-1)&&S.trains.length)good(_t`<b>${b} geldi!</b><span class="note">Bu ay bütün yolcu gelirleri %50 fazla. Bayram trenleri tıklım tıklım.</span>`,5000);
   cardMonth(m)}
 
 /* ---------- driver mode ---------- */
@@ -2549,8 +2555,8 @@ function regionDone(id){const a=ALBUM[id];return !!a&&(META.albumSets||[]).inclu
 function albumCheck(){if(!S||S.scn||FF.on)return;const A=album(),nw=[];for(const c of CITIES)if(!A[c.id]&&connected(c.id)){A[c.id]={y:year(),nw:1};nw.push(c.id)}
   if(!nw.length)return;const sets=[];
   for(const [k,R] of Object.entries(REGIONS)){const ids=regionIds(k);if(ids.every(i=>A[i])&&!(META.albumSets||[]).includes(k)){(META.albumSets=META.albumSets||[]).push(k);const g=60*ids.length;S.money+=g;S.inc+=g;passXP(40);sets.push(_t`${R.n} seti tamam: +${fmt(g)} bin ₺, bölgede yolcu geliri kalıcı +%5`)}}
-  saveMeta();sfx('chime');
-  good(nw.length===1?_t`<b>📇 Albüme yeni kart: ${C[nw[0]].n}</b><span class="note">Yöresel ürün: ${ALBUM[nw[0]].u}. Albüm sekmesinde.</span>`:_t`<b>📇 Albüme ${nw.length} yeni kart</b><span class="note">${nw.map(i=>C[i].n).join(', ')}</span>`,4600);
+  saveMeta();if(!(gT()<4&&!sets.length)){sfx('chime');
+  good(nw.length===1?_t`<b>📇 Albüme yeni kart: ${C[nw[0]].n}</b><span class="note">Yöresel ürün: ${ALBUM[nw[0]].u}. Albüm sekmesinde.</span>`:_t`<b>📇 Albüme ${nw.length} yeni kart</b><span class="note">${nw.map(i=>C[i].n).join(', ')}</span>`,4600);}
   if(sets.length)setTimeout(()=>{sfx('fanfare');good(`<b>🏅 ${sets.join(' · ')}</b>`,6000)},4800);
   renderAlbum();checkMissions()}
 let albSel=null;
@@ -3346,6 +3352,11 @@ const closeOverlays=()=>{try{if(FS.tab)fsClose()}catch(e){}try{const sp=$('setpa
 /* günlük ödül hazırsa, öğretici bitmiş oyuncuya açılışta bir kez hatırlat */
 setTimeout(()=>{try{if(!S||S.over||(S.tut??-1)>=0||!dailyAvail())return;const ns=nextStreak();
   info(_t`<b>🎁 ${ns}. gün ödülün hazır: +${ns*40} bin ₺</b><span class="note">Mağaza sekmesinden al. Her gün gel, seri büyüsün; bir gün kaçırırsan sıfırlanır.</span>`)}catch(e){}},9000);
+/* öğretici "şehre dokun" adımlarında hedef şehir etiketi parlasın ve üstünde el işareti olsun:
+   küçük etiketler arasında Ankara'yı bulmak telefonda zordu */
+{const _ts=tutSync;tutSync=function(){_ts();try{const i=S.tut??-1,st=i>=0&&!S.scn&&!S.over?TUT[i]:null,id=st&&st.focus;
+  for(const k in E.labels||{}){const el=E.labels[k].el;if(el)el.classList.toggle('tutgo',k===id)}}catch(e){}}}
+{const _dl=daylight;daylight=function(){const d=_dl();let k=1;try{if(S&&!S.scn)k=clamp01((gT()-14)/4)}catch(e){}return k>=1?d:{night:d.night*k,dusk:d.dusk*k}}}
 /* ---------- dikey ekran düzeltmeleri ---------- */
 /* bilgi kartı ve rehber, sağdaki düğme sütununun (dile göre genişliği değişir) üstüne binmesin */
 {const st=document.createElement('style');st.textContent='.cinfo,.coach{right:calc(var(--wcw,52px) + 10px)}';document.head.appendChild(st);
