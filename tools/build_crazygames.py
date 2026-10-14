@@ -23,17 +23,22 @@ ZIP = ROOT / "dist" / "DemirAglar-crazygames.zip"
 LOADER_PRE = """<script>
 window.DA_BOOT=async()=>{if(window.__daBoot)return;window.__daBoot=1;const C=window.CrazyGames&&window.CrazyGames.SDK;let store=null;
   try{if(C){
-    await Promise.race([C.init(),new Promise(r=>setTimeout(r,4000))]);
+    /* Veri modülü yalnız init gerçekten bitince kullanılır (hesap verisi init sırasında yüklenir).
+       Bitmezse oyun tarayıcı deposuyla açılır; buluttaki kayda hiç dokunulmaz, ezilmez. */
+    let ready=false;
+    await Promise.race([C.init().then(()=>{ready=true}),new Promise(r=>setTimeout(r,10000))]);
     try{C.game.loadingStart()}catch(e){}
-    if(C.environment&&C.environment!=='disabled'){store=C.data;
+    if(!ready)window.DA_CG_OFFLINE=1;
+    if(ready&&C.environment&&C.environment!=='disabled'){store=C.data;
       const si=C.user&&C.user.systemInfo,loc=(si&&(si.locale||si.language||si.countryCode))||'';let o={};
       try{o=JSON.parse(store.getItem('demir-aglar-opt')||'{}')||{}}catch(e){}
       if(!o.lang&&loc&&!/[?&]lang=/.test(location.search))window.DA_LANG=/^tr/i.test(loc)?'tr':'en'}}}catch(e){}
+  if(!C)window.DA_CG_OFFLINE=1;
   window.DA_STORE=store||window.localStorage;
   for(const s of [...document.querySelectorAll('script[type="text/da-boot"]')]){const n=document.createElement('script');n.textContent=s.textContent;document.body.appendChild(n)}
 };
 /* SDK betiği hiç inmezse (yavaş/kapalı ağ) oyun yine de açılsın */
-setTimeout(()=>window.DA_BOOT(),8000);
+setTimeout(()=>window.DA_BOOT(),12000);
 </script>
 """
 LOADER = '<script>window.DA_BOOT()</script>\n'
