@@ -20,8 +20,8 @@ SRC = ROOT / "android" / "app" / "src" / "main" / "assets" / "www"
 OUT = ROOT / "dist" / "crazygames"
 ZIP = ROOT / "dist" / "DemirAglar-crazygames.zip"
 
-LOADER = """<script>
-(async()=>{const C=window.CrazyGames&&window.CrazyGames.SDK;let store=null;
+LOADER_PRE = """<script>
+window.DA_BOOT=async()=>{if(window.__daBoot)return;window.__daBoot=1;const C=window.CrazyGames&&window.CrazyGames.SDK;let store=null;
   try{if(C){
     await Promise.race([C.init(),new Promise(r=>setTimeout(r,4000))]);
     try{C.game.loadingStart()}catch(e){}
@@ -31,9 +31,12 @@ LOADER = """<script>
       if(!o.lang&&loc&&!/[?&]lang=/.test(location.search))window.DA_LANG=/^tr/i.test(loc)?'tr':'en'}}}catch(e){}
   window.DA_STORE=store||window.localStorage;
   for(const s of [...document.querySelectorAll('script[type="text/da-boot"]')]){const n=document.createElement('script');n.textContent=s.textContent;document.body.appendChild(n)}
-})();
+};
+/* SDK betiği hiç inmezse (yavaş/kapalı ağ) oyun yine de açılsın */
+setTimeout(()=>window.DA_BOOT(),8000);
 </script>
 """
+LOADER = '<script>window.DA_BOOT()</script>\n'
 
 
 def main() -> int:
@@ -92,7 +95,7 @@ def main() -> int:
     if n < 2:
         print(f"HATA: beklenen betikler bulunamadı ({n})", file=sys.stderr)
         return 1
-    tail = tail.replace("</body>", sdk_tag + LOADER + "</body>", 1)
+    tail = tail.replace("</body>", LOADER_PRE + sdk_tag + LOADER + "</body>", 1)
     (OUT / "index.html").write_text(flatten_refs(head + tail), encoding="utf-8")
     left = [d for d in OUT.iterdir() if d.is_dir()]
     if left:
