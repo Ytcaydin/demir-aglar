@@ -1092,7 +1092,12 @@ function stars(){let raw=null;try{raw=localStorage.getItem(STAR_KEY)}catch(e){wi
   if(bad)try{if(!localStorage.getItem(STAR_KEY+'-bozuk'))localStorage.setItem(STAR_KEY+'-bozuk',raw)}catch(e){}return out}
 /* senaryo yıldızı önce bekleyen ödül olarak meta kaydına yazılır, sonra yıldız kaydına işlenir; yazılamazsa sonra tekrar denenir */
 function starAward(id,st){META.starPend=META.starPend||{};META.starPend[id]=Math.max(META.starPend[id]||0,st);saveMeta();starFlush()}
-function starFlush(){const P=META.starPend;if(!P||!Object.keys(P).length||window.__readErr)return;const all=stars();if(window.__readErr)return;
+function scnAwardSettle(A){if(!A||!A.aid)return;META.awApplied=Array.isArray(META.awApplied)?META.awApplied:[];if(A.st>0)starAward(A.id,A.st);if(META.awApplied.includes(A.aid))return;
+  META.awApplied.push(A.aid);if(META.awApplied.length>40)META.awApplied=META.awApplied.slice(-40);if(A.xp>0)passXP(A.xp);else saveMeta()}
+/* bekleyen yıldız şeması: düz nesne, bilinen senaryo, 0-3 tam sayı */
+function starPendClean(){const P=META.starPend;if(P==null)return {};const out={};if(typeof P!=='object'||Array.isArray(P)){META.starPendBad=JSON.stringify(P).slice(0,500);META.starPend={};return out}
+  for(const k in P){const v=P[k];if(SCN.some(x=>x.id===k)&&Number.isInteger(v)&&v>=0&&v<=3)out[k]=v;else{META.starPendBad=JSON.stringify(P).slice(0,500)}}META.starPend=out;return out}
+function starFlush(){const P=starPendClean();if(!Object.keys(P).length||window.__readErr)return;const all=stars();if(window.__readErr)return;
   for(const k in P)if((all[k]||0)<P[k])all[k]=P[k];try{localStorage.setItem(STAR_KEY,JSON.stringify(all));META.starPend={};saveMeta();try{renderScn()}catch(e){}}catch(e){console.warn('stars',e)}}
 function scnDef(){return S.scn&&SCN.find(x=>x.id===S.scn.id)}
 function loadKey(k){let raw=null;try{raw=localStorage.getItem(k)}catch(e){window.__readErr=1;return null}try{const s=JSON.parse(raw);if(okSave(s))return s}catch(e){}return null}
@@ -1124,8 +1129,10 @@ function exitScn(){const prev=S;persist();const re0=window.__readErr;let nx=load
   if(!nx&&window.__readErr){window.__readErr=re0;bad(_t('<b>Ana oyun kaydı şu an okunamıyor.</b><span class="note">Senaryoda kalıyorsun; kaydın korunuyor. Biraz sonra tekrar dene ya da sayfayı yenile.</span>'));return}
   try{localStorage.setItem('demir-aglar-slot','free')}catch(e){}S=nx||freshState();carryMeta(prev,S);resetWorld();persist();setTab('scn')}
 function scnCheck(){const s=S.scn,def=scnDef();if(!s||s.end)return;
-  if(def.ok()){const u=(S.t-s.start)/def.mo,st=u<=0.5?3:u<=0.75?2:1;s.end='win';s.stars=st;const all=stars(),prevSt=Math.max(all[s.id]||0,(META.starPend&&META.starPend[s.id])||0);if(prevSt<st)starAward(s.id,st);
-    speed=0;setSpeedUI();sfx('fanfare');passXP(40*Math.max(0,st-prevSt));$('banner').innerHTML=_t`<div class="banner good"><b>Senaryo tamam: ${def.t} ${'★'.repeat(st)}${'☆'.repeat(3-st)}</b><span class="note">${Math.round(S.t-s.start)} ayda bitirdin. ${st<3?_t`3 yıldız için ${Math.floor(def.mo*0.5)} ay içinde bitir.`:_t('Kusursuz!')} ${st>prevSt?_t` +${40*(st-prevSt)} XP`:''}</span><div class="btns"><button class="btn primary" data-a="scnexit">Serbest oyuna dön</button><button class="btn" data-a="scnre">Tekrar oyna</button></div></div>`;renderScn()}
+  if(def.ok()){const u=(S.t-s.start)/def.mo,st=u<=0.5?3:u<=0.75?2:1;s.end='win';s.stars=st;const all=stars(),prevSt=Math.max(all[s.id]||0,(META.starPend&&META.starPend[s.id])||0);
+    /* yıldız + XP tek ödül: kimliğiyle bitmiş senaryo kaydında taşınır; meta yazılamazsa açılışta bir kez tamamlanır */
+    s.award={aid:Date.now().toString(36)+Math.random().toString(36).slice(2,6),id:s.id,st,xp:40*Math.max(0,st-prevSt)};persist();scnAwardSettle(s.award);
+    speed=0;setSpeedUI();sfx('fanfare');$('banner').innerHTML=_t`<div class="banner good"><b>Senaryo tamam: ${def.t} ${'★'.repeat(st)}${'☆'.repeat(3-st)}</b><span class="note">${Math.ceil(S.t-s.start-1e-6)} ayda bitirdin. ${st<3?_t`3 yıldız için ${Math.floor(def.mo*0.5)} ay içinde bitir.`:_t('Kusursuz!')} ${st>prevSt?_t` +${40*(st-prevSt)} XP`:''}</span><div class="btns"><button class="btn primary" data-a="scnexit">Serbest oyuna dön</button><button class="btn" data-a="scnre">Tekrar oyna</button></div></div>`;renderScn()}
   else if(S.t>=s.until){s.end='fail';speed=0;setSpeedUI();$('banner').innerHTML=_t`<div class="banner"><b>Süre doldu: ${def.t}</b><span class="note">${def.d}</span><div class="btns"><button class="btn primary" data-a="scnre">Tekrar dene</button><button class="btn" data-a="scnexit">Serbest oyuna dön</button></div></div>`;renderScn()}}
 function renderScn(){const tb=document.querySelector('.tab[data-tab="scn"]');if(tb)tb.hidden=!unl('scn');const el=$('scnlist'),cur=$('scncur');if(!el)return;const all=stars(),res=loadKey(SAVE_SCN),d=scnDef();
   cur.innerHTML=d?_t`<h3>${d.t}</h3><p>${d.d}</p><div class="kv"><span>Kalan süre</span><span>${S.scn.end?'—':Math.max(0,Math.ceil(S.scn.until-S.t))+_t(' ay')}</span></div>${meterBar(Math.min(1,(S.t-S.scn.start)/d.mo),'#e2b85c')}<small class="note">3 yıldız: ${Math.floor(d.mo*0.5)} ay içinde · 2 yıldız: ${Math.floor(d.mo*0.75)} ay içinde</small><div class="btns"><button class="btn" data-a="scnre">Baştan başla</button><button class="btn" data-a="scnexit">Serbest oyuna dön</button></div>`
@@ -2677,7 +2684,7 @@ function renderNesil(){const el=$('nesilp');if(!el)return;const N=nesil(),open=n
 let NESIL_PEND=null;
 function nesilGo(){if(!nesilOpen())return;const p=nesilPts();NESIL_PEND={p,last:{y:year(),n:nCon(),v:Math.round(myValue()),p}};nesilConfirm=false;startNew()}
 function nesilCommit(){const P=NESIL_PEND;NESIL_PEND=null;if(!P)return null;const N=nesil();N.pts+=P.p;N.n++;N.last=P.last;saveMeta();return {N,p:P.p}}
-function nesilDone(r){if(!r)return;setTab('co');sfx('fanfare');
+function nesilDone(r){if(!r)return;setTab('co');sfx('fanfare');try{renderNesil();renderCompany()}catch(e){}
   good(_t`<b>🌱 ${r.N.n+1}. nesil başladı!</b><span class="note">${r.p} demiryolcu nişanı kazandın. Şirket sekmesinde Yeni Nesil bölümünden kalıcı güçlere harca.</span>`,6500)}
 /* ---------- 5) geri dönüş özeti ve bildirimler ---------- */
 function waitingList(){const L=[];try{if(dailyAvail())L.push(_t`🎁 ${nextStreak()}. gün ödülün hazır (Mağaza)`)}catch(e){}
@@ -3422,15 +3429,15 @@ function nesilSettle(loud,saved){const A=S&&S.nesilAward;if(!A||S.scn)return;con
   N.pts+=A.p;N.n++;N.last=A.last;N.applied.push(A.id);if(N.applied.length>50)N.applied=N.applied.slice(-50);
   if(!saveMeta()){N.pts-=A.p;N.n--;N.applied.pop();wait();return}
   S.nesil=nesilN();nesilDone({N,p:A.p})}
-{const _p2=persist;persist=function(){_p2();if(window.__saveOk&&S&&S.nesilAward)nesilSettle(false,true);if(window.__saveOk&&META.starPend)starFlush()}}
-setTimeout(()=>{try{starFlush()}catch(e){}},2500);
+{const _p2=persist;persist=function(){_p2();if(window.__saveOk&&!window.__readErr){const b=$('rdErrBtn');if(b)b.remove()}if(window.__saveOk&&S&&S.nesilAward)nesilSettle(false,true);if(window.__saveOk&&META.starPend)starFlush()}}
+setTimeout(()=>{try{const sc=loadKey(SAVE_SCN);if(sc&&sc.scn&&sc.scn.award&&!window.__readErr)scnAwardSettle(sc.scn.award);starFlush()}catch(e){}},2500);
 {const _mg2=migrate;migrate=function(){_mg2();if(S&&S.nesilAward)setTimeout(()=>nesilSettle(false,true),1500)}}
 /* bitmiş senaryoda zaman akmaz (hız düğmesine basılsa da) */
 {const _tk=tick;tick=function(d){if(window.__cgAd)return;if(S&&S.scn&&S.scn.end){if(speed){speed=0;try{setSpeedUI()}catch(e){}}return}_tk(d)}}
 /* kayıt durumu: okuma hatası ne zaman olursa olsun hemen görünür (yalnız açılışta değil) */
-function showReadErr(){if($('rdErrBtn'))return;const d=document.createElement('button');d.id='rdErrBtn';d.className='mini';d.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--navh,0px) + 64px);z-index:80;background:#7a3a2e;color:#fff;border:1px solid #e28b6b';d.textContent=_t('⚠ Kayıt kapalı · yenile');d.onclick=()=>location.reload();document.body.appendChild(d);
+function showReadErr(){if($('rdErrBtn')||!window.__readErr)return;const d=document.createElement('button');d.id='rdErrBtn';d.className='mini';d.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--navh,0px) + 64px);z-index:80;background:#7a3a2e;color:#fff;border:1px solid #e28b6b';d.textContent=_t('⚠ Kayıt kapalı · yenile');d.onclick=()=>location.reload();document.body.appendChild(d);
   try{bad(_t('<b>Kayıt okunamadı.</b><span class="note">Depoya şu an erişilemiyor. Kayıtlı oyunun korunsun diye bu oturum kaydedilmiyor. Sayfayı yenileyip tekrar dene.</span>'))}catch(e){}}
-{let _re=window.__readErr||0;Object.defineProperty(window,'__readErr',{configurable:true,get(){return _re},set(v){_re=v;if(v)setTimeout(()=>{try{showReadErr()}catch(e){}},document.readyState==='complete'?0:3500)}})}
+{let _re=window.__readErr||0;Object.defineProperty(window,'__readErr',{configurable:true,get(){return _re},set(v){_re=v;if(v)setTimeout(()=>{try{if(window.__readErr)showReadErr()}catch(e){}},document.readyState==='complete'?0:3500);else{const b=$('rdErrBtn');if(b)b.remove()}}})}
 setTimeout(()=>{try{if(window.__readErr)showReadErr();
   else if(window.__badSave===2)bad(_t('<b>Son kayıt bozuktu; bir önceki kayıt açıldı.</b><span class="note">Bozuk kayıt silinmedi, ayrı bir yere alındı.</span>'));
   else if(window.__badSave)bad(_t('<b>Kayıt okunamadı, yeni oyun açıldı.</b><span class="note">Bozuk kayıt silinmedi, ayrı bir yere alındı.</span>'))}catch(e){}},3500);
