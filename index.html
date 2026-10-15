@@ -663,7 +663,7 @@ function monthEnd(m){
       else if(met*2<needs.length)st.gr=Math.max(0,st.gr-1)}
     const dec=DECAY/((st.ambar?2:1)*(saltOn(c.id)?2:1));for(const g of needs)st.m[g]=Math.max(0,(st.m[g]||0)-dec);for(const g of bonusOf(c.id))st.m[g]=Math.max(0,(st.m[g]||0)-DECAY);st.im=Math.max(0,(st.im||0)-dec)}
   const interest=S.debt*0.006,cost=Math.round(upkeep()+interest);
-  S.money-=cost;S.exp+=cost;S.last={inc:S.inc,exp:S.exp};
+  S.money-=cost;S.exp+=cost;S.last={inc:S.inc,exp:S.exp,oneoff:S.oneoff||0};S.oneoff=0;
   S.hist.push({m,money:Math.round(S.money),inc:S.inc,exp:S.exp});if(S.hist.length>60)S.hist.shift();
   S.inc=0;S.exp=0;
   S.events=S.events.filter(e=>e.until>m);const unb=S.blocks.filter(b=>b.until<=m);S.blocks=S.blocks.filter(b=>b.until>m);
@@ -914,7 +914,7 @@ document.addEventListener('click',e=>{
 function startNew(){if(S.scn){startScn(S.scn.id);return}confirmNew=false;const prevS=S;S=freshState();if(prevS)carryMeta(prevS,S);nesilApply(S);S.card=null;if($('card3'))$('card3').hidden=true;if($('eracard'))$('eracard').hidden=true;if(E.follow)followStop();DRV.on=false;S.trains.forEach(prepTrain);layoutCache.clear();sel=[];speed=1;offerBanner=null;setSpeedUI();$('banner').innerHTML='';renderAct();renderSide();persist()}
 function offlineCheck(){
   const el=(Date.now()-(S.lastSeen||Date.now()))/1000;if(el<180||!S.last)return;
-  const net=Math.max(0,S.last.inc-S.last.exp);if(net<=0)return;const months=Math.min(el/300,96);const g=Math.round(net*months*0.8);if(g<5)return;
+  const net=Math.max(0,S.last.inc-S.last.exp-(S.last.oneoff||0));if(net<=0)return;const months=Math.min(el/300,96);const g=Math.round(net*months*0.8);if(g<5)return;
   offerBanner=g;const hrs=el>=3600?_t`${Math.floor(el/3600)} saat ${Math.floor(el%3600/60)} dakika`:_t`${Math.floor(el/60)} dakika`;
   $('banner').innerHTML=_t`<div class="banner good"><b>Sen yokken trenler çalıştı: +${fmt(g)} bin ₺</b><span class="note">${hrs} uzaktaydın (en fazla 8 saat sayılır).</span><div class="btns"><button class="btn primary" data-a="offdouble"><span class="adtag">REKLAM</span>2 katını al · +${fmt(g*2)}</button><button class="btn" data-a="offcollect">Topla</button></div></div>`;
 }
@@ -1055,7 +1055,7 @@ function tutSync(){const el=$('coach');if(!el)return;const i=S.tut??-1;
 
 /* ---------- stock market ---------- */
 function stk(){if(!S.stk)S.stk={pub:6,riv:0,mine:0,rcash:60};return S.stk}
-function myValue(){const net=S.last?S.last.inc-S.last.exp:0;return Math.max(80,S.money+trackKm()*0.6+S.trains.reduce((s,t)=>s+TYPES[t.type].cost*0.5,0)+S.ships.length*70-S.debt+net*12+megaValue())}
+function myValue(){const net=S.last?S.last.inc-S.last.exp-(S.last.oneoff||0):0;return Math.max(80,S.money+trackKm()*0.6+S.trains.reduce((s,t)=>s+TYPES[t.type].cost*0.5,0)+S.ships.length*70-S.debt+net*12+megaValue())}
 const myPrice=()=>Math.round(myValue()/10);
 function rivalPrice(){const R=S.rival;return Math.round((150+110*R.tracks.length+40*R.trains.length)/10*(1+0.08*stk().mine)*(hasStaff('diplomat')?0.85:1))}
 function myShare(){const k=stk();return 4+(6-k.pub-k.riv)}
@@ -2632,7 +2632,7 @@ function renderAlbum(){const el=$('album');if(!el)return;const A=album(),n=CITIE
 function weekId(d){d=d||new Date();const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())),day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1));return t.getUTCFullYear()+'-'+String(Math.ceil(((t-y0)/864e5+1)/7)).padStart(2,'0')}
 function rec(){return META.rec||(META.rec={})}
 function recWeek(){const R=rec(),w=weekId();if(!R.week||R.week.id!==w){if(R.week)R.prev=R.week;R.week={id:w,net:0,mo:0,v:0,n:0}}return R.week}
-function recMonth(){if(!S||S.scn)return;const W=recWeek(),R=rec(),v=Math.round(myValue()),n=nCon();if(S.last){W.net+=S.last.inc-S.last.exp;W.mo++}
+function recMonth(){if(!S||S.scn)return;const W=recWeek(),R=rec(),v=Math.round(myValue()),n=nCon();if(S.last){W.net+=S.last.inc-S.last.exp-(S.last.oneoff||0);W.mo++}
   if(v>W.v){W.v=v;W.y=year()}if(n>W.n)W.n=n;if(!R.best||v>R.best.v)R.best={v,y:year(),n,d:today()};if(!FF.on)saveMeta()}
 function shareURL(){if(window.DA_CG)return '';return /^https?:/.test(location.protocol)&&location.host!=='appassets.androidplatform.net'?location.origin+location.pathname.replace(/[^/]*$/,''):''}
 function shareText(){const u=shareURL();return _t`Demir Ağlar’da ${year()} yılına geldim: ${nCon()} şehri bağladım, ${fmt(trackKm())} km hat döşedim. Şirket değeri ${fmt(myValue())} bin ₺!${u?' '+u:''}`}
@@ -2716,7 +2716,7 @@ async function ntfToggle(){if(!(_t('Notification') in window)||!('serviceWorker'
   info(_t`<b>🔔 Bildirimler açık.</b><span class="note">${bg?_t('Uzun süre girmediğinde kasandaki kazancı ve günlük ödülünü hatırlatacağız.'):_t('Bu cihaz arka planda hatırlatmayı desteklemiyor. Oyunu ana ekrana uygulama olarak eklersen çalışabilir; Play Store sürümünde tam desteklenecek.')}</span>`)}
 let ntfT=0;
 async function ntfSync(force){const n=Date.now();if(!S||(!force&&n-ntfT<60000))return;ntfT=n;if(!('caches' in window))return;
-  try{const c=await caches.open('da-state'),net=S.last?Math.max(0,S.last.inc-S.last.exp):0;await c.put('./__state',new Response(JSON.stringify({on:ntfOn(),lastSeen:S.lastSeen||n,net,day:S.daily&&S.daily.date||'',lang:LANG}),{headers:{'Content-Type':'application/json'}}))}catch(e){}}
+  try{const c=await caches.open('da-state'),net=S.last?Math.max(0,S.last.inc-S.last.exp-(S.last.oneoff||0)):0;await c.put('./__state',new Response(JSON.stringify({on:ntfOn(),lastSeen:S.lastSeen||n,net,day:S.daily&&S.daily.date||'',lang:LANG}),{headers:{'Content-Type':'application/json'}}))}catch(e){}}
 const _persist=persist;persist=function(){_persist();ntfSync(false)};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)ntfSync(true)});
 /* ---------- 6) bakım ve arıza ---------- */
@@ -3438,7 +3438,7 @@ function nesilSettle(loud,saved){const A=S&&S.nesilAward;if(!A||S.scn)return;con
   if(!saveMeta()){N.pts-=A.p;N.n--;N.applied.pop();wait();return}
   S.nesil=nesilN();nesilDone({N,p:A.p})}
 {const _p2=persist;persist=function(){_p2();if(window.__saveOk&&S&&Array.isArray(S.awq)&&S.awq.length&&!window.__awqBusy){window.__awqBusy=1;try{awqSettle()}finally{window.__awqBusy=0}}if(window.__saveOk&&!window.__readErr){const b=$('rdErrBtn');if(b)b.remove()}if(window.__saveOk&&S&&S.nesilAward)nesilSettle(false,true);if(window.__saveOk&&META.starPend)starFlush()}}
-setTimeout(()=>{try{const sc=loadKey(SAVE_SCN);if(sc&&sc.scn&&sc.scn.award&&!window.__readErr)scnAwardSettle(sc.scn.award);awqSettle();starFlush()}catch(e){}},2500);
+setTimeout(()=>{try{const sc=loadKey(SAVE_SCN);if(sc&&sc.scn&&sc.scn.award&&!window.__readErr&&!scnAwardSettle(sc.scn.award)){const A=sc.scn.award;S.awq=Array.isArray(S.awq)?S.awq:[];if(!S.awq.some(a=>a.aid===A.aid)){S.awq.push(A);persist()}}awqSettle();starFlush()}catch(e){}},2500);
 {const _cmeta=carryMeta;carryMeta=function(from,to){_cmeta(from,to);try{const q=[...(Array.isArray(from.awq)?from.awq:[])];const A=from.scn&&from.scn.award;
   if(A&&!scnAwardSettle(A))q.push(A);const seen=new Set();to.awq=q.filter(a=>a&&a.aid&&!seen.has(a.aid)&&seen.add(a.aid))}catch(e){}}}
 {const _mg2=migrate;migrate=function(){_mg2();if(S&&S.nesilAward)setTimeout(()=>nesilSettle(false,true),1500)}}
@@ -3485,11 +3485,13 @@ function cardK(){const inc=S&&S.last?S.last.inc||0:0;return Math.max(1,Math.min(
 function cardScaleTxt(t){const k=(S&&S.card&&S.card.k)||1;if(k<=1||typeof t!=='string')return t;
   return t.replace(/(\d{1,3}(?:[.,]\d{3})+|\d+)(\s*bin ₺|k ₺)/g,(all,n,u)=>fmt(Math.round(+n.replace(/[.,]/g,'')*k))+u)}
 for(const c of CARDS){if(c.__k)continue;c.__k=1;const d=c.d;c.d=ctx=>cardScaleTxt(d(ctx));
-  for(const o of c.o){const t=o.t,f=o.f;o.t=ctx=>cardScaleTxt(t(ctx));o.f=ctx=>{const m0=S.money,i0=S.inc,x0=S.exp,k=(S.card&&S.card.k)||1,p0=S.promise;const r=f(ctx);if(k>1){const dl=S.money-m0;S.money+=dl*(k-1);if(S.promise&&S.promise!==p0)S.promise.k=k}
+  for(const o of c.o){const t=o.t,f=o.f;o.t=ctx=>cardScaleTxt(t(ctx));o.f=ctx=>{const m0=S.money,i0=S.inc,x0=S.exp,d0=S.debt||0,k=(S.card&&S.card.k)||1,p0=S.promise;const r=f(ctx);if(k>1){const dl=S.money-m0;S.money+=dl*(k-1);if(S.promise&&S.promise!==p0)S.promise.k=k}
     /* kart para hareketi aylık rapora girsin (kartın kendisi yazmadıysa) */
-    const tot=S.money-m0;if(tot<0&&S.exp===x0)S.exp+=-tot;else if(tot>0&&S.inc===i0)S.inc+=tot;return cardScaleTxt(r)}}}
+    const tot=S.money-m0,dd=Math.max(0,(S.debt||0)-d0);if(tot<0&&S.exp===x0)S.exp+=-tot;
+    /* borçlanma işletme geliri değildir; kalan pozitif fark tek seferlik destek olarak işaretlenir */
+    else if(tot>0&&S.inc===i0){const g=Math.max(0,tot-dd);S.inc+=g;S.oneoff=(S.oneoff||0)+g}return cardScaleTxt(r)}}}
 /* sakin başlangıç: yeni oyunun ilk 150 gerçek saniyesi (tek saat), rastgele ve tarih kartı yok */
-window.__ngT=performance.now();{const _sn3=startNew;startNew=function(){const r=_sn3.apply(this,arguments);window.__ngT=performance.now();return r}}
+window.__ngT=performance.now();{const _sn3=startNew;startNew=function(){const S0=S;const r=_sn3.apply(this,arguments);if(S!==S0)window.__ngT=performance.now();return r}}
 function calmStart(){return !S.scn&&performance.now()-(window.__ngT||0)<150000}
 {const _hm=histMonth;histMonth=function(m){if(calmStart()&&!FF.on)return;return _hm.apply(this,arguments)}}
 /* ücretli seçenek kasayı aşıyorsa kapalı (en az bir seçenek açık kalır) */
