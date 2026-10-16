@@ -3381,7 +3381,7 @@ function xferOf(path){if(!path||path.length<3)return null;if(_xf.has(path))retur
     return {x:a[0]+(b[0]-a[0])*f,z:a[1]+(b[1]-a[1])*f,ux:(b[0]-a[0])/l,uz:(b[1]-a[1])/l,a:path[ia],b:path[ib],f:before?1:0,water:i===1}}}
   return _po3(path,pos)}}
 function tferry(o,q,dir){const on=!!(q&&q.water)&&!megaDone('marmaray');if(on){if(!o.tf){o.tf=shipMesh('ferry');o.tf.scale.setScalar(0.3);o.grp.add(o.tf)}o.tf.visible=true;o.tf.position.set(q.x,0,q.z);o.tf.rotation.y=-Math.atan2(q.uz*dir,q.ux*dir)}else if(o.tf)o.tf.visible=false}
-function realAds(){try{return !!(window.DA_CG||(window.AndroidBridge&&AndroidBridge.hasAds&&AndroidBridge.hasAds()))}catch(e){return false}}
+function realAds(){try{return !!(window.DA_CG||window.DA_GD||(window.AndroidBridge&&AndroidBridge.hasAds&&AndroidBridge.hasAds()))}catch(e){return false}}
 /* tam ekranda açık yan panel (Şirket vb.) çağ/yeni oyun kartının üstünü kapatıyordu: kart açılınca paneli kapat */
 const closeOverlays=()=>{try{if(FS.tab)fsClose()}catch(e){}try{const sp=$('setpanel');if(sp&&!sp.hidden){sp.hidden=true;$('setbtn')&&$('setbtn').classList.remove('on')}}catch(e){}};
 {const _es=eraShow;eraShow=function(h){closeOverlays();return _es(h)}}
@@ -3531,6 +3531,8 @@ const netTxt=v=>v==null?_t('ölçülüyor (1 ay)'):(v>=0?'+':'−')+fmt(Math.abs
  setInterval(add,1500);
  document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('[data-inst="pwa"]');if(!b)return;
    if(bip){bip.prompt();try{await bip.userChoice}catch(x){}bip=null}else info(_t('<b>Ana ekrana ekle</b><span class="note">Tarayıcı menüsünden “Ana ekrana ekle” ya da “Uygulamayı yükle”yi seç. iPhone’da: Paylaş → Ana Ekrana Ekle.</span>'))})}
+/* ilk açılışta dönem seçimi yok: doğrudan 1927 (CrazyGames'te seçim ekranında çıkan oyuncu çoktu; diğer platformlarda da aynı) */
+{const _ng0=newGameAsk;newGameAsk=function(first){_ng0(first);if(first&&!window.DA_CG){const c=document.querySelector('#eracard [data-a="ng:cum"]');if(c)c.click()}}}
 /* ---------- dikey ekran düzeltmeleri ---------- */
 /* bilgi kartı ve rehber, sağdaki düğme sütununun (dile göre genişliği değişir) üstüne binmesin */
 {const st=document.createElement('style');st.textContent='.cinfo,.coach{right:calc(var(--wcw,52px) + 10px)}';document.head.appendChild(st);
@@ -3594,6 +3596,30 @@ if(window.DA_CG){const SDK=window.CrazyGames&&window.CrazyGames.SDK,ok=()=>SDK&&
      const late=cgLate();aid=cgAdOn(end);try{SDK.ad.requestAd('midgame',{adStarted:()=>{fin?late.start():cgAdPlay(aid)},adFinished:()=>{fin?late.end():end()},adError:()=>{fin?late.end():end()}})}catch(e){end()}};
    document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;if(a==='erago'||a==='scnre'||a==='scnexit'||a==='new2'||a==='scnnext')setTimeout(mid,600)},true)}
 }
+/* ---------- GameDistribution ---------- */
+/* Paket tools/build_gamedistribution.py ile üretilir: DA_GD bayrağı ve GD_OPTIONS başta, SDK yükleyici sonda.
+   Reklam yalnız oyuncu dokunuşundan sonra; reklam boyunca oyun durur, ses kapanır, ekran dokunmaya kapalı. */
+if(window.DA_GD){
+  const gd=()=>window.gdsdk;let paused=false,sp0=1,block=null,rw=null;
+  const blockOn=()=>{if(!block){block=document.createElement('div');block.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.35)';['click','pointerdown','touchstart'].forEach(t=>block.addEventListener(t,e=>{e.preventDefault();e.stopPropagation()},true));document.body.appendChild(block)}block.hidden=false};
+  const blockOff=()=>{if(block)block.hidden=true};
+  window.__gdPause=()=>{if(paused)return;paused=true;window.__cgAd=1;sp0=speed;speed=0;try{setSpeedUI()}catch(e){}if(AU.master)AU.master.gain.value=0;blockOn()};
+  window.__gdResume=()=>{if(!paused)return;paused=false;window.__cgAd=0;blockOff();if(!S.over&&$('eracard').hidden&&$('card3').hidden)speed=sp0;try{setSpeedUI()}catch(e){}if(AU.master&&OPT.snd!=='off')AU.master.gain.value=0.7;
+    if(rw){const r=rw;rw=null;r.end()}};
+  window.__gdEvent=ev=>{const n=ev&&ev.name;if(n==='SDK_READY'){try{gd().preloadAd&&gd().preloadAd('rewarded').catch(()=>{})}catch(e){}}else if(n==='SDK_GAME_PAUSE')window.__gdPause();else if(n==='SDK_GAME_START')window.__gdResume();else if(n==='SDK_REWARDED_WATCH_COMPLETE'&&rw)rw.ok=true};
+  const has=()=>{const g=gd();return !!(g&&typeof g.showAd==='function')};
+  /* ödüllü reklam: ödül yalnız izleme tamamlanınca; reklam yok/engelli ise bilgi verilir */
+  fakeAd=function(btn,done){if(!has()){bad(_t('<b>Şu an gösterilecek reklam yok.</b><span class="note">Biraz sonra tekrar dene.</span>'));return}const html=btn.innerHTML;btn.disabled=true;let fin=false;
+    const end=()=>{if(fin)return;fin=true;const ok=rw0.ok;window.__gdResume();if(ok)done();else{btn.disabled=false;btn.innerHTML=html;bad(_t('<b>Şu an gösterilecek reklam yok.</b><span class="note">Biraz sonra tekrar dene.</span>'))}};
+    const rw0={ok:false,end};rw=rw0;
+    try{const pr=gd().showAd('rewarded');if(pr&&pr.then)pr.then(()=>setTimeout(()=>{if(!paused)end()},300)).catch(()=>end());}catch(e){end()}
+    setTimeout(()=>{if(!fin&&!paused)end()},20000)};
+  /* geçiş reklamı: doğal molalarda (çağ kartı, senaryo sonu/yeniden, yeni oyun) ve ilk dokunuşta bir kez; sıklığı SDK yönetir */
+  const mid=()=>{if(!has()||paused||FF.on||S.over==='lose')return;try{const pr=gd().showAd();if(pr&&pr.catch)pr.catch(()=>{})}catch(e){}};
+  let first=true;document.addEventListener('pointerup',()=>{if(first){first=false;setTimeout(mid,50)}},true);
+  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;if(a==='erago'||a==='scnre'||a==='scnexit'||a==='new2'||a==='scnnext')setTimeout(mid,600)},true);
+}
+
 window.claude?.hot?.snapshot?.(()=>({S:JSON.parse(serial())}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>

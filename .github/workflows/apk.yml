@@ -42,6 +42,11 @@ jobs:
       - name: Genel web paketi (itch.io, Newgrounds, Game Jolt)
         run: python3 tools/build_web.py
 
+      - name: GameDistribution paketi
+        env:
+          GD_GAME_ID: ${{ vars.GD_GAME_ID }}
+        run: python3 tools/build_gamedistribution.py
+
       - name: APK derle
         run: |
           set -o pipefail
@@ -60,11 +65,14 @@ jobs:
 
             **DemirAglar-crazygames.zip**: CrazyGames'e yüklenecek web paketi (Developer Portal → oyunu yükle → bu zip).
 
+            **DemirAglar-gamedistribution.zip**: GameDistribution'a yüklenecek paket (oyun kimliği depo değişkeni GD_GAME_ID'den gelir).
+
             **DemirAglar-web.zip**: Reklamsız genel web paketi; itch.io, Newgrounds, Game Jolt gibi sitelere yüklenir (HTML oyun, index.html).
           files: |
             DemirAglar.apk
             dist/DemirAglar-crazygames.zip
             dist/DemirAglar-web.zip
+            dist/DemirAglar-gamedistribution.zip
 
       - name: Hata kaydını yükle
         if: failure()
