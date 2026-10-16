@@ -101,6 +101,7 @@ h1{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:.14e
 #stage3{position:relative;width:100%;min-height:360px;background:linear-gradient(#bcd6e6,#8fb2c4)}
 #stage3 canvas{display:block;width:100%;touch-action:none}
 #labels3{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lab3::before{content:'';position:absolute;inset:-10px -8px}
 .lab3{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;display:flex;align-items:center;gap:3px;white-space:nowrap;background:rgba(255,253,247,.93);color:#2a241c;border:1.5px solid rgba(60,50,35,.25);border-radius:10px;padding:2px 7px;font-size:11px;line-height:15px;box-shadow:0 1px 4px rgba(0,0,0,.25);will-change:transform}
 .lab3 b{font-weight:700;margin-right:2px}
 .lab3{flex-direction:column;align-items:center;gap:2px;padding:3px 7px 4px}
@@ -1804,7 +1805,7 @@ function init3D(){adjustLandmarks();
   for(const c of CITIES){const d=document.createElement('div');d.className='lab3';d.dataset.id=c.id;d.addEventListener('click',()=>tapCity(c.id));lay.appendChild(d);E.labels[c.id]={el:d,html:'',w:60}}
   /* picking */
   let pd=null;
-  r.domElement.addEventListener('pointerdown',e=>{pd={x:e.clientX,y:e.clientY,t:performance.now()};E.camAnim=null;if(E.follow){followStop();pd=null}});
+  r.domElement.addEventListener('pointerdown',e=>{pd={x:e.clientX,y:e.clientY,t:performance.now()};if(E.camAnim)E.camAnimEnd=performance.now();E.camAnim=null;if(E.follow){followStop();pd=null}});
   r.domElement.addEventListener('pointerup',e=>{if(!pd)return;const mv=Math.hypot(e.clientX-pd.x,e.clientY-pd.y);if(mv<7&&performance.now()-pd.t<450){const rc=r.domElement.getBoundingClientRect();pickAt(e.clientX-rc.left,e.clientY-rc.top)}pd=null});
   r.domElement.addEventListener('contextmenu',e=>e.preventDefault());
   buildLandmarks();try{buildForests()}catch(e){console.warn('forest',e)}E.skyU.sunDir.value.set(-0.52,0.68,-0.4).normalize();envReflections();resize3D();E.ready=true;gfxApply();const l=$('load3');if(l)l.hidden=true;
@@ -1812,8 +1813,14 @@ function init3D(){adjustLandmarks();
 function resize3D(){if(!E.renderer)return;const w=$('world').clientWidth,h=document.body.classList.contains('fs3')?window.innerHeight:Math.round(Math.max(360,Math.min(window.innerHeight*0.64,620)));E.VW=w;E.VH=h;E.renderer.setSize(w,h);E.camera.aspect=w/h;E.camera.fov=w<520?50:40;E.camera.updateProjectionMatrix()}
 function project(x,y,z){const v=_v.set(x,y,z).project(E.camera);return [(v.x+1)/2*E.VW,(1-v.y)/2*E.VH,v.z]}
 function cityBase(c){return Math.max(hAt(c.x,c.y),Y_LAND*0.9)}
-function pickAt(sx,sy){let best=null,bd=40;for(const c of CITIES){const L=cityLayout(c.id);const [px,py,pz]=project(c.x,cityBase(c)+Math.min(L.top,70)*0.35,c.y);if(pz>1)continue;const d=Math.hypot(px-sx,py-sy);if(d<bd){bd=d;best=c.id}}
-  if(best)tapCity(best);else if(sel.length){sel=[];renderAct()}}
+function pickAt(sx,sy){const coarse=window.matchMedia&&matchMedia('(pointer:coarse)').matches,R=coarse?64:52,tut=(S.tut??-1)>=0&&!S.scn;let best=null,bd=1e9;
+  for(const c of CITIES){const L=cityLayout(c.id),b=cityBase(c);const r=R*(tut&&window.TUTGO===c.id?1.7:1);let dm=1e9;
+    for(const hy of [b,b+Math.min(L.top,70)*0.35,b+Math.min(L.top,70)*0.8]){const [px,py,pz]=project(c.x,hy,c.y);if(pz>1)continue;dm=Math.min(dm,Math.hypot(px-sx,py-sy))}
+    const lb=E.labels&&E.labels[c.id];if(lb&&lb.el&&lb.el.offsetWidth&&lb.el.style.display!=='none'){const lr=lb.el.getBoundingClientRect(),cr=E.renderer.domElement.getBoundingClientRect();const lx=lr.left-cr.left+lr.width/2,ly=lr.top-cr.top;dm=Math.min(dm,Math.hypot(lx-sx,ly+lr.height/2-sy),Math.hypot(lx-sx,ly+lr.height+R*0.5-sy))}
+    if(dm<r&&dm/r<bd){bd=dm/r;best=c.id}}
+  if(best)tapCity(best);
+  /* boşa dokunuş: rehberde ya da kamera kayarken seçimi silme (hedef şehir hareket ederken ıskalanabiliyor) */
+  else if(sel.length&&!tut&&!E.camAnim&&performance.now()-(E.camAnimEnd||0)>700){sel=[];renderAct()}}
 function focusCity(id){if(!E.ready)return;const c=C[id];const t=new THREE.Vector3(c.x,Y_LAND,c.y);const off=E.camera.position.clone().sub(E.controls.target);off.setLength(Math.min(Math.max(off.length(),170),300));E.camAnim={t,p:t.clone().add(off)}}
 function zoomBy(f){if(!E.ready)return;const off=E.camera.position.clone().sub(E.controls.target);off.multiplyScalar(f);const l=off.length();if(l<45)off.setLength(45);if(l>1900)off.setLength(1900);E.camAnim={t:E.controls.target.clone(),p:E.controls.target.clone().add(off)}}
 function fitAll(){if(!E.ready)return;const t=new THREE.Vector3(790,0,210);E.camAnim={t,p:t.clone().add(new THREE.Vector3(0,1050,820))}}
@@ -2123,7 +2130,7 @@ function frame3D(dt){
     const tg=new THREE.Vector3(p.x+hx*14,p.y+3,p.z+hz*14),cp=new THREE.Vector3(p.x-hx*(sh?52:34),p.y+(sh?22:16),p.z-hz*(sh?52:34));cp.y=Math.max(cp.y,hAt(cp.x,cp.z)+7);
     const k=Math.min(1,dt*2.2);ctl.target.lerp(tg,k);cam.position.lerp(cp,k);cam.lookAt(ctl.target);
     if(!sh&&speed&&!S.over){const tr=S.trains[E.follow.i];if(tr&&!tr.wait){E.clackT=(E.clackT||0)-dt*speed;if(E.clackT<=0){sfx('clack',0.9);E.clackT=0.6}}}}
-  else{if(E.camAnim){const k=Math.min(1,dt*4);ctl.target.lerp(E.camAnim.t,k);cam.position.lerp(E.camAnim.p,k);if(cam.position.distanceTo(E.camAnim.p)<1)E.camAnim=null}
+  else{if(E.camAnim){const k=Math.min(1,dt*4);ctl.target.lerp(E.camAnim.t,k);cam.position.lerp(E.camAnim.p,k);if(cam.position.distanceTo(E.camAnim.p)<1){E.camAnim=null;E.camAnimEnd=performance.now()}}
   ctl.update();const t=ctl.target;const cx=Math.max(0,Math.min(1600,t.x)),cz=Math.max(-20,Math.min(420,t.z));if(cx!==t.x||cz!==t.z){const d=new THREE.Vector3(cx-t.x,0,cz-t.z);t.add(d);cam.position.add(d)}}
   const t=ctl.target;const camDist=cam.position.distanceTo(t);
   E.sun.target.position.copy(t);E.sun.position.copy(t).add(new THREE.Vector3(-520,680,-400));
