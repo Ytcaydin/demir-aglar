@@ -3596,6 +3596,14 @@ if(window.DA_CG){const SDK=window.CrazyGames&&window.CrazyGames.SDK,ok=()=>SDK&&
      const late=cgLate();aid=cgAdOn(end);try{SDK.ad.requestAd('midgame',{adStarted:()=>{fin?late.start():cgAdPlay(aid)},adFinished:()=>{fin?late.end():end()},adError:()=>{fin?late.end():end()}})}catch(e){end()}};
    document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;if(a==='erago'||a==='scnre'||a==='scnexit'||a==='new2'||a==='scnnext')setTimeout(mid,600)},true)}
 }
+/* ---------- portal paketleri (GameDistribution, itch.io, Newgrounds…) ---------- */
+/* her zaman tam ekran oyun düzeni (sayfa düzeni portal çerçevesinde boş alan bırakıyordu);
+   köşedeki düğme yalnız tarayıcı tam ekranını açıp kapatır */
+if(window.DA_PORTAL&&!window.DA_CG){
+  {const st=document.createElement('style');st.textContent='body.portal #ntf,body.portal #bkbtn{display:none!important}body.portal{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}';document.head.appendChild(st);document.body.classList.add('portal')}
+  fsEnter();fsExit=function(){try{if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen()}catch(e){}};
+  const fb=$('fsbtn');if(fb)fb.addEventListener('click',e=>{e.stopImmediatePropagation();e.preventDefault();try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch(x){}},true);
+}
 /* ---------- GameDistribution ---------- */
 /* Paket tools/build_gamedistribution.py ile üretilir: DA_GD bayrağı ve GD_OPTIONS başta, SDK yükleyici sonda.
    Reklam yalnız oyuncu dokunuşundan sonra; reklam boyunca oyun durur, ses kapanır, ekran dokunmaya kapalı. */
