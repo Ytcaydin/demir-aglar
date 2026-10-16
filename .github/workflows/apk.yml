@@ -39,6 +39,9 @@ jobs:
       - name: CrazyGames paketi
         run: python3 tools/build_crazygames.py
 
+      - name: Genel web paketi (itch.io, Newgrounds, Game Jolt)
+        run: python3 tools/build_web.py
+
       - name: APK derle
         run: |
           set -o pipefail
@@ -56,9 +59,12 @@ jobs:
             İlk kurulumda "bilinmeyen kaynaklardan yükleme" izni istenebilir.
 
             **DemirAglar-crazygames.zip**: CrazyGames'e yüklenecek web paketi (Developer Portal → oyunu yükle → bu zip).
+
+            **DemirAglar-web.zip**: Reklamsız genel web paketi; itch.io, Newgrounds, Game Jolt gibi sitelere yüklenir (HTML oyun, index.html).
           files: |
             DemirAglar.apk
             dist/DemirAglar-crazygames.zip
+            dist/DemirAglar-web.zip
 
       - name: Hata kaydını yükle
         if: failure()
