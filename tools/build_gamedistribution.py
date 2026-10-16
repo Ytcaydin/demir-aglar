@@ -35,7 +35,8 @@ def main() -> int:
     if not (SRC / "index.html").exists():
         print("HATA: önce python3 android/prepare_assets.py çalıştır", file=sys.stderr)
         return 1
-    gid = (os.environ.get("GD_GAME_ID") or "").strip() or "GD_GAME_ID_BURAYA"
+    # Rails of Anatolia (GameDistribution panel no. 78305). Kimlik gizli değildir; oyun sayfasının kaynağında görünür.
+    gid = (os.environ.get("GD_GAME_ID") or "").strip() or "d9ec29ab7e274bf196cc0b474712144e"
     if not re.fullmatch(r"[A-Za-z0-9_\-]+", gid):
         print("HATA: GD_GAME_ID geçersiz", file=sys.stderr)
         return 1
